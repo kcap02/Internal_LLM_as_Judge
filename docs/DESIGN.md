@@ -168,9 +168,10 @@ CONDA=C:/Users/valno/anaconda3/envs/gemma_spectral/python.exe
 $CONDA scripts/11_run_judge.py --only llmbar --pilot --limit 400
 $CONDA scripts/12_run_judge_spectral.py --only llmbar --pilot --dry-run 400
 
-# Format ablation (own stream)
+# Format ablation (own stream; run AFTER the spectral job, not alongside it)
 $CONDA scripts/11_run_judge.py --only llmbar --pilot --limit 400 \
        --config configs/chat_template.json --tag chat
+python scripts/20_analyse.py --only llmbar --tag chat
 
 # CPU
 python scripts/20_analyse.py --only llmbar

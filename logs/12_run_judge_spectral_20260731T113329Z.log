@@ -63,3 +63,5 @@
 13:47:48 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
 13:48:19 INFO   [20/400] median 1.4 s/item
 13:49:12 INFO   [40/400] median 1.7 s/item
+14:00:58 INFO   [60/400] median 1.8 s/item
+14:01:48 INFO   [80/400] median 2.0 s/item

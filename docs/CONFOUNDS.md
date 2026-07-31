@@ -28,7 +28,7 @@ time). Analysis-level controls run inside `scripts/20_analyse.py`.
 | C-NUM | fp16 overflow deleting a model's spectral data | NEUTRALISED | bfloat16 default, uniform across the panel |
 | C-TOK | verdict-token instability | NEUTRALISED | re-resolved on 32 prompts/format |
 | C-STAGE | stage 11/12 drift | NEUTRALISED | agreement monitored (0.00% observed) |
-| C-FORMAT | raw prompts on instruct models | RESOLVED | ablation: no material effect |
+| C-FORMAT | raw prompts on instruct models | RESOLVED for competent judges | ablation: ≤1.5 pt; small-model half pending a bf16 re-run |
 | C-LEN | length gives the verdict away | MEASURED | pairwise immune (0.500); nuisance regressor for `single` |
 | C-SELF | self-preference in distractors | NEUTRALISED | distractor panel disjoint from judges (`configs/main.json`) |
 | C-LABEL | `single` = preference as absolute truth | MEASURED | inherent; pairwise is primary |
@@ -417,22 +417,33 @@ artefact, which would make every downstream null a power problem rather than
 a result.
 
 *Test.* The same 400 LLMBar items, both settings, four pilot judges
-(`--tag chat` keeps the variant in its own stream), **all under bf16** — the
-first version of this ablation ran under fp16 and its 1.5B rows were
-meaningless (see C-NUM). Bias = P(pred == first label); 50% is unbiased,
-0/100% is degenerate.
+(`--tag chat` keeps the variant in its own stream). Bias = P(pred == first
+label); 50% is unbiased, 0/100% is degenerate.
 
-| model | format | raw acc | raw bias | chat acc | chat bias |
-|---|---|---|---|---|---|
-| Qwen2.5-0.5B | pairwise | 52.0% | 42.0% | see `__chat` run | |
-| Qwen2.5-1.5B | pairwise | 73.5% | 36.5% | | |
-| Llama-3.2-1B | pairwise | 48.5% | 2.5% | | |
-| **Qwen2.5-3B** | **pairwise** | **82.5%** | **41.5%** | | |
+Under **fp16** (archived as `__fp16` / `__chat_fp16`), the format changed
+competent judges by ≤1.5 points — Qwen2.5-3B pairwise 83.5% raw vs 82.0%
+chat — while both arms showed Qwen2.5-1.5B as fully degenerate. That last
+part was an fp16 artefact (C-NUM), so the ablation must be re-run under bf16
+before its *small-model* rows mean anything; the ≤1.5-point conclusion for
+competent judges is unaffected, since those models were dtype-stable to ~2
+points.
 
-*Conclusion.* For the competent judges the two formats agree to within ~1.5
-points, so **raw prompts are kept** for uniformity across base and instruct
-models. Prompt format is not what separates a usable judge from a degenerate
-one — precision (C-NUM) and scale are.
+Current **bf16** raw baseline, for the re-run to be compared against:
+
+| model | pairwise acc | pairwise bias |
+|---|---|---|
+| Qwen2.5-0.5B | 52.0% | 42.0% |
+| Llama-3.2-1B | 48.5% | 2.5% |
+| Qwen2.5-1.5B | 73.5% | 36.5% |
+| **Qwen2.5-3B** | **82.5%** | **41.5%** |
+
+*Conclusion.* Prompt format is not what separates a usable judge from a
+degenerate one — precision (C-NUM) and scale are. **Raw prompts are kept**
+for uniformity across base and instruct models.
+
+*Outstanding.* Re-run `--tag chat` under bf16 to complete the small-model half
+of this table. Command in DESIGN.md; it is one stage-11 pass (~5 min) and must
+not run concurrently with a spectral job.
 
 *Design conclusion that survives.* **Pairwise is the primary format**: far
 more accurate than `single` for a competent judge (82.5% vs 64.0% on
