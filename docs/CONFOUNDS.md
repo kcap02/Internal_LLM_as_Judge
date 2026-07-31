@@ -247,31 +247,52 @@ and caps achievable accuracy.
 
 ---
 
-## C-NUM — Numerical precision silently deleting a model, and mixed dtype
+## C-NUM — Numerical precision corrupting verdicts and deleting spectral data
 
-**Status: NEUTRALISED** (found by the pilot)
+**Status: NEUTRALISED** (found by the pilot; the most consequential finding)
 
 Loading in **float16**, Qwen2.5-1.5B produced attention values that overflow
-to `inf`, and `spectral_trust` then raised *"array must not contain infs or
-NaNs"* on **every one of its 400 items**. The verdicts still landed (the
-spectral failure is caught per item by design), so nothing crashed and
-nothing looked wrong — the model simply contributed zero spectral rows, and
-the analysis correctly but silently dropped its spectral family. A quarter of
-the pilot panel had no spectral data and only the per-item error field said
-so.
+to `inf`. Two distinct harms followed, one loud and one silent.
 
-*Fix.* `config.model_dtype = "bfloat16"` is the default for every stage. Same
-memory as fp16, far wider exponent range. Re-running the identical model and
-items: **6/6 valid** where fp16 gave 0/400.
+**Harm 1 — spectral data deleted.** `spectral_trust` raised *"array must not
+contain infs or NaNs"* on **every one of its 400 items**. Verdicts still
+landed, because a spectral failure is caught per item by design, so nothing
+crashed and no summary looked wrong: the model simply contributed zero
+spectral rows and the analysis silently dropped its spectral family. Only the
+per-item `error` field recorded it.
 
-*Second-order confound.* Precision must be **uniform across the panel**:
-spectral metrics computed at different dtypes are not comparable, so a mixed
-run would confound "model" with "numerical precision". The fp16 pilot stream
-is archived as `__fp16` and the pilot was re-run end to end under bf16.
+**Harm 2 — the verdicts themselves were wrong.** This is worse, and it was
+only visible after fixing Harm 1 and comparing:
 
-*Standing check.* `spectral: {"error": ...}` rows are counted per model in the
-audit; a model whose spectral coverage is 0 must be investigated, never
-averaged over.
+| model / format | fp16 acc | fp16 bias | bf16 acc | bf16 bias | verdicts agreeing |
+|---|---|---|---|---|---|
+| Qwen2.5-1.5B pairwise | 50.0% | **100.0%** | **73.5%** | **36.5%** | **36.5%** |
+| Qwen2.5-1.5B single | 50.0% | 0.0% | 58.0% | 14.0% | 86.0% |
+| Qwen2.5-3B pairwise | 83.5% | 41.5% | 82.5% | 41.5% | 98.0% |
+| Qwen2.5-0.5B pairwise | 54.0% | 40.0% | 52.0% | 42.0% | 95.0% |
+| Llama-3.2-1B pairwise | 49.5% | 1.5% | 48.5% | 2.5% | 99.0% |
+
+Under fp16, Qwen2.5-1.5B looked like a **fully degenerate judge** (100% one
+verdict, chance accuracy). Under bf16 it is a **competent** one (73.5%,
+well-balanced), and the two dtypes agree on only 36.5% of its verdicts. Every
+other model was stable to within ~2 points.
+
+*The wrong conclusion this nearly produced.* On the fp16 data the pilot
+concluded "judges below ~3B are capability-limited, and a chat-template
+ablation confirms it is not a prompting artefact". Both arms of that ablation
+were fp16, so the evidence was invalid for this model: 1.5B was not
+capability-limited at all, it was numerically broken. **A numerical bug was
+about to be written up as a finding about model scale.**
+
+*Fix.* `config.model_dtype = "bfloat16"` for every stage — same memory as
+fp16, far wider exponent range — and precision must be **uniform across the
+panel**, since neither spectral metrics nor verdicts are comparable across
+dtypes. The fp16 streams are archived as `__fp16` (as the evidence above) and
+the whole pilot was re-run under bf16.
+
+*Standing checks.* `audit_spectral_coverage()` counts `spectral.error` rows
+per model and FAILs at zero coverage; the fp16-vs-bf16 verdict-agreement
+comparison above is the template for validating any future dtype change.
 
 ---
 
@@ -396,31 +417,33 @@ artefact, which would make every downstream null a power problem rather than
 a result.
 
 *Test.* The same 400 LLMBar items, both settings, four pilot judges
-(`--tag chat` keeps the variant in its own stream). Bias = P(pred == first
-label); 50% is unbiased, 0/100% is degenerate.
+(`--tag chat` keeps the variant in its own stream), **all under bf16** — the
+first version of this ablation ran under fp16 and its 1.5B rows were
+meaningless (see C-NUM). Bias = P(pred == first label); 50% is unbiased,
+0/100% is degenerate.
 
 | model | format | raw acc | raw bias | chat acc | chat bias |
 |---|---|---|---|---|---|
-| Qwen2.5-0.5B | pairwise | 54.0% | 40.0% | 53.5% | 33.5% |
-| Qwen2.5-0.5B | single | 50.5% | 0.5% | 55.0% | 9.0% |
-| Qwen2.5-1.5B | pairwise | 50.0% | 100.0% | 50.0% | 100.0% |
-| Qwen2.5-1.5B | single | 50.0% | 0.0% | 50.0% | 0.0% |
-| Llama-3.2-1B | pairwise | 49.5% | 1.5% | 53.5% | 19.5% |
-| Llama-3.2-1B | single | 56.0% | 51.0% | 49.5% | 96.5% |
-| **Qwen2.5-3B** | **pairwise** | **83.5%** | **41.5%** | 82.0% | 44.0% |
-| Qwen2.5-3B | single | 64.0% | 65.0% | 61.0% | 74.0% |
+| Qwen2.5-0.5B | pairwise | 52.0% | 42.0% | see `__chat` run | |
+| Qwen2.5-1.5B | pairwise | 73.5% | 36.5% | | |
+| Llama-3.2-1B | pairwise | 48.5% | 2.5% | | |
+| **Qwen2.5-3B** | **pairwise** | **82.5%** | **41.5%** | | |
 
-*Conclusion.* The chat template does not rescue the small models —
-Qwen2.5-1.5B is fully degenerate under **both** formats, so the degeneracy is
-a capability limit, not a prompting artefact. For the one competent judge the
-two formats agree to within 1.5 points. **Raw prompts are kept** for
-uniformity across base and instruct models, and this table is the
-justification.
+*Conclusion.* For the competent judges the two formats agree to within ~1.5
+points, so **raw prompts are kept** for uniformity across base and instruct
+models. Prompt format is not what separates a usable judge from a degenerate
+one — precision (C-NUM) and scale are.
 
-*Two design conclusions fall out.* Judges must be ≳3B to be measurable at
-all; and **pairwise is the primary format** — it is both far more accurate
-for a competent judge (83.5% vs 64.0%) and structurally immune to the length
-confound (C-LEN AUC exactly 0.500 by counterbalancing).
+*Design conclusion that survives.* **Pairwise is the primary format**: far
+more accurate than `single` for a competent judge (82.5% vs 64.0% on
+Qwen2.5-3B) and structurally immune to the length confound (C-LEN AUC exactly
+0.500 by counterbalancing).
+
+*Revised scale statement.* With fp16 corrected, the floor is lower than the
+first pilot suggested: **Qwen2.5-1.5B is usable** (73.5% pairwise, balanced),
+while Qwen2.5-0.5B (52.0%) and Llama-3.2-1B (48.5%, 2.5% bias) remain at
+chance and degenerate. Judges must be ≳1.5B, not ≳3B — and any claim about
+scale must be made on dtype-matched data.
 
 ---
 

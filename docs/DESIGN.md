@@ -55,20 +55,24 @@ JudgeBench validated every stage end to end. Measured throughput:
 
 Pilot findings that shape the main run:
 
-- **Judges below ~3B are unusable as measurement subjects.** Verdict
-  behaviour is degenerate: Qwen2.5-1.5B answers one way on 100% of items in
-  both formats, Qwen2.5-0.5B says "Yes" to 99.5% of `single` items,
-  Llama-3.2-1B picks "B" on 98.4% of `pairwise`. Only **Qwen2.5-3B** is
-  competent (83.5% pairwise, 41.5% verdict bias). Small models remain useful
-  as pipeline tests and as the distractor panel.
-- **The degeneracy is a capability limit, not a prompt artefact.** A
-  chat-template ablation (`--tag chat`) moved nothing that mattered: 1.5B
-  stayed 100% degenerate under both formats, and the competent judge agreed
-  to within 1.5 points. Raw prompts are kept; the table is in CONFOUNDS.md
-  under C-FORMAT.
-- **`pairwise` is the primary format.** For the competent judge it is far
-  more accurate than `single` (83.5% vs 64.0%) and it is structurally immune
-  to the length confound, since both orders contain the same two responses
+- **The most valuable finding was a numerical one.** Under float16,
+  Qwen2.5-1.5B overflowed to `inf` inside attention: it lost 100% of its
+  spectral data *and* its verdicts were corrupted, so it presented as a fully
+  degenerate judge (100% verdict bias, chance accuracy) where under bfloat16
+  it is competent (73.5% pairwise, 36.5% bias). The two dtypes agree on only
+  36.5% of its verdicts, while every other model was stable to ~2 points. A
+  numerical bug was on its way into the write-up as a finding about model
+  scale. `model_dtype = "bfloat16"`, uniform across the panel — see C-NUM.
+- **Usable-judge floor is ~1.5B**, on dtype-matched data: Qwen2.5-1.5B
+  (73.5%) and Qwen2.5-3B (82.5% pairwise) are measurable; Qwen2.5-0.5B
+  (52.0%) and Llama-3.2-1B (48.5%, 2.5% bias) are at chance. Sub-usable
+  models remain valuable as the distractor panel.
+- **Prompt format is not the discriminator.** The chat-template ablation
+  (`--tag chat`) moves a competent judge by ~1.5 points. Raw prompts are kept
+  for uniformity across base and instruct models.
+- **`pairwise` is the primary format.** For a competent judge it is far more
+  accurate than `single` (82.5% vs 64.0%) and it is structurally immune to
+  the length confound, since both orders contain the same two responses
   (C-LEN AUC exactly 0.500).
 - **Degenerate judges manufacture false discoveries if unguarded.** Two
   contrasts initially survived BH-FDR purely because a conditional AUROC was
