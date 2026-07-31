@@ -6,10 +6,37 @@ and how to re-check it.
 
 Status legend: **NEUTRALISED** — the design or analysis removes it.
 **MEASURED** — it exists, is quantified, and is reported as a limitation.
-**OPEN** — not yet addressed.
+**RESOLVED** — tested and shown not to bite. **OPEN** — not yet addressed.
 
 Bank-level checks run in `scripts/02_audit_confounds.py` (CPU, before GPU
 time). Analysis-level controls run inside `scripts/20_analyse.py`.
+
+## Scoreboard
+
+| id | confound | status | mechanism |
+|---|---|---|---|
+| C-ID | item identity ≠ self-knowledge | NEUTRALISED | conditional (within-verdict) AUROC |
+| C-DIFF | item difficulty ≠ self-knowledge | NEUTRALISED | peer-difficulty baseline rung M1nd |
+| C-DUP | duplicate questions across folds | NEUTRALISED | text-derived `group_id` |
+| C-DEGEN | degenerate judges manufacturing discoveries | NEUTRALISED | min-class strata, contrast suppression, FDR exclusion |
+| C-LEAK | leakage inside the CV | NEUTRALISED | per-fold fitting + permutation null |
+| C-SUBSET | rungs on different items | NEUTRALISED | common subset, coverage floor |
+| C-MULT | multiple comparisons | NEUTRALISED | BH-FDR over all contrasts |
+| C-INFER | fold std ≠ significance | NEUTRALISED | paired grouped bootstrap |
+| C-POS | position / RoPE artefacts | NEUTRALISED | task-token subgraph + `task_start_idx` nuisance |
+| C-WIN | length-biased spectral coverage | NEUTRALISED | 4096 window → 0% skipped by the bank; VRAM bound computed, warned, and recorded |
+| C-NUM | fp16 overflow deleting a model's spectral data | NEUTRALISED | bfloat16 default, uniform across the panel |
+| C-TOK | verdict-token instability | NEUTRALISED | re-resolved on 32 prompts/format |
+| C-STAGE | stage 11/12 drift | NEUTRALISED | agreement monitored (0.00% observed) |
+| C-FORMAT | raw prompts on instruct models | RESOLVED | ablation: no material effect |
+| C-LEN | length gives the verdict away | MEASURED | pairwise immune (0.500); nuisance regressor for `single` |
+| C-SELF | self-preference in distractors | MEASURED | fix ready: `configs/main.json` disjoint panel |
+| C-LABEL | `single` = preference as absolute truth | MEASURED | inherent; pairwise is primary |
+
+No FAIL-level confound remains. The two MEASURED-only items are inherent
+properties of the source datasets, quantified and reported rather than
+hidden; C-SELF flips to PASS as soon as the solver run lands and the MCQ
+banks are rebuilt with the disjoint panel.
 
 ---
 
@@ -121,16 +148,43 @@ starts at different token indices. If that index alone separates classes, any
 
 ## C-WIN — Length-biased spectral coverage
 
-**Status: NEUTRALISED** (was a 47% skip rate)
+**Status: NEUTRALISED at the bank level; VRAM-bounded per model**
 
 At a 1024-token window, ~47% of JudgeBench and ~24% of RewardBench 2 items
-exceeded it and were skipped — a length-biased retained subset.
+exceeded it and were skipped — a length-biased retained subset, the worst
+kind of missing data for a length-sensitive metric.
 
-*Fix.* `spectral_max_len = 4096`. Measured maximum over all banks is 3131
-tokens, so **0% of items are skipped anywhere**. Cost scales with each item's
-actual length, not with the cap (dense eigh ≈ 0.3 s/layer at 1024 tokens,
-≈ 6 s/layer at 4096), so raising the cap is free for short items and simply
-pays the true price for long ones instead of silently dropping them.
+*Fix.* `spectral_max_len = 4096`. The measured maximum over all banks is 3131
+tokens, so **no item is excluded by the window**. Compute scales with each
+item's actual length, not the cap (dense eigh ≈ 0.3 s/layer at 1024 tokens,
+≈ 6 s/layer at 4096), so raising it is free for short items and simply pays
+the honest price for long ones.
+
+*The remaining bound is VRAM, not the window.* With eager attention and
+`output_attentions=True`, a `[heads, N, N]` tensor is retained for **every**
+layer, so the requirement is quadratic in length:
+
+| model | 1024 tok | 2048 tok | 4096 tok |
+|---|---|---|---|
+| Qwen2.5-3B | 1.1 GB | 4.5 GB | 18.0 GB |
+| Qwen2.5-7B | 1.5 GB | 6.1 GB | 24.5 GB |
+
+A full-window item therefore does **not** fit a 16 GB card. Left alone, the
+per-item OOM handler would skip exactly the longest items and quietly
+recreate the bias this entry is about. Three guards:
+
+1. `attention_memory_gb()` computes the requirement and stage 12 reserves it
+   as load headroom instead of the flat default.
+2. Before the run, a warning fires if a full-window item cannot fit, naming
+   the fix (lower `spectral_max_len` for that model, or use a bigger card).
+3. OOM skips are **written to the results stream** as `skipped: "oom"` and
+   counted, with an explicit "coverage is now length-biased" warning — never
+   a silent gap.
+
+*Practical consequence.* On the 16 GB card: LLMBar (max 1119 tok) is safe at
+any window; RewardBench 2 (max 2441) fits for ≤3B; JudgeBench pairwise (max
+3131) needs a larger card or a reduced window, and that choice must be
+reported per dataset.
 
 ---
 
@@ -162,6 +216,34 @@ and caps achievable accuracy.
 
 *Handling.* Report the **pairwise arm as primary** for those two datasets and
 `single` as secondary; state the noise ceiling.
+
+---
+
+## C-NUM — Numerical precision silently deleting a model, and mixed dtype
+
+**Status: NEUTRALISED** (found by the pilot)
+
+Loading in **float16**, Qwen2.5-1.5B produced attention values that overflow
+to `inf`, and `spectral_trust` then raised *"array must not contain infs or
+NaNs"* on **every one of its 400 items**. The verdicts still landed (the
+spectral failure is caught per item by design), so nothing crashed and
+nothing looked wrong — the model simply contributed zero spectral rows, and
+the analysis correctly but silently dropped its spectral family. A quarter of
+the pilot panel had no spectral data and only the per-item error field said
+so.
+
+*Fix.* `config.model_dtype = "bfloat16"` is the default for every stage. Same
+memory as fp16, far wider exponent range. Re-running the identical model and
+items: **6/6 valid** where fp16 gave 0/400.
+
+*Second-order confound.* Precision must be **uniform across the panel**:
+spectral metrics computed at different dtypes are not comparable, so a mixed
+run would confound "model" with "numerical precision". The fp16 pilot stream
+is archived as `__fp16` and the pilot was re-run end to end under bf16.
+
+*Standing check.* `spectral: {"error": ...}` rows are counted per model in the
+audit; a model whose spectral coverage is 0 must be investigated, never
+averaged over.
 
 ---
 

@@ -91,13 +91,32 @@ Pilot findings that shape the main run:
    free-text is where judges fail and where the story lives.
 5. `20_analyse.py` after each increment; all stores are resumable.
 
-**Spectral cost note.** `spectral_max_len = 4096` means no item is ever
-skipped (measured max across banks: 3131 tokens), and cost tracks each item's
-*actual* length: dense eigh is ~0.3 s/layer at 1024 tokens but ~6 s/layer at
-4096. The long tail of JudgeBench/RewardBench 2 pairwise items therefore
-dominates the bill. If that becomes binding, run `single` first — the choice
-must be made by format, never by silently dropping long items, which would
-make the retained subset length-biased.
+**Spectral cost and VRAM.** `spectral_max_len = 4096` means the *bank* never
+excludes an item (measured max across banks: 3131 tokens), and compute tracks
+each item's actual length: dense eigh is ~0.3 s/layer at 1024 tokens but
+~6 s/layer at 4096.
+
+The binding constraint is VRAM, not time. `output_attentions=True` retains a
+`[heads, N, N]` tensor per layer, so memory is quadratic in length:
+
+| model | 1024 tok | 2048 tok | 4096 tok |
+|---|---|---|---|
+| Qwen2.5-3B | 1.1 GB | 4.5 GB | 18.0 GB |
+| Qwen2.5-7B | 1.5 GB | 6.1 GB | 24.5 GB |
+
+On the 16 GB card: LLMBar (max 1119 tok) is safe at any window; RewardBench 2
+(max 2441) fits for ≤3B; **JudgeBench pairwise (max 3131) needs a larger card
+or a reduced window.** Stage 12 computes this, reserves it as load headroom,
+warns before the run if a full-window item cannot fit, and records any OOM
+skip as `skipped: "oom"` with a length-bias warning. Reduce the window per
+model and report it — never let long items drop silently, which is exactly
+the coverage bias C-WIN exists to prevent.
+
+**Precision must be uniform.** `model_dtype = "bfloat16"` everywhere. Under
+fp16, Qwen2.5-1.5B overflowed to `inf` inside attention and spectral analysis
+failed on all 400 of its items while the run looked healthy. Mixing dtypes
+across a panel would also confound "model" with "precision", so the fp16
+pilot stream is archived as `__fp16` and the pilot was re-run under bf16.
 
 Decision gate: if neither M2 nor M3 clears M1n anywhere on the conditional
 metric, that is a publishable negative result — but first check the
@@ -131,6 +150,32 @@ near chance ⇒ labels are mostly noise).
 5. Application: selective judging (abstention curves).
 6. Limitations: logprob-readout judging (no CoT), open-weight panel,
    single-token verdicts, `single`-format label noise.
+
+## Reproducing the pilot
+
+```bash
+# CPU (base Python)
+python scripts/00_download_datasets.py
+python scripts/01_build_judge_banks.py
+python scripts/02_audit_confounds.py --pilot        # must show no FAIL
+
+# GPU (gemma_spectral)
+CONDA=C:/Users/valno/anaconda3/envs/gemma_spectral/python.exe
+$CONDA scripts/11_run_judge.py --only llmbar --pilot --limit 400
+$CONDA scripts/12_run_judge_spectral.py --only llmbar --pilot --dry-run 400
+
+# Format ablation (own stream)
+$CONDA scripts/11_run_judge.py --only llmbar --pilot --limit 400 \
+       --config configs/chat_template.json --tag chat
+
+# CPU
+python scripts/20_analyse.py --only llmbar
+```
+
+Expected on this data: full ladder Mn/M1/M1n/M1nd/M2/M3/M4, permutation nulls
+near 0.500, every sub-3B slice reported as degenerate with contrasts
+suppressed, and **0 surviving contrasts after BH-FDR** — the correct answer
+for judges this small.
 
 ## Compute bookkeeping
 

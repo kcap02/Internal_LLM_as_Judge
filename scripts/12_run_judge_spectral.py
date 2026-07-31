@@ -26,11 +26,13 @@ os.environ.setdefault("TQDM_DISABLE", "1")  # one tqdm bar per item otherwise
 
 import numpy as np
 import torch
+from transformers import AutoTokenizer
 
 from llm_judge.config import DATA_DIR, RESULTS_DIR, Config, tagged
 from llm_judge.io_utils import ResumableResults, read_json
 from llm_judge.log_utils import setup_logging
-from llm_judge.model_loading import (estimate_params_billions, free_vram,
+from llm_judge.model_loading import (attention_memory_gb,
+                                     estimate_params_billions, free_vram,
                                      load_model_safe, unload, vram_free_gb)
 from llm_judge.prompts import (build_judge_prompt, render, task_token_start,
                                verdict_labels)
@@ -50,8 +52,44 @@ def run_model(model_name, items, dataset, store, cfg, log, dry_run=None):
 
     model = tokenizer = framework = None
     try:
+        # Reserve VRAM for the retained attention matrices, which dominate
+        # here: output_attentions=True keeps [heads, N, N] per layer, so the
+        # requirement is quadratic in length. Getting this wrong is not merely
+        # slow — the per-item OOM handler would skip the LONGEST items,
+        # quietly reintroducing the length-biased coverage that raising the
+        # window to 4096 removed (C-WIN).
+        #
+        # Size it from the LONGEST PROMPT ACTUALLY PRESENT, not from the cap:
+        # reserving for 4096 when the bank tops out at ~1.1k tokens would push
+        # models to CPU offload for no reason and make the campaign
+        # intractable. Needs the tokenizer before the weights, so load it
+        # separately first (cheap — no weights involved).
+        probe_tok = AutoTokenizer.from_pretrained(model_name,
+                                                  trust_remote_code=True)
+        max_tok = 0
+        for it in todo:
+            h, b = build_judge_prompt(it)
+            n = len(probe_tok(render(h, b, probe_tok, cfg.use_chat_template),
+                              add_special_tokens=True)["input_ids"])
+            max_tok = max(max_tok, min(n, cfg.spectral_max_len))
+        del probe_tok
+
+        attn_gb = attention_memory_gb(model_name, max_tok)
+        headroom = max(2.0, attn_gb * 1.3 + 1.0)
+        free_now = vram_free_gb()
+        log.info("%s: longest prompt %d tokens -> ~%.1f GB retained attention; "
+                 "reserving %.1f GB of the %.1f GB free", short, max_tok,
+                 attn_gb, headroom, free_now)
+        if attn_gb and attn_gb > free_now:
+            log.warning(
+                "%s: the longest item cannot fit in VRAM (~%.1f GB needed vs "
+                "%.1f GB free). Long items will OOM and be skipped, biasing "
+                "spectral coverage by length. Lower spectral_max_len for this "
+                "model, or run it on a larger card.", short, attn_gb, free_now)
+
         model, tokenizer, info = load_model_safe(
-            model_name, allow_cpu_offload=(model_name not in cfg.no_cpu_offload))
+            model_name, allow_cpu_offload=(model_name not in cfg.no_cpu_offload),
+            dtype=cfg.model_dtype, headroom_gb=headroom)
 
         ids_by_format = {}
         for fmt in sorted({it["format"] for it in todo}):
@@ -78,11 +116,13 @@ def run_model(model_name, items, dataset, store, cfg, log, dry_run=None):
                  sorted(ids_by_format))
 
         durations = []
+        n_oom = 0
         limit = dry_run or len(todo)
         for i, it in enumerate(todo[:limit]):
             fmt = it["format"]
             if fmt not in ids_by_format:
                 continue
+            n_tok = -1
             try:
                 t0 = time.time()
                 h, b = build_judge_prompt(it)
@@ -140,11 +180,24 @@ def run_model(model_name, items, dataset, store, cfg, log, dry_run=None):
                     log.info("  [%d/%d] median %.1f s/item", i + 1, limit,
                              float(np.median(durations)))
             except torch.cuda.OutOfMemoryError:
-                log.warning("OOM — %s skipped", it["item_id"])
+                # Recorded, not just logged: OOM skips correlate with length,
+                # so their count is a coverage-bias statistic, not noise.
+                n_oom += 1
+                log.warning("OOM — %s skipped (%d tokens)", it["item_id"], n_tok)
+                store.append({"model": model_name, "item_id": it["item_id"],
+                              "question_id": it["question_id"],
+                              "group_id": it.get("group_id"),
+                              "dataset": dataset, "skipped": "oom"})
                 free_vram()
             except Exception as e:
                 log.error("%s: %s: %s", it["item_id"], type(e).__name__, e)
 
+        if n_oom:
+            log.warning("  %s: %d item(s) skipped by OOM. These are the LONG "
+                        "items, so spectral coverage is now length-biased — "
+                        "lower spectral_max_len or use a larger card before "
+                        "reporting spectral results for this model.",
+                        short, n_oom)
         if durations:
             med = float(np.median(durations))
             log.info("  median %.1f s/item -> ~%.0f min for %d items",

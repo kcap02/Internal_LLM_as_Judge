@@ -105,9 +105,19 @@ python scripts/20_analyse.py --only llmbar
 ```
 
 Everything configurable lives in `src/llm_judge/config.py`; override any key
-with a JSON file via `--config`. Every stage writes a log to `logs/` whose
-header records the git commit, package versions and full config — a results
-file is fully traceable to the run that produced it.
+with a JSON file via `--config` (see `configs/`). Every stage writes a log to
+`logs/` whose header records the git commit, package versions and full config
+— a results file is fully traceable to the run that produced it.
+
+**Ablations** need `--tag`, which gives the variant its own result stream:
+
+```bash
+python scripts/11_run_judge.py --config configs/chat_template.json --tag chat ...
+python scripts/20_analyse.py --tag chat --only llmbar
+```
+
+Without a tag the variant would collide with the main run's `(model,
+item_id)` resume keys and be silently skipped as already-done work.
 
 ## Repo layout
 

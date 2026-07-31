@@ -1,0 +1,11 @@
+13:12:53 INFO stage=12_run_judge_spectral | commit=e2ad403 | logfile=12_run_judge_spectral_20260731T111253Z.log
+13:12:53 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.5.0", "datasets": "4.8.4", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.1"}
+13:12:53 INFO config={"seed": 42, "judge_models_pilot": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen2.5-1.5B-Instruct", "meta-llama/Llama-3.2-1B-Instruct", "Qwen/Qwen2.5-3B-Instruct"], "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "distractor_panel": null, "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "model_dtype": "bfloat16", "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 4096, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_probe": "full", "activation_pca_dims": 24}
+13:12:54 INFO order:   1.7 B params  Qwen/Qwen2.5-1.5B-Instruct
+13:12:54 INFO === dataset llmbar: 1676 items (bank mode=native), resume=0 ===
+13:12:54 INFO Qwen2.5-1.5B-Instruct: 1676 items
+13:12:57 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+13:13:10 INFO   median 2.6 s/item -> ~74 min for 1676 items
+13:13:10 INFO   DRY RUN (6 items) — drop --dry-run for the full campaign.
+13:13:10 INFO Qwen2.5-1.5B-Instruct: unloaded, 11.8 GB VRAM free
+13:13:10 INFO done. Next: python scripts/20_analyse.py

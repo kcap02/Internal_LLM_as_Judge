@@ -85,6 +85,12 @@ class Config:
         "rewardbench2": 1000,
     })
 
+    # Weight dtype. bfloat16, not float16: same memory, far wider exponent
+    # range. Under fp16 some models overflow to inf inside attention and the
+    # spectral analysis then fails on every single item (observed: all 400
+    # items of Qwen2.5-1.5B). Never quantized.
+    model_dtype: str = "bfloat16"
+
     # ── Prompting ────────────────────────────────────────────────────────────
     ntrain: int = 0                     # k-shot; 0 = zero-shot everywhere
     use_chat_template: bool = False     # raw Hendrycks-style prompts by default

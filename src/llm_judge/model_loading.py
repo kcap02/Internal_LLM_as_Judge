@@ -29,9 +29,12 @@ os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer  # noqa: E402
 
-# Headroom left free per GPU for activations, attention matrices
-# (output_attentions=True is hungry) and cache.
-VRAM_HEADROOM_GB = 8.0
+# Default headroom left free per GPU for activations and cache. Enough for a
+# plain forward (stages 10/11). Stage 12 must pass a much larger value: with
+# eager attention and output_attentions=True the attention matrices of EVERY
+# layer are retained, which is quadratic in prompt length — see
+# attention_memory_gb().
+VRAM_HEADROOM_GB = 2.0
 
 # Disk offload dir, used only if CPU RAM is insufficient.
 OFFLOAD_DIR = "./offload"
@@ -112,9 +115,33 @@ def _fp16_gb(model_name: str) -> float:
     return estimate_params_billions(model_name) * 2.0
 
 
+def attention_memory_gb(model_name: str, n_tokens: int,
+                        bytes_per_elem: int = 2) -> float:
+    """VRAM the retained attention matrices need for one forward pass.
+
+    `output_attentions=True` keeps a [heads, N, N] tensor for every layer, so
+    the cost is quadratic in prompt length and linear in depth. At a 4096
+    window this dominates the model weights and is the real reason a spectral
+    run OOMs where the behavioural run is comfortable.
+
+    Returns 0.0 when the config cannot be read (caller should not block on it).
+    """
+    try:
+        cfg = AutoConfig.from_pretrained(model_name, trust_remote_code=True)
+        heads = getattr(cfg, "num_attention_heads", None)
+        layers = getattr(cfg, "num_hidden_layers", None)
+        if not heads or not layers:
+            return 0.0
+        return heads * layers * (n_tokens ** 2) * bytes_per_elem / 1024**3
+    except Exception:
+        return 0.0
+
+
 # ── Loading plan ──────────────────────────────────────────────────────────────
-def plan_loading(model_name: str, allow_cpu_offload: bool = True) -> dict:
+def plan_loading(model_name: str, allow_cpu_offload: bool = True,
+                 headroom_gb: float | None = None) -> dict:
     need = _fp16_gb(model_name)
+    head = VRAM_HEADROOM_GB if headroom_gb is None else headroom_gb
     n_gpu = torch.cuda.device_count() if torch.cuda.is_available() else 0
     gpu0 = vram_free_gb(0)
     gpu_all = vram_total_free_gb()
@@ -122,34 +149,45 @@ def plan_loading(model_name: str, allow_cpu_offload: bool = True) -> dict:
 
     if need == 0.0:
         mode = "single_gpu"                    # estimation failed: just try
-    elif need + VRAM_HEADROOM_GB <= gpu0:
+    elif need + head <= gpu0:
         mode = "single_gpu"
-    elif n_gpu > 1 and need + VRAM_HEADROOM_GB * n_gpu <= gpu_all:
+    elif n_gpu > 1 and need + head * n_gpu <= gpu_all:
         mode = "multi_gpu"
-    elif allow_cpu_offload and need + VRAM_HEADROOM_GB <= gpu_all + ram:
+    elif allow_cpu_offload and need + head <= gpu_all + ram:
         mode = "cpu_offload"
     else:
         mode = "impossible"
 
-    return {"model": model_name, "need_gb": need, "n_gpu": n_gpu,
-            "gpu0_gb": gpu0, "gpu_all_gb": gpu_all, "ram_gb": ram, "mode": mode}
+    return {"model": model_name, "need_gb": need, "headroom_gb": head,
+            "n_gpu": n_gpu, "gpu0_gb": gpu0, "gpu_all_gb": gpu_all,
+            "ram_gb": ram, "mode": mode}
 
 
-def _max_memory(mode: str) -> dict | None:
+def _max_memory(mode: str, headroom_gb: float = VRAM_HEADROOM_GB):
     """Per-device memory cap, with the safety headroom subtracted."""
     if mode == "single_gpu":
         return None
     n_gpu = torch.cuda.device_count()
-    mm = {i: f"{max(1, int(vram_free_gb(i) - VRAM_HEADROOM_GB))}GiB"
-          for i in range(n_gpu)}
+    mm: dict = {i: f"{max(1, int(vram_free_gb(i) - headroom_gb))}GiB"
+                for i in range(n_gpu)}
     if mode == "cpu_offload":
         mm["cpu"] = f"{max(1, int(cpu_ram_free_gb() * 0.8))}GiB"
     return mm
 
 
-def _kwargs(mode: str) -> dict:
+DTYPES = {"bfloat16": torch.bfloat16, "float16": torch.float16,
+          "float32": torch.float32}
+
+
+def _kwargs(mode: str, dtype: str = "bfloat16",
+            headroom_gb: float = VRAM_HEADROOM_GB) -> dict:
     kw = dict(
-        dtype=torch.float16,           # full fp16, never quantized
+        # bfloat16 by default, NOT float16. Same memory, far wider exponent
+        # range: several models (Qwen2.5-1.5B here) produce attention values
+        # that overflow fp16 to inf, and spectral_trust then dies with
+        # "array must not contain infs or NaNs" on EVERY item — a whole model
+        # silently contributing no spectral data. Never quantized either way.
+        dtype=DTYPES[dtype],
         trust_remote_code=True,
         low_cpu_mem_usage=True,
         attn_implementation="eager",   # sdpa would not return attentions
@@ -158,7 +196,7 @@ def _kwargs(mode: str) -> dict:
         kw["device_map"] = {"": 0}
     else:
         kw["device_map"] = "auto"
-        kw["max_memory"] = _max_memory(mode)
+        kw["max_memory"] = _max_memory(mode, headroom_gb)
         if mode == "cpu_offload":
             os.makedirs(OFFLOAD_DIR, exist_ok=True)
             kw["offload_folder"] = OFFLOAD_DIR
@@ -168,19 +206,25 @@ def _kwargs(mode: str) -> dict:
 
 # ── Loading ───────────────────────────────────────────────────────────────────
 def load_model_safe(model_name: str, allow_cpu_offload: bool = True,
-                    force: str | None = None):
-    """Load a model in float16, without quantization.
+                    force: str | None = None, dtype: str = "bfloat16",
+                    headroom_gb: float | None = None):
+    """Load a model at full precision (bf16 by default), no quantization.
+
+    `headroom_gb` is the VRAM to leave free for activations. Stage 12 must
+    raise it well above the default because retained attention matrices are
+    quadratic in prompt length (see attention_memory_gb).
 
     Returns (model, tokenizer, info). Raises RuntimeError if impossible,
     AFTER releasing VRAM.
     """
     short = model_name.split("/")[-1]
-    plan = plan_loading(model_name, allow_cpu_offload)
+    plan = plan_loading(model_name, allow_cpu_offload, headroom_gb)
+    head = plan["headroom_gb"]
     if force:
         plan["mode"] = force
 
-    print(f"  [plan] {short}: fp16 ~ {plan['need_gb']:.0f} GB | "
-          f"GPU0 {plan['gpu0_gb']:.0f} GB free"
+    print(f"  [plan] {short}: weights ~{plan['need_gb']:.0f} GB + "
+          f"{head:.0f} GB headroom | GPU0 {plan['gpu0_gb']:.0f} GB free"
           + (f", {plan['n_gpu']} GPUs = {plan['gpu_all_gb']:.0f} GB"
              if plan["n_gpu"] > 1 else "")
           + f", RAM {plan['ram_gb']:.0f} GB -> {plan['mode']}")
@@ -220,13 +264,14 @@ def load_model_safe(model_name: str, allow_cpu_offload: bool = True,
         model = None
         try:
             before = vram_total_free_gb()
-            model = AutoModelForCausalLM.from_pretrained(model_name, **_kwargs(mode))
+            model = AutoModelForCausalLM.from_pretrained(
+                model_name, **_kwargs(mode, dtype, head))
             model.eval()
             devices = set(str(d) for d in getattr(model, "hf_device_map", {}).values())
-            print(f"  [ok] {short} loaded fp16/{mode} "
+            print(f"  [ok] {short} loaded {dtype}/{mode} "
                   f"({before - vram_total_free_gb():.1f} GB VRAM used"
                   + (f", devices: {sorted(devices)}" if devices else "") + ")")
-            return model, tokenizer, {"mode": mode, "dtype": "float16",
+            return model, tokenizer, {"mode": mode, "dtype": dtype,
                                       "need_gb": plan["need_gb"]}
         except (torch.cuda.OutOfMemoryError, RuntimeError, ValueError, OSError) as e:
             last_err = e

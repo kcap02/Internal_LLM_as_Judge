@@ -45,7 +45,9 @@ def build_gsp_config(model_name: str, cfg) -> "GSPConfig":
     return GSPConfig(
         model_name=model_name,
         device="cuda",
-        torch_dtype="float16",
+        # Only a hint here: the framework analyses the model WE injected, so
+        # the real precision is config.model_dtype in model_loading.
+        torch_dtype=cfg.model_dtype,
         trust_remote_code=True,
         max_length=cfg.spectral_max_len,
         normalization=cfg.spectral_normalization,

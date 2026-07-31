@@ -46,7 +46,8 @@ def run_model(model_name, questions, dev_by_subject, store, cfg, log, limit=None
     log.info("%s: %d questions to score", short, len(todo))
     model = tokenizer = None
     try:
-        model, tokenizer, _info = load_model_safe(model_name)
+        model, tokenizer, _info = load_model_safe(model_name,
+                                                  dtype=cfg.model_dtype)
         probe = todo[0]
         probe_prompt = (gen_solver_prompt(dev_by_subject.get(probe["subject"], []),
                                           probe["subject"], 0)

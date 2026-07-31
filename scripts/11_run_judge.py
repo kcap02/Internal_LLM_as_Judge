@@ -42,7 +42,8 @@ def run_model(model_name, items, dataset, store, cfg, log, limit=None,
     model = tokenizer = None
     try:
         model, tokenizer, info = load_model_safe(
-            model_name, allow_cpu_offload=(model_name not in cfg.no_cpu_offload))
+            model_name, allow_cpu_offload=(model_name not in cfg.no_cpu_offload),
+            dtype=cfg.model_dtype)
 
         # Resolve verdict token ids once per format present in the bank.
         ids_by_format = {}
