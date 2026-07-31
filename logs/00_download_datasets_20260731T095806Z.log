@@ -1,0 +1,8 @@
+11:58:06 INFO stage=00_download_datasets | commit=febd25e | logfile=00_download_datasets_20260731T095806Z.log
+11:58:09 INFO versions={"python": "3.11.9", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.5.1+cu124", "transformers": "4.46.2", "datasets": "4.8.5", "sklearn": "1.5.2", "numpy": "1.26.4", "spectral_trust": "not installed"}
+11:58:09 INFO config={"seed": 42, "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 1024, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_pca_dims": 24}
+11:58:09 INFO llmbar: downloading & normalizing ...
+11:58:11 INFO llmbar: 1676 items ({'single': 838, 'pairwise': 838}) over 419 questions -> llmbar_items.json
+11:58:11 INFO mmlu: downloading & normalizing ...
+11:58:28 INFO mmlu: 2000 questions, 285 dev examples -> mmlu_questions.json
+11:58:28 INFO done.

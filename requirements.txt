@@ -1,0 +1,9 @@
+# Exact environment is recorded in each log header (logs/*.log).
+torch
+transformers
+datasets
+accelerate
+scikit-learn
+numpy
+psutil
+spectral-trust

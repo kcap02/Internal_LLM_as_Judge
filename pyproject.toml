@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-judge-internals"
+version = "0.3.0"
+description = "Internal-signal prediction of LLM-judge verdict correctness (logprob margin, activation probes, attention-graph spectral diagnostics)."
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "transformers",
+    "datasets",
+    "accelerate",
+    "scikit-learn",
+    "numpy",
+    "psutil",
+    "spectral-trust",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pyright]
+extraPaths = ["src"]

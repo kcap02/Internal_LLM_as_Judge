@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# Data & results (regenerable; keep banks small enough to commit if desired)
+data/raw/
+data/hf_cache/
+results/activations/
+offload/
+gsp_out/
+
+# Logs are kept in git for replicability EXCEPT bulky per-item streams
+logs/*.tmp
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
