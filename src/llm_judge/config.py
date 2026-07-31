@@ -131,6 +131,8 @@ class Config:
             with open(path, encoding="utf-8") as f:
                 overrides = json.load(f)
             for k, v in overrides.items():
+                if k.startswith("_"):
+                    continue          # "_comment" and friends document the file
                 if not hasattr(cfg, k):
                     raise KeyError(f"Unknown config key: {k!r}")
                 setattr(cfg, k, v)

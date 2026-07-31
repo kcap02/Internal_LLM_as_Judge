@@ -229,8 +229,10 @@ def compare(rows: list[dict], n_splits: int = 5, n_boot: int = 2000,
                               min_coverage, log)
     if len(rows) < 40:
         return {"skipped": f"only {len(rows)} usable rows"}
-    if not avail["spectral"]:
-        activations_npz = activations_npz if avail["activations"] else None
+    if not avail["activations"]:
+        # Coverage was too thin to keep the family; make sure the rung is not
+        # rebuilt downstream from a partially-populated archive.
+        activations_npz = None
 
     y = np.array([float(r["is_correct"]) for r in rows])
     # Group on the text-derived group_id when the bank provides one: some

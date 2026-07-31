@@ -31,6 +31,9 @@ def main() -> None:
     ap.add_argument("--tokenizer", default="Qwen/Qwen2.5-0.5B-Instruct")
     ap.add_argument("--no-tokenizer", action="store_true",
                     help="skip length/window/token checks (offline)")
+    ap.add_argument("--pilot", action="store_true",
+                    help="audit against the pilot judge panel instead of the "
+                         "main one (changes only the C-SELF overlap check)")
     args = ap.parse_args()
 
     cfg = Config.load(args.config)
@@ -54,8 +57,12 @@ def main() -> None:
         log.info("=" * 72)
         log.info("BANK %s  (%d items, mode=%s)", name, len(bank["items"]),
                  bank.get("mode"))
+        # C-SELF asks whether the models that will JUDGE also helped pick the
+        # distractors, so it must be checked against the panel actually used
+        # for this campaign — not against every model in the config.
+        judges = cfg.judge_models_pilot if args.pilot else cfg.judge_models
         checks = run_bank_audit(name, bank, tokenizer, cfg.spectral_max_len,
-                                judge_models=cfg.judge_models_pilot + cfg.judge_models,
+                                judge_models=judges,
                                 distractor_panel=cfg.distractor_panel)
         summary[name] = checks
         for label, res in checks.items():

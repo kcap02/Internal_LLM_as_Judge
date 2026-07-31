@@ -5,3 +5,13 @@
 12:53:07 INFO === dataset llmbar: 1676 items (bank mode=native), resume=1205 ===
 12:53:07 INFO Qwen2.5-3B-Instruct: 1676 items
 12:53:12 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+12:54:08 INFO   [20/400] median 2.9 s/item
+12:55:31 INFO   [40/400] median 3.2 s/item
+12:56:39 INFO   [60/400] median 3.2 s/item
+12:57:51 INFO   [80/400] median 3.2 s/item
+12:58:53 INFO   [100/400] median 3.1 s/item
+12:59:29 INFO   [120/400] median 2.6 s/item
+13:00:00 INFO   [140/400] median 2.2 s/item
+13:00:26 INFO   [160/400] median 1.9 s/item
+13:00:50 INFO   [180/400] median 1.7 s/item
+13:01:48 INFO   [200/400] median 1.8 s/item

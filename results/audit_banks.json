@@ -1,0 +1,95 @@
+{
+  "mmlu": {
+    "C-BAL  class balance": {
+      "status": "PASS",
+      "per_format": {
+        "mcq": {
+          "counts": {
+            "Yes": 2000,
+            "No": 2000
+          },
+          "rates": {
+            "Yes": 0.5,
+            "No": 0.5
+          },
+          "status": "PASS"
+        }
+      }
+    },
+    "C-DUP  duplicate questions": {
+      "status": "PASS",
+      "n_duplicate_texts": 4,
+      "n_unique_texts": 1993,
+      "fraction": 0.002007024586051179,
+      "group_id_present": true,
+      "neutralised_by_text_grouping": true,
+      "examples": [
+        [
+          "mmlu-clinical_knowledge-617",
+          "mmlu-college_medicine-1280"
+        ],
+        [
+          "mmlu-college_medicine-1366",
+          "mmlu-high_school_statistics-5573"
+        ]
+      ]
+    },
+    "C-SUBJ subject concentration": {
+      "status": "PASS",
+      "n_subjects": 57,
+      "top_subject": "professional_law",
+      "top_share": 0.11,
+      "normalized_entropy": 0.9253830465834095
+    },
+    "C-PAIR pairwise counterbalance": {
+      "status": "PASS",
+      "note": "no pairwise items"
+    },
+    "C-SELF distractor provenance": {
+      "status": "WARN",
+      "mode": "synthetic",
+      "sources": {
+        "synthetic": 4000
+      },
+      "note": "random distractors: no self-preference exposure, but distractors are often trivial (ceiling effect). Run the solver and rebuild for ecological validity."
+    },
+    "C-LABEL single-format validity": {
+      "status": "PASS",
+      "note": "no single-format items"
+    },
+    "C-LEN  length->verdict leak": {
+      "status": "PASS",
+      "per_format": {
+        "mcq": {
+          "auc_length_predicts_verdict": 0.498428875,
+          "positive_label": "No",
+          "median_len": 124.0,
+          "status": "PASS"
+        }
+      }
+    },
+    "C-WIN  spectral window": {
+      "status": "PASS",
+      "window": 4096,
+      "per_format": {
+        "mcq": {
+          "median": 124,
+          "p90": 301,
+          "max": 1052,
+          "frac_over_window": 0.0,
+          "status": "PASS"
+        }
+      }
+    },
+    "C-TOK  verdict-token stability": {
+      "status": "PASS",
+      "per_format": {
+        "mcq": {
+          "status": "PASS",
+          "n_distinct_id_maps": 1,
+          "n_probed": 32
+        }
+      }
+    }
+  }
+}

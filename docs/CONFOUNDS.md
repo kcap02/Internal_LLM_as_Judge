@@ -85,12 +85,13 @@ Preference datasets have the classic chosen-is-longer artefact, and every
 spectral metric is length-sensitive. Measured AUC of *predicting the verdict
 from prompt length alone*:
 
-| bank | pairwise | single |
-|---|---|---|
-| mmlu / mmlu_pro | — | 0.50 (clean) |
-| judgebench | 0.500 | 0.504 |
-| llmbar | 0.500 | **0.626** |
-| rewardbench2 | 0.500 | **0.565** |
+| bank | mcq | pairwise | single |
+|---|---|---|---|
+| mmlu | 0.498 | — | — |
+| mmlu_pro | 0.497 | — | — |
+| judgebench | — | 0.500 | 0.504 |
+| llmbar | — | 0.500 | **0.626** |
+| rewardbench2 | — | 0.500 | **0.565** |
 
 **Counterbalancing makes the pairwise arm immune**: both A/B orders contain
 the same two responses, so length is identical across the pair and the AUC is
