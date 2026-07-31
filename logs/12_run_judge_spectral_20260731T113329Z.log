@@ -23,3 +23,17 @@
 13:38:20 INFO   [240/400] median 0.6 s/item
 13:38:36 INFO   [260/400] median 0.6 s/item
 13:38:50 INFO   [280/400] median 0.6 s/item
+13:39:09 INFO   [300/400] median 0.6 s/item
+13:39:23 INFO   [320/400] median 0.6 s/item
+13:39:38 INFO   [340/400] median 0.6 s/item
+13:39:54 INFO   [360/400] median 0.6 s/item
+13:40:15 INFO   [380/400] median 0.6 s/item
+13:40:24 INFO   [400/400] median 0.5 s/item
+13:40:24 INFO   median 0.5 s/item -> ~15 min for 1672 items
+13:40:24 INFO   DRY RUN (400 items) — drop --dry-run for the full campaign.
+13:40:25 INFO Qwen2.5-0.5B-Instruct: unloaded, 13.7 GB VRAM free
+13:40:25 INFO Llama-3.2-1B-Instruct: 1676 items
+13:40:27 INFO Llama-3.2-1B-Instruct: longest prompt 1120 tokens -> ~1.2 GB retained attention; reserving 2.6 GB of the 13.7 GB free
+13:40:30 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+13:40:54 INFO   [20/400] median 1.2 s/item
+13:41:30 INFO   [40/400] median 1.2 s/item

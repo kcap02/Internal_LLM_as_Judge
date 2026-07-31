@@ -119,12 +119,24 @@ python scripts/20_analyse.py --tag chat --only llmbar
 Without a tag the variant would collide with the main run's `(model,
 item_id)` resume keys and be silently skipped as already-done work.
 
+## Tests
+
+```bash
+python tests/test_stats.py          # or: python -m pytest tests/ -q
+```
+
+Six tests on the functions that decide what may be claimed. Two encode the
+central guarantees directly: a score that only encodes the *stratum* must come
+back as unestimable rather than near-perfect (C-ID), and a stratum holding one
+minority item must not drive the estimate (C-DEGEN).
+
 ## Repo layout
 
 ```
 src/llm_judge/        library (datasets/, analysis/, diagnostics, grouping, ...)
 scripts/              numbered pipeline stages (thin wrappers over the library)
 configs/              config overrides (main run, ablations)
+tests/                tests for the statistical core
 data/                 normalized datasets + judge banks   [committed]
 results/*.json        analyses and audits                 [committed]
 results/*.jsonl       per-item result streams             [ignored: regenerable]
