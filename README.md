@@ -8,60 +8,96 @@ diagnostics ([spectral-trust](https://pypi.org/project/spectral-trust/))?
 The framing is deliberately representation-agnostic: the paper is interesting
 whichever family wins, because every claim is tested against the cheaper
 alternative (spectral must beat activation probes, activation probes must
-beat the margin, everything must beat prompt length).
+beat the margin, everything must beat prompt length, position and subject).
+
+Every known way this could produce a spurious result is enumerated, fixed or
+quantified in **[docs/CONFOUNDS.md](docs/CONFOUNDS.md)** — read that before
+trusting any number here.
 
 ## Pipeline
 
 ```
 CPU  00_download_datasets.py   HF hub -> data/*_questions.json / *_items.json
 CPU  01_build_judge_banks.py   -> data/bank_<dataset>.json   (what judges score)
-GPU  10_run_solver.py          MCQ solver logprobs -> results/solver_<d>.json
+CPU  02_audit_confounds.py     -> results/audit_banks.json   (PASS/WARN/FAIL)
+GPU  10_run_solver.py          MCQ solver logprobs -> results/solver_<d>.jsonl
 CPU  01 (again, --force)       rebuild MCQ banks with panel-derived distractors
 GPU  11_run_judge.py           verdicts + margins + ACTIVATIONS (fast)
 GPU  12_run_judge_spectral.py  verdicts + spectral profiles (slow, O(N^3)/layer)
-CPU  20_analyse.py             AUROC ladder + bootstrap CIs -> results/analysis_<d>.json
+CPU  20_analyse.py             AUROC ladder + controls -> results/analysis_<d>.json
 ```
 
 Stages 11 and 12 read the **same bank file** — that identity is what makes
-behavioral and spectral numbers comparable. All GPU stages are resumable
-(atomic writes, `(model, item_id)` resume keys) and can be interrupted freely.
+behavioural and spectral numbers comparable, and stage 20 merges both so a
+model present in only one still gets every rung its features allow. Result
+streams are append-only JSONL: O(1) per item, crash-safe, resumable on
+`(model, item_id)`.
+
+## Two environments
+
+`datasets` is unusable in the GPU env (Windows cert-store SSL bug) and
+`spectral_trust` is absent from the base env, so stages are split — and the
+code enforces it: GPU stages import `llm_judge.registry`, never
+`llm_judge.datasets`.
+
+| stages | interpreter | needs |
+|---|---|---|
+| 00, 01, 02 | base Python 3.11 | `datasets`, `transformers` |
+| 10, 11, 12 | `conda run -n gemma_spectral` | `torch`, `transformers`, `spectral_trust` |
+| 20 | either | `numpy`, `scikit-learn` |
 
 ## Datasets
 
-| name | task | items | why |
-|---|---|---|---|
-| `mmlu` | 4-choice MCQ | pos/neg letter pairs | controlled pilot |
-| `mmlu_pro` | 10-choice MCQ | pos/neg letter pairs | harder, richer distractors |
-| `judgebench` | free-text | single (Yes/No) + pairwise (A/B, both orders) | objective response labels |
-| `llmbar` | free-text | single + pairwise | adversarial — where judges fail |
-| `rewardbench2` | free-text | single + pairwise | best-of-N reward evaluation |
+| name | task | items | groups | why |
+|---|---|---|---|---|
+| `mmlu` | 4-choice MCQ | 4,000 | 1,993 | controlled pilot |
+| `mmlu_pro` | 10-choice MCQ | 4,000 | 1,991 | harder, richer distractors |
+| `judgebench` | free-text | 2,480 | 528 | objective response labels |
+| `llmbar` | free-text | 1,676 | 418 | adversarial — where judges fail |
+| `rewardbench2` | free-text | 4,000 | 999 | best-of-N reward evaluation |
 
-All judge banks are balanced 50/50 by construction, seeded, and identical
-across judges. MCQ distractors come from the solver panel's letter logprobs
-(the most *tempting* wrong option, not a random letter).
+Free-text banks carry two item families: `single` (one response, Yes/No) and
+`pairwise` (both responses, A/B, **shown in both orders**). All banks are
+balanced 50/50 by construction, seeded, and identical across judges. CV
+groups come from the normalised question *text*, not the id — JudgeBench
+reuses 92 questions across its `claude`/`gpt` splits.
 
 ## Analysis ladder
 
-| model | features | question it answers |
+| rung | features | question it answers |
 |---|---|---|
-| Mn | prompt length | is the "signal" just length? |
-| M1 | logprob margin | what does behavior alone predict? |
-| M1n | margin + length | the honest behavioral baseline |
+| Mn | length + task-start position + subject | is the "signal" just the prompt? |
+| M1 | logprob margin | what does behaviour alone predict? |
+| M1n | margin + nuisance | **the baseline every internal claim must clear** |
 | M2 | + spectral profile & Fiedler velocity | does the attention graph add anything? |
-| M3 | + activation probe (PCA-24, fold-fitted) | does a cheap linear probe already do it? |
+| M3 | + activation probe (per-fold) | does a cheap linear probe already do it? |
 | M4 | everything | headroom |
 
-Out-of-fold predictions with `GroupKFold(groups=question_id)` (pos/neg pairs
-never split across folds), paired **grouped bootstrap** CIs on adjacent-rung
-AUROC deltas, difficulty strata for MCQ.
+**The headline metric is the conditional AUROC** — computed only between
+items sharing a `gt_verdict`. Pooling pos and neg items would let any feature
+that merely distinguishes them impersonate self-knowledge (see C-ID); pooled
+AUROC is reported alongside, labelled as the inflated number.
+
+Every run also produces:
+- an **identity-decodability control** (how much of the pooled number is item identity),
+- a **permutation-null control** (labels shuffled within strata, full refit; must land at ~0.500),
+- **paired grouped-bootstrap** CIs on each contrast,
+- **BH-FDR** across every contrast in the run (`results/analysis_fdr.json`).
 
 ## Setup
 
 ```bash
 pip install -e .            # or: pip install -r requirements.txt
 huggingface-cli login       # or set HF_TOKEN (gated: Llama, Gemma)
+
 python scripts/00_download_datasets.py
 python scripts/01_build_judge_banks.py
+python scripts/02_audit_confounds.py        # must be free of FAIL
+
+# GPU pilot (<4B models, fast end-to-end validation)
+conda run -n gemma_spectral python scripts/11_run_judge.py --pilot --limit 400 --only llmbar
+conda run -n gemma_spectral python scripts/12_run_judge_spectral.py --pilot --dry-run 400 --only llmbar
+python scripts/20_analyse.py --only llmbar
 ```
 
 Everything configurable lives in `src/llm_judge/config.py`; override any key
@@ -72,31 +108,33 @@ file is fully traceable to the run that produced it.
 ## Repo layout
 
 ```
-src/llm_judge/        library (datasets/, analysis/, model_loading, prompts, ...)
+src/llm_judge/        library (datasets/, analysis/, diagnostics, grouping, ...)
 scripts/              numbered pipeline stages (thin wrappers over the library)
 data/                 normalized datasets + judge banks
-results/              solver / judge / spectral results, activations (.npz), analyses
+results/              *.jsonl result streams, activations (.npz), analyses, audits
 logs/                 one provenance log per stage run (kept in git)
+docs/CONFOUNDS.md     every confound: neutralised / measured / open
 docs/DESIGN.md        research design + phased compute plan
 legacy/               original monolithic scripts (superseded, kept for reference)
 ```
 
 ## Key methodological decisions
 
-- **`normalization="sym"`** in GSPConfig (verified against spectral_trust
-  0.2.2: valid values `rw|sym|none`). The `rw` default's eigenvectors are not
-  orthonormal, silently invalidating HFER/spectral-entropy.
+- **`normalization="sym"`** in GSPConfig (verified against the installed
+  spectral_trust: valid values `rw|sym|none`). The `rw` default's
+  eigenvectors are not orthonormal, silently invalidating HFER and spectral
+  entropy.
 - **Task-token subgraph** (`subgraph_indices`) so spectral metrics are not
-  driven by header/preamble length; prompt length is additionally a nuisance
-  feature in the ladder.
-- **No layer cherry-picking:** layer profiles are summarized as mean/slope on
-  the last third + normalized argmax (3 numbers per metric), fixed a priori.
-- **Activation probe = full-dim regularized logistic** (fit per fold,
-  C=0.1) by default: unsupervised PCA keeps high-variance directions and can
-  destroy a correctness signal with no variance advantage. A fold-fitted
-  PCA variant (`activation_probe="pca"`) exists for small-n settings.
-- **Spectral window skips are recorded, never silent** (`skipped: too_long`):
-  ~47% of JudgeBench and ~24% of RewardBench 2 items exceed the 1024-token
-  window (see docs/DESIGN.md for the coverage policy); MCQ banks fit fully.
+  driven by header length; `task_start_idx` is additionally a nuisance
+  regressor, as a position-artefact alarm.
+- **`spectral_max_len = 4096`**: measured max over all banks is 3131 tokens,
+  so **no item is ever skipped for length**. Cost tracks each item's actual
+  length, not the cap.
+- **No layer cherry-picking:** layer profiles are summarised as mean/slope on
+  the last third + normalised argmax (3 numbers per metric), fixed a priori.
+- **Activation probe = full-dim regularised logistic** fitted per fold
+  (C=0.1). Unsupervised PCA keeps high-variance directions and can discard a
+  correctness signal with no variance advantage; `activation_probe="pca"`
+  remains available for small-n settings.
 - **Verdicts survive spectral failures**; empty spectral output is a loud
   error, never a silently missing feature family.

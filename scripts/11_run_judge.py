@@ -20,14 +20,17 @@ from llm_judge.config import DATA_DIR, RESULTS_DIR, Config
 from llm_judge.io_utils import ResumableResults, read_json
 from llm_judge.log_utils import setup_logging
 from llm_judge.model_loading import free_vram, load_model_safe, unload, vram_free_gb
-from llm_judge.prompts import build_judge_prompt, render, verdict_labels
+from llm_judge.prompts import (build_judge_prompt, render, task_token_start,
+                               verdict_labels)
 from llm_judge.scoring import ActivationStore, margin, score_targets
 from llm_judge.token_ids import resolve_target_token_ids
 
 
-def run_model(model_name, items, dataset, store, cfg, log):
+def run_model(model_name, items, dataset, store, cfg, log, limit=None):
     short = model_name.split("/")[-1]
     todo = [it for it in items if not store.is_done(model_name, it["item_id"])]
+    if limit:
+        todo = todo[:limit]
     if not todo:
         log.info("%s: already complete", short)
         return
@@ -66,6 +69,7 @@ def run_model(model_name, items, dataset, store, cfg, log):
                 if n_tok > max_len:
                     store.append({"model": model_name, "item_id": it["item_id"],
                                   "question_id": it["question_id"],
+                                  "group_id": it.get("group_id"),
                                   "dataset": dataset, "skipped": "too_long",
                                   "n_tokens_prompt": n_tok})
                     continue
@@ -78,6 +82,10 @@ def run_model(model_name, items, dataset, store, cfg, log):
                     "model": model_name,
                     "item_id": it["item_id"],
                     "question_id": it["question_id"],
+                    # CV group key (normalised question text) — the analysis
+                    # groups on this, not on question_id, so duplicated
+                    # questions cannot straddle folds.
+                    "group_id": it.get("group_id"),
                     "dataset": dataset,
                     "subject": it.get("subject"),
                     "format": fmt,
@@ -87,6 +95,9 @@ def run_model(model_name, items, dataset, store, cfg, log):
                     "verdict_logprobs": lp,
                     "margin": margin(lp, labels),
                     "n_tokens_prompt": n_tok,
+                    # Position-artefact alarm: if this alone separates
+                    # classes, the "signal" is a RoPE/position effect.
+                    "task_start_idx": task_token_start(h, b, tokenizer, prompt),
                     "neg_source": it.get("neg_source"),
                     "gt_mean_prob": it.get("gt_mean_prob"),
                     "load_mode": info["mode"],
@@ -114,11 +125,16 @@ def main() -> None:
     ap.add_argument("--config", default=None)
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--models", nargs="*", default=None)
+    ap.add_argument("--pilot", action="store_true",
+                    help="use the <4B pilot panel instead of the main panel")
+    ap.add_argument("--limit", type=int, default=None,
+                    help="cap items per model (pilot runs)")
     args = ap.parse_args()
 
     cfg = Config.load(args.config)
     log = setup_logging("11_run_judge", cfg.dump())
-    models = args.models or cfg.judge_models
+    models = args.models or (cfg.judge_models_pilot if args.pilot
+                             else cfg.judge_models)
 
     for name in (args.only or cfg.datasets):
         bank = read_json(DATA_DIR / f"bank_{name}.json")
@@ -134,7 +150,8 @@ def main() -> None:
                         "pilot, rebuild from solver logprobs for the paper.",
                         name)
         for model_name in models:
-            run_model(model_name, items, name, store, cfg, log)
+            run_model(model_name, items, name, store, cfg, log,
+                      limit=args.limit)
 
     log.info("done.")
 

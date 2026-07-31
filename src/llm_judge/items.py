@@ -72,8 +72,20 @@ def _softmax(lp: dict, letters: list[str]) -> dict:
 
 
 def make_items_logprob(questions: list, solver_rows: list, dataset: str,
-                       min_panel: int = 3, log=print) -> list:
-    """neg = wrong letter with the highest panel-mean probability."""
+                       min_panel: int = 3, panel_models: list | None = None,
+                       log=print) -> list:
+    """neg = wrong letter with the highest panel-mean probability.
+
+    `panel_models` restricts which solver models define the distractor. Set
+    it to a panel DISJOINT from the judges to remove self-preference: a judge
+    shown a trap it helped select is being tested on its own inclinations,
+    which inflates or deflates its score for reasons unrelated to judging.
+    """
+    if panel_models is not None:
+        allowed = set(panel_models)
+        solver_rows = [r for r in solver_rows if r["model"] in allowed]
+        log(f"  distractor panel restricted to {len(allowed)} model(s): "
+            f"{sorted(allowed)}")
     by_q = {q["question_id"]: q for q in questions}
     probs = defaultdict(lambda: defaultdict(list))   # qid -> letter -> [p]
     preds = defaultdict(list)                        # qid -> [pred_letter]

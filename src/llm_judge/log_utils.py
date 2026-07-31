@@ -12,8 +12,7 @@ import logging
 import platform
 import subprocess
 import sys
-from datetime import datetime
-from pathlib import Path
+from datetime import datetime, timezone
 
 from .config import LOGS_DIR, REPO_ROOT
 
@@ -28,15 +27,28 @@ def _git_commit() -> str:
         return "unknown"
 
 
+# Distribution names differ from import names for some packages.
+_PKGS = {"torch": "torch", "transformers": "transformers",
+         "datasets": "datasets", "sklearn": "scikit-learn",
+         "numpy": "numpy", "spectral_trust": "spectral_trust"}
+
+
 def _versions() -> dict:
+    """Record package versions WITHOUT importing the packages.
+
+    Importing to read `__version__` has side effects: in the GPU environment
+    `import datasets` pulls aiohttp, which crashes on a broken Windows
+    certificate store. Provenance logging must never be able to take a run
+    down, so read the installed distribution metadata instead.
+    """
+    from importlib.metadata import PackageNotFoundError, version
+
     out = {"python": sys.version.split()[0], "platform": platform.platform()}
-    for mod in ("torch", "transformers", "datasets", "sklearn", "numpy",
-                "spectral_trust"):
+    for name, dist in _PKGS.items():
         try:
-            m = __import__(mod)
-            out[mod] = getattr(m, "__version__", "?")
-        except ImportError:
-            out[mod] = "not installed"
+            out[name] = version(dist)
+        except PackageNotFoundError:
+            out[name] = "not installed"
     return out
 
 
@@ -47,7 +59,7 @@ def setup_logging(stage: str, config_dump: dict | None = None) -> logging.Logger
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     logfile = LOGS_DIR / f"{stage}_{stamp}.log"
 
     logger = logging.getLogger(f"llm_judge.{stage}")

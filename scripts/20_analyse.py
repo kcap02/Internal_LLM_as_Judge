@@ -1,15 +1,21 @@
 """Stage 20 (CPU) — nested-model analysis with honest baselines.
 
 Per (dataset x model x format): the AUROC ladder Mn/M1/M1n/M2/M3/M4 on
-grouped out-of-fold predictions, paired grouped-bootstrap CIs on the deltas
-that carry the claims, and difficulty strata for MCQ.
+grouped out-of-fold predictions, with the CONDITIONAL (within-gt_verdict)
+AUROC as the headline metric, paired grouped-bootstrap CIs on the contrasts
+that carry the claims, BH-FDR across every contrast in the run, and
+difficulty strata for MCQ.
 
-Inputs:  results/judge_spectral_<name>.json  (preferred: margins + spectral)
-         results/judge_<name>.json           (fallback: margins only)
-         results/activations/<name>_<model>.npz (optional: probe baseline)
+Inputs are merged so no model is lost:
+  results/judge_<name>.json           margins + activations coverage
+  results/judge_spectral_<name>.json  margins + spectral profiles
+  results/activations/<name>_<model>.npz
+A model present in only one of the two files still gets every rung its
+features allow.
+
 Output:  results/analysis_<name>.json + full log in logs/.
 
-Usage:  python scripts/20_analyse.py [--only mmlu ...]
+Usage:  python scripts/20_analyse.py [--only mmlu ...] [--no-permutation]
 """
 
 import _bootstrap  # noqa: F401
@@ -20,9 +26,45 @@ from collections import defaultdict
 import numpy as np
 
 from llm_judge.analysis.cv import compare, difficulty_strata
+from llm_judge.analysis.stats import benjamini_hochberg
 from llm_judge.config import RESULTS_DIR, Config
-from llm_judge.io_utils import atomic_write_json, read_json
+from llm_judge.io_utils import atomic_write_json, read_json, read_rows
 from llm_judge.log_utils import setup_logging
+
+
+def merge_sources(judge_rows, spectral_rows, log) -> list[dict]:
+    """Union of both result files, keyed by (model, item_id).
+
+    Spectral profiles are grafted onto the behavioural rows. Where both files
+    scored the same item, the verdicts must agree — the two stages run the
+    same prompt through the same model, so a mismatch means a prompt or
+    tokenisation drift between stages and is reported loudly.
+    """
+    merged: dict[tuple, dict] = {}
+    for r in (judge_rows or []):
+        merged[(r["model"], r["item_id"])] = dict(r)
+
+    n_overlap = n_disagree = 0
+    for r in (spectral_rows or []):
+        key = (r["model"], r["item_id"])
+        if key in merged:
+            n_overlap += 1
+            if (merged[key].get("pred_verdict") is not None
+                    and r.get("pred_verdict") is not None
+                    and merged[key]["pred_verdict"] != r["pred_verdict"]):
+                n_disagree += 1
+            merged[key]["spectral"] = r.get("spectral")
+            merged[key].setdefault("task_start_idx", r.get("task_start_idx"))
+        else:
+            merged[key] = dict(r)
+
+    if n_overlap:
+        rate = n_disagree / n_overlap
+        msg = (f"  stage11/stage12 overlap {n_overlap} items, verdict "
+               f"disagreement {n_disagree} ({rate:.2%})")
+        log.warning(msg + " — investigate prompt drift between stages"
+                    ) if rate > 0.01 else log.info(msg)
+    return list(merged.values())
 
 
 def usable(rows):
@@ -33,23 +75,27 @@ def usable(rows):
 def load_activations(dataset: str, model: str):
     short = model.split("/")[-1]
     path = RESULTS_DIR / "activations" / f"{dataset}_{short}.npz"
-    if path.exists():
-        return np.load(path)
-    return None
+    return np.load(path) if path.exists() else None
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=None)
     ap.add_argument("--only", nargs="*", default=None)
+    ap.add_argument("--no-permutation", action="store_true",
+                    help="skip the permutation-null control (faster)")
     args = ap.parse_args()
 
     cfg = Config.load(args.config)
     log = setup_logging("20_analyse", cfg.dump())
 
+    all_contrasts = []          # (dataset, key, contrast_name, result dict)
+    reports = {}
+
     for name in (args.only or cfg.datasets):
-        rows = (read_json(RESULTS_DIR / f"judge_spectral_{name}.json")
-                or read_json(RESULTS_DIR / f"judge_{name}.json"))
+        rows = merge_sources(read_rows(RESULTS_DIR / f"judge_{name}.jsonl"),
+                             read_rows(RESULTS_DIR / f"judge_spectral_{name}.jsonl"),
+                             log)
         if not rows:
             log.info("%s: no judge results yet — skipping", name)
             continue
@@ -69,15 +115,29 @@ def main() -> None:
             res = compare(rs, n_splits=cfg.n_splits, n_boot=cfg.n_bootstrap,
                           pca_dims=cfg.activation_pca_dims,
                           activations_npz=npz, seed=cfg.seed,
-                          activation_probe=cfg.activation_probe, log=log.info)
-            for label, auc in res["aurocs"].items():
-                log.info("  %-34s AUROC %.3f", label, auc)
-            for label, c in res["contrasts"].items():
-                log.info("  %-12s delta=%+.3f  CI95=[%+.3f, %+.3f]  p=%.4f",
-                         label, c["delta"], c["ci95"][0], c["ci95"][1],
-                         c["p_one_sided"])
+                          activation_probe=cfg.activation_probe,
+                          run_permutation_null=not args.no_permutation,
+                          log=log.info)
+            if res.get("skipped"):
+                log.info("  skipped: %s", res["skipped"])
+                continue
 
-            # Difficulty strata (MCQ only; needs panel logprob metadata)
+            log.info("  %-5s %-12s %-12s", "rung", "conditional", "pooled")
+            for rung in res["auroc_conditional"]:
+                c = res["auroc_conditional"][rung]
+                p = res["auroc_pooled"][rung]
+                log.info("  %-5s %-12s %-12s", rung,
+                         "n/a" if c is None else f"{c:.3f}",
+                         "n/a" if p is None else f"{p:.3f}")
+            for cname, c in res["contrasts"].items():
+                if c["delta"] is None:
+                    log.info("  %-10s n/a (degenerate stratum)", cname)
+                    continue
+                log.info("  %-10s delta=%+.3f  CI95=[%+.3f, %+.3f]  p=%.4f",
+                         cname, c["delta"], c["ci95"][0], c["ci95"][1],
+                         c["p_one_sided"])
+                all_contrasts.append((name, f"{model}|{fmt}", cname, c))
+
             strata = {}
             if fmt == "mcq":
                 for stratum, srs in difficulty_strata(rs).items():
@@ -87,16 +147,37 @@ def main() -> None:
                         log.info("  stratum %-6s n=%4d judge_acc=%.1f%%",
                                  stratum, len(srs), acc * 100)
 
-            report[f"{model}|{fmt}"] = {"n": len(rs), **res, "strata": strata}
+            report[f"{model}|{fmt}"] = {**res, "strata": strata}
 
-        out = RESULTS_DIR / f"analysis_{name}.json"
-        atomic_write_json(out, report)
-        log.info("%s: analysis written -> %s", name, out.name)
+        reports[name] = report
+        atomic_write_json(RESULTS_DIR / f"analysis_{name}.json", report)
+        log.info("%s: analysis written -> analysis_%s.json", name, name)
 
-    log.info("Reading guide: 0.50 = no information. A family contributes only "
-             "if its delta over M1n is positive with a CI clear of zero. If "
-             "M3 (activations) already matches M2 (spectral), the spectral "
-             "story needs the selectivity/velocity angle, not raw AUROC.")
+    # ── Multiplicity control across every contrast in this run ───────────
+    if all_contrasts:
+        pvals = [c["p_one_sided"] for *_, c in all_contrasts]
+        rejected = benjamini_hochberg(pvals, alpha=0.05)
+        log.info("=" * 72)
+        log.info("BH-FDR over %d contrasts (alpha=0.05): %d survive",
+                 len(pvals), sum(rejected))
+        for (ds, key, cname, c), rej in zip(all_contrasts, rejected):
+            if rej:
+                log.info("  SURVIVES  %-12s %-28s %-10s delta=%+.3f p=%.4f",
+                         ds, key.split("/")[-1], cname, c["delta"],
+                         c["p_one_sided"])
+        fdr = {"n_contrasts": len(pvals), "n_survive": int(sum(rejected)),
+               "survivors": [{"dataset": ds, "key": key, "contrast": cname,
+                              "delta": c["delta"], "p": c["p_one_sided"]}
+                             for (ds, key, cname, c), rej
+                             in zip(all_contrasts, rejected) if rej]}
+        atomic_write_json(RESULTS_DIR / "analysis_fdr.json", fdr)
+
+    log.info("Reading guide: the CONDITIONAL AUROC is the headline — it only "
+             "compares items sharing a gt_verdict, so a feature cannot score "
+             "by merely telling a pos item from a neg one. Pooled AUROC is "
+             "reported for completeness and is inflated by exactly that. A "
+             "family contributes only if its contrast over M1n is positive, "
+             "its CI clears zero, and it survives BH-FDR.")
 
 
 if __name__ == "__main__":

@@ -17,9 +17,10 @@ import _bootstrap  # noqa: F401
 import argparse
 
 from llm_judge.config import DATA_DIR, Config
-from llm_judge.datasets import KIND, LOADERS
+from llm_judge.datasets import DATASET_NAMES, get_loader
 from llm_judge.io_utils import atomic_write_json
 from llm_judge.log_utils import setup_logging
+from llm_judge.registry import KIND
 
 
 def main() -> None:
@@ -34,8 +35,8 @@ def main() -> None:
     names = args.only or cfg.datasets
 
     for name in names:
-        if name not in LOADERS:
-            log.error("unknown dataset %r (known: %s)", name, sorted(LOADERS))
+        if name not in DATASET_NAMES:
+            log.error("unknown dataset %r (known: %s)", name, DATASET_NAMES)
             continue
         kind = KIND[name]
         out_main = DATA_DIR / (f"{name}_questions.json" if kind == "questions"
@@ -47,7 +48,7 @@ def main() -> None:
 
         log.info("%s: downloading & normalizing ...", name)
         n = cfg.n_questions.get(name)
-        payload = LOADERS[name](n, cfg.seed)
+        payload = get_loader(name)(n, cfg.seed)
 
         if kind == "questions":
             atomic_write_json(out_main, payload["questions"])

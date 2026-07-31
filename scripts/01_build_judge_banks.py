@@ -19,10 +19,11 @@ import _bootstrap  # noqa: F401
 import argparse
 
 from llm_judge.config import DATA_DIR, RESULTS_DIR, Config
-from llm_judge.datasets import KIND
-from llm_judge.io_utils import atomic_write_json, read_json
+from llm_judge.grouping import assign_group_ids
+from llm_judge.io_utils import atomic_write_json, read_json, read_rows
 from llm_judge.items import make_items_logprob, make_items_synthetic
 from llm_judge.log_utils import setup_logging
+from llm_judge.registry import KIND
 
 
 def main() -> None:
@@ -47,9 +48,10 @@ def main() -> None:
             if questions is None:
                 log.error("%s: run stage 00 first", name)
                 continue
-            solver = read_json(RESULTS_DIR / f"solver_{name}.json")
+            solver = read_rows(RESULTS_DIR / f"solver_{name}.jsonl")
             if solver:
                 items = make_items_logprob(questions, solver, name,
+                                           panel_models=cfg.distractor_panel,
                                            log=log.info)
                 mode = "logprob"
             else:
@@ -65,11 +67,20 @@ def main() -> None:
                 continue
             mode = "native"
 
+        # CV group = normalised question TEXT, not question_id: JudgeBench
+        # reuses questions across its claude/gpt splits and the MCQ sets have
+        # a few cross-subject duplicates. Grouping on ids would leak those.
+        grp = assign_group_ids(items)
+        if grp["n_merged_by_text"]:
+            log.info("%s: %d question_ids collapsed into shared text groups "
+                     "(duplicate questions that would otherwise leak across "
+                     "folds)", name, grp["n_merged_by_text"])
+
         atomic_write_json(out, {"dataset": name, "mode": mode, "seed": cfg.seed,
-                                "items": items})
-        n_q = len({it["question_id"] for it in items})
-        log.info("%s: bank written (%d items, %d questions, mode=%s) -> %s",
-                 name, len(items), n_q, mode, out.name)
+                                "grouping": grp, "items": items})
+        log.info("%s: bank written (%d items, %d question_ids, %d CV groups, "
+                 "mode=%s) -> %s", name, len(items), grp["n_question_ids"],
+                 grp["n_groups"], mode, out.name)
 
     log.info("done.")
 

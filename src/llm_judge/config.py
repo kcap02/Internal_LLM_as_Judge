@@ -25,7 +25,16 @@ class Config:
     seed: int = 42                      # every random draw derives from this
 
     # ── Model panel ──────────────────────────────────────────────────────────
-    # Small panel (fits a single ~24-48 GB GPU in fp16, spectral is cheap).
+    # Pilot panel: <4B, ungated, fits a 16 GB card with room for attention
+    # matrices. Used to validate the pipeline end to end before spending
+    # GPU-days on the real panel.
+    judge_models_pilot: list[str] = field(default_factory=lambda: [
+        "Qwen/Qwen2.5-0.5B-Instruct",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "meta-llama/Llama-3.2-1B-Instruct",
+        "Qwen/Qwen2.5-3B-Instruct",
+    ])
+    # Main panel (7-27B; fp16 on a 24-48 GB card).
     judge_models: list[str] = field(default_factory=lambda: [
         "Qwen/Qwen2.5-7B-Instruct",
         "meta-llama/Llama-3.1-8B-Instruct",
@@ -43,6 +52,11 @@ class Config:
     no_cpu_offload: list[str] = field(default_factory=lambda: [
         "google/gemma-2-27b-it",
     ])
+    # Solver models whose logprobs define MCQ distractors. Keep this DISJOINT
+    # from the judge panel: a judge shown a trap it helped select is being
+    # tested on its own inclinations (self-preference confound C-SELF).
+    # None = use every solver model available (fast, but confounded).
+    distractor_panel: list[str] | None = None
 
     # ── Datasets ─────────────────────────────────────────────────────────────
     # Which datasets to build judge banks for. Keys must match the registry in
@@ -66,7 +80,13 @@ class Config:
     max_prompt_tokens: int = 4096       # hard cap before k-reduction
 
     # ── Spectral (spectral_trust 0.2.x) ─────────────────────────────────────
-    spectral_max_len: int = 1024        # eigendecomposition is O(N^3)/layer
+    # Window = 4096 so NO item is dropped for length (measured max over all
+    # banks is ~3.1k tokens). Cost is driven by each item's ACTUAL length,
+    # not by the cap: dense eigh is ~0.3 s at 1024 and ~6 s at 4096 tokens
+    # PER LAYER, so raising the cap is free for short items and simply pays
+    # the true price for the long ones instead of silently skipping them
+    # (a length-biased retained subset is a worse problem than compute).
+    spectral_max_len: int = 4096
     spectral_normalization: str = "sym"  # valid in 0.2.x: rw | sym | none.
     # "sym" is REQUIRED for basis-dependent metrics (HFER, spectral entropy):
     # the rw Laplacian is non-symmetric -> non-orthonormal eigenvectors ->

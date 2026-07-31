@@ -91,6 +91,7 @@ def run_model(model_name, items, dataset, store, cfg, log, dry_run=None):
                 if n_tok > max_len:
                     store.append({"model": model_name, "item_id": it["item_id"],
                                   "question_id": it["question_id"],
+                                  "group_id": it.get("group_id"),
                                   "dataset": dataset, "skipped": "too_long",
                                   "n_tokens_prompt": n_tok})
                     continue
@@ -99,11 +100,11 @@ def run_model(model_name, items, dataset, store, cfg, log, dry_run=None):
                 pred, lp, _, n_tok = score_targets(model, tokenizer, prompt,
                                                    ids_by_format[fmt])
 
+                start = task_token_start(h, b, tokenizer, prompt)
                 spectral = None
                 if framework is not None:
                     sub = None
                     if cfg.spectral_task_subgraph:
-                        start = task_token_start(h, b, tokenizer, prompt)
                         total = len(tokenizer(prompt)["input_ids"])
                         sub = list(range(start, total))
                     spectral = analyze_prompt(framework, prompt,
@@ -118,6 +119,7 @@ def run_model(model_name, items, dataset, store, cfg, log, dry_run=None):
                     "model": model_name,
                     "item_id": it["item_id"],
                     "question_id": it["question_id"],
+                    "group_id": it.get("group_id"),
                     "dataset": dataset,
                     "subject": it.get("subject"),
                     "format": fmt,
@@ -127,6 +129,7 @@ def run_model(model_name, items, dataset, store, cfg, log, dry_run=None):
                     "verdict_logprobs": lp,
                     "margin": margin(lp, labels),
                     "n_tokens_prompt": n_tok,
+                    "task_start_idx": start,
                     "neg_source": it.get("neg_source"),
                     "gt_mean_prob": it.get("gt_mean_prob"),
                     "load_mode": info["mode"],
@@ -172,13 +175,16 @@ def main() -> None:
     ap.add_argument("--config", default=None)
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--models", nargs="*", default=None)
+    ap.add_argument("--pilot", action="store_true",
+                    help="use the <4B pilot panel instead of the main panel")
     ap.add_argument("--dry-run", type=int, default=None,
                     help="stop after N items per model to estimate duration")
     args = ap.parse_args()
 
     cfg = Config.load(args.config)
     log = setup_logging("12_run_judge_spectral", cfg.dump())
-    models = args.models or cfg.judge_models
+    models = args.models or (cfg.judge_models_pilot if args.pilot
+                             else cfg.judge_models)
     # Smallest first: if the biggest fails, the others are already done.
     try:
         models = sorted(models, key=estimate_params_billions)

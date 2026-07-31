@@ -14,8 +14,8 @@ import argparse
 import torch
 
 from llm_judge.config import DATA_DIR, RESULTS_DIR, Config
-from llm_judge.datasets import KIND
 from llm_judge.io_utils import ResumableResults, read_json
+from llm_judge.registry import KIND
 from llm_judge.log_utils import setup_logging
 from llm_judge.model_loading import free_vram, load_model_safe, unload, vram_free_gb
 from llm_judge.prompts import format_mcq_example, gen_solver_prompt, letters_for
@@ -24,20 +24,22 @@ from llm_judge.token_ids import resolve_target_token_ids
 
 
 def fit_prompt(tokenizer, dev_examples, subject, k_max, q, max_len):
-    k = k_max
-    while k >= 0:
+    """Drop few-shot exemplars until the prompt fits (k=0 always returns)."""
+    prompt = ""
+    for k in range(k_max, -1, -1):
         prompt = (gen_solver_prompt(dev_examples, subject, k)
                   + format_mcq_example(q["question"], q["choices"]))
         n_tok = len(tokenizer(prompt, add_special_tokens=False)["input_ids"])
         if n_tok <= max_len or k == 0:
             return prompt, k
-        k -= 1
     return prompt, 0
 
 
-def run_model(model_name, questions, dev_by_subject, store, cfg, log):
+def run_model(model_name, questions, dev_by_subject, store, cfg, log, limit=None):
     short = model_name.split("/")[-1]
     todo = [q for q in questions if not store.is_done(model_name, q["question_id"])]
+    if limit:
+        todo = todo[:limit]
     if not todo:
         log.info("%s: already complete", short)
         return
@@ -98,17 +100,22 @@ def main() -> None:
     ap.add_argument("--config", default=None)
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--models", nargs="*", default=None)
+    ap.add_argument("--pilot", action="store_true",
+                    help="use the <4B pilot panel instead of the main panel")
+    ap.add_argument("--limit", type=int, default=None,
+                    help="cap questions per model (pilot runs)")
     args = ap.parse_args()
 
     cfg = Config.load(args.config)
     log = setup_logging("10_run_solver", cfg.dump())
-    models = args.models or cfg.judge_models
+    models = args.models or (cfg.judge_models_pilot if args.pilot
+                             else cfg.judge_models)
 
     mcq_sets = [n for n in (args.only or cfg.datasets)
                 if KIND.get(n) == "questions"]
     for name in mcq_sets:
         questions = read_json(DATA_DIR / f"{name}_questions.json")
-        dev = read_json(DATA_DIR / f"{name}_dev.json", default=[])
+        dev = read_json(DATA_DIR / f"{name}_dev.json", default=[]) or []
         if questions is None:
             log.error("%s: run stage 00 first", name)
             continue
@@ -120,7 +127,8 @@ def main() -> None:
         log.info("=== dataset %s: %d questions, resume=%d rows ===",
                  name, len(questions), len(store))
         for model_name in models:
-            run_model(model_name, questions, dev_by_subject, store, cfg, log)
+            run_model(model_name, questions, dev_by_subject, store, cfg, log,
+                      limit=args.limit)
 
     log.info("done. Rebuild banks now: python scripts/01_build_judge_banks.py --force")
 

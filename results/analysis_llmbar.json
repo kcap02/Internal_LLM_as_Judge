@@ -1,0 +1,638 @@
+{
+  "Qwen/Qwen2.5-0.5B-Instruct|pairwise": {
+    "n_items": 47,
+    "availability": {
+      "spectral": true,
+      "activations": true,
+      "n_input": 200,
+      "n_used": 47,
+      "dropped_no_spectral": 153,
+      "dropped_no_activation": 0
+    },
+    "health": {
+      "accuracy": 0.6170212765957447,
+      "pred_rate_A": 0.48936170212765956,
+      "per_stratum": {
+        "A": {
+          "n": 23,
+          "accuracy": 0.6086956521739131
+        },
+        "B": {
+          "n": 24,
+          "accuracy": 0.625
+        }
+      },
+      "degenerate": false
+    },
+    "auroc_conditional": {
+      "Mn": 0.4022988505747127,
+      "M1": 0.4827586206896552,
+      "M1n": 0.4521072796934866,
+      "M2": 0.367816091954023,
+      "M3": 0.314176245210728,
+      "M4": 0.31034482758620696
+    },
+    "auroc_pooled": {
+      "Mn": 0.40038314176245204,
+      "M1": 0.47701149425287354,
+      "M1n": 0.4664750957854406,
+      "M2": 0.3831417624521073,
+      "M3": 0.3026819923371648,
+      "M4": 0.29693486590038315
+    },
+    "contrasts": {
+      "M1n - M1": {
+        "metric_a": 0.4827586206896552,
+        "metric_b": 0.4521072796934866,
+        "delta": -0.03065134099616862,
+        "ci95": [
+          -0.08635448005232174,
+          0.01836160637008821
+        ],
+        "p_one_sided": 0.9,
+        "n_boot_effective": 2000
+      },
+      "M2 - M1n": {
+        "metric_a": 0.4521072796934866,
+        "metric_b": 0.367816091954023,
+        "delta": -0.08429118773946359,
+        "ci95": [
+          -0.28182180036742194,
+          0.08992805755395683
+        ],
+        "p_one_sided": 0.8375,
+        "n_boot_effective": 2000
+      },
+      "M3 - M1n": {
+        "metric_a": 0.4521072796934866,
+        "metric_b": 0.314176245210728,
+        "delta": -0.13793103448275856,
+        "ci95": [
+          -0.32745091261061954,
+          0.0405960539197229
+        ],
+        "p_one_sided": 0.94,
+        "n_boot_effective": 2000
+      },
+      "M4 - M3": {
+        "metric_a": 0.314176245210728,
+        "metric_b": 0.31034482758620696,
+        "delta": -0.0038314176245210496,
+        "ci95": [
+          -0.03543613298337707,
+          0.02868012974317961
+        ],
+        "p_one_sided": 0.688,
+        "n_boot_effective": 2000
+      }
+    },
+    "controls": {
+      "identity_decodability": {
+        "features": "M4",
+        "auroc": 0.5688405797101449
+      },
+      "permutation_null": {
+        "features": "M4",
+        "auroc_conditional": 0.32567049808429116
+      }
+    },
+    "strata": {}
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct|single": {
+    "n_items": 48,
+    "availability": {
+      "spectral": true,
+      "activations": true,
+      "n_input": 200,
+      "n_used": 48,
+      "dropped_no_spectral": 152,
+      "dropped_no_activation": 0
+    },
+    "health": {
+      "accuracy": 0.5,
+      "pred_rate_No": 0.0,
+      "per_stratum": {
+        "No": {
+          "n": 24,
+          "accuracy": 0.0
+        },
+        "Yes": {
+          "n": 24,
+          "accuracy": 1.0
+        }
+      },
+      "degenerate": true
+    },
+    "auroc_conditional": {
+      "Mn": null,
+      "M1": null,
+      "M1n": null,
+      "M2": null,
+      "M3": null,
+      "M4": null
+    },
+    "auroc_pooled": {
+      "Mn": 0.48003472222222227,
+      "M1": 0.5538194444444444,
+      "M1n": 0.5729166666666667,
+      "M2": 0.4774305555555556,
+      "M3": 0.5538194444444444,
+      "M4": 0.5503472222222223
+    },
+    "contrasts": {
+      "M1n - M1": {
+        "metric_a": null,
+        "metric_b": null,
+        "delta": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "p_one_sided": null,
+        "n_boot_effective": 0
+      },
+      "M2 - M1n": {
+        "metric_a": null,
+        "metric_b": null,
+        "delta": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "p_one_sided": null,
+        "n_boot_effective": 0
+      },
+      "M3 - M1n": {
+        "metric_a": null,
+        "metric_b": null,
+        "delta": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "p_one_sided": null,
+        "n_boot_effective": 0
+      },
+      "M4 - M3": {
+        "metric_a": null,
+        "metric_b": null,
+        "delta": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "p_one_sided": null,
+        "n_boot_effective": 0
+      }
+    },
+    "controls": {
+      "identity_decodability": {
+        "features": "M4",
+        "auroc": 0.5503472222222222
+      },
+      "permutation_null": {
+        "features": "M4",
+        "auroc_conditional": null
+      }
+    },
+    "strata": {}
+  },
+  "Qwen/Qwen2.5-1.5B-Instruct|pairwise": {
+    "n_items": 200,
+    "availability": {
+      "spectral": false,
+      "activations": true,
+      "n_input": 200,
+      "n_used": 200,
+      "dropped_no_spectral": 0,
+      "dropped_no_activation": 0
+    },
+    "health": {
+      "accuracy": 0.5,
+      "pred_rate_A": 1.0,
+      "per_stratum": {
+        "A": {
+          "n": 100,
+          "accuracy": 1.0
+        },
+        "B": {
+          "n": 100,
+          "accuracy": 0.0
+        }
+      },
+      "degenerate": true
+    },
+    "auroc_conditional": {
+      "Mn": null,
+      "M1": null,
+      "M1n": null,
+      "M3": null
+    },
+    "auroc_pooled": {
+      "Mn": 0.5,
+      "M1": 0.5,
+      "M1n": 0.5,
+      "M3": 0.5
+    },
+    "contrasts": {
+      "M1n - M1": {
+        "metric_a": null,
+        "metric_b": null,
+        "delta": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "p_one_sided": null,
+        "n_boot_effective": 0
+      },
+      "M3 - M1n": {
+        "metric_a": null,
+        "metric_b": null,
+        "delta": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "p_one_sided": null,
+        "n_boot_effective": 0
+      }
+    },
+    "controls": {
+      "identity_decodability": {
+        "features": "M1n",
+        "auroc": 0.5
+      },
+      "permutation_null": {
+        "features": "M1n",
+        "auroc_conditional": null
+      }
+    },
+    "strata": {}
+  },
+  "Qwen/Qwen2.5-1.5B-Instruct|single": {
+    "n_items": 200,
+    "availability": {
+      "spectral": false,
+      "activations": true,
+      "n_input": 200,
+      "n_used": 200,
+      "dropped_no_spectral": 0,
+      "dropped_no_activation": 0
+    },
+    "health": {
+      "accuracy": 0.5,
+      "pred_rate_No": 0.0,
+      "per_stratum": {
+        "No": {
+          "n": 100,
+          "accuracy": 0.0
+        },
+        "Yes": {
+          "n": 100,
+          "accuracy": 1.0
+        }
+      },
+      "degenerate": true
+    },
+    "auroc_conditional": {
+      "Mn": null,
+      "M1": null,
+      "M1n": null,
+      "M3": null
+    },
+    "auroc_pooled": {
+      "Mn": 0.45985,
+      "M1": 0.5,
+      "M1n": 0.45985,
+      "M3": 0.49945000000000006
+    },
+    "contrasts": {
+      "M1n - M1": {
+        "metric_a": null,
+        "metric_b": null,
+        "delta": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "p_one_sided": null,
+        "n_boot_effective": 0
+      },
+      "M3 - M1n": {
+        "metric_a": null,
+        "metric_b": null,
+        "delta": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "p_one_sided": null,
+        "n_boot_effective": 0
+      }
+    },
+    "controls": {
+      "identity_decodability": {
+        "features": "M1n",
+        "auroc": 0.45985
+      },
+      "permutation_null": {
+        "features": "M1n",
+        "auroc_conditional": null
+      }
+    },
+    "strata": {}
+  },
+  "Qwen/Qwen2.5-3B-Instruct|pairwise": {
+    "n_items": 200,
+    "availability": {
+      "spectral": false,
+      "activations": true,
+      "n_input": 200,
+      "n_used": 200,
+      "dropped_no_spectral": 0,
+      "dropped_no_activation": 0
+    },
+    "health": {
+      "accuracy": 0.835,
+      "pred_rate_A": 0.415,
+      "per_stratum": {
+        "A": {
+          "n": 100,
+          "accuracy": 0.75
+        },
+        "B": {
+          "n": 100,
+          "accuracy": 0.92
+        }
+      },
+      "degenerate": false
+    },
+    "auroc_conditional": {
+      "Mn": 0.3921869015702795,
+      "M1": 0.6920720030639602,
+      "M1n": 0.6863270777479892,
+      "M3": 0.6978169283799309
+    },
+    "auroc_pooled": {
+      "Mn": 0.39784068227182,
+      "M1": 0.6842678279804029,
+      "M1n": 0.6701143168209036,
+      "M3": 0.6755579749591726
+    },
+    "contrasts": {
+      "M1n - M1": {
+        "metric_a": 0.6920720030639602,
+        "metric_b": 0.6863270777479892,
+        "delta": -0.005744925315971039,
+        "ci95": [
+          -0.03341507231358051,
+          0.020614244765456955
+        ],
+        "p_one_sided": 0.6955,
+        "n_boot_effective": 2000
+      },
+      "M3 - M1n": {
+        "metric_a": 0.6863270777479892,
+        "metric_b": 0.6978169283799309,
+        "delta": 0.011489850631941745,
+        "ci95": [
+          -0.09333606557377054,
+          0.1252662175538121
+        ],
+        "p_one_sided": 0.4115,
+        "n_boot_effective": 2000
+      }
+    },
+    "controls": {
+      "identity_decodability": {
+        "features": "M1n",
+        "auroc": 0.8909
+      },
+      "permutation_null": {
+        "features": "M1n",
+        "auroc_conditional": 0.46610494063577174
+      }
+    },
+    "strata": {}
+  },
+  "Qwen/Qwen2.5-3B-Instruct|single": {
+    "n_items": 200,
+    "availability": {
+      "spectral": false,
+      "activations": true,
+      "n_input": 200,
+      "n_used": 200,
+      "dropped_no_spectral": 0,
+      "dropped_no_activation": 0
+    },
+    "health": {
+      "accuracy": 0.64,
+      "pred_rate_No": 0.65,
+      "per_stratum": {
+        "No": {
+          "n": 100,
+          "accuracy": 0.79
+        },
+        "Yes": {
+          "n": 100,
+          "accuracy": 0.49
+        }
+      },
+      "degenerate": false
+    },
+    "auroc_conditional": {
+      "Mn": 0.4736652236652237,
+      "M1": 0.62000962000962,
+      "M1n": 0.6197691197691197,
+      "M3": 0.6154401154401155
+    },
+    "auroc_pooled": {
+      "Mn": 0.4781901041666667,
+      "M1": 0.6272786458333333,
+      "M1n": 0.6253255208333333,
+      "M3": 0.6267361111111112
+    },
+    "contrasts": {
+      "M1n - M1": {
+        "metric_a": 0.62000962000962,
+        "metric_b": 0.6197691197691197,
+        "delta": -0.0002405002405002632,
+        "ci95": [
+          -0.01962921690843684,
+          0.019945642973144755
+        ],
+        "p_one_sided": 0.4975,
+        "n_boot_effective": 2000
+      },
+      "M3 - M1n": {
+        "metric_a": 0.6197691197691197,
+        "metric_b": 0.6154401154401155,
+        "delta": -0.0043290043290042934,
+        "ci95": [
+          -0.09764634017294688,
+          0.08360660499651033
+        ],
+        "p_one_sided": 0.549,
+        "n_boot_effective": 2000
+      }
+    },
+    "controls": {
+      "identity_decodability": {
+        "features": "M1n",
+        "auroc": 0.7053999999999999
+      },
+      "permutation_null": {
+        "features": "M1n",
+        "auroc_conditional": 0.5271765271765272
+      }
+    },
+    "strata": {}
+  },
+  "meta-llama/Llama-3.2-1B-Instruct|pairwise": {
+    "n_items": 200,
+    "availability": {
+      "spectral": false,
+      "activations": true,
+      "n_input": 200,
+      "n_used": 200,
+      "dropped_no_spectral": 0,
+      "dropped_no_activation": 0
+    },
+    "health": {
+      "accuracy": 0.495,
+      "pred_rate_A": 0.015,
+      "per_stratum": {
+        "A": {
+          "n": 100,
+          "accuracy": 0.01
+        },
+        "B": {
+          "n": 100,
+          "accuracy": 0.98
+        }
+      },
+      "degenerate": false
+    },
+    "auroc_conditional": {
+      "Mn": 0.43389830508474575,
+      "M1": 0.6610169491525424,
+      "M1n": 0.6677966101694915,
+      "M3": 0.7254237288135593
+    },
+    "auroc_pooled": {
+      "Mn": 0.4960996099609961,
+      "M1": 0.604910491049105,
+      "M1n": 0.6001600160016002,
+      "M3": 0.5746574657465746
+    },
+    "contrasts": {
+      "M1n - M1": {
+        "metric_a": 0.6610169491525424,
+        "metric_b": 0.6677966101694915,
+        "delta": 0.006779661016949157,
+        "ci95": [
+          0.0,
+          0.020811855670103102
+        ],
+        "p_one_sided": 0.4259946949602122,
+        "n_boot_effective": 1885
+      },
+      "M3 - M1n": {
+        "metric_a": 0.6677966101694915,
+        "metric_b": 0.7254237288135593,
+        "delta": 0.057627118644067776,
+        "ci95": [
+          -0.8367346938775511,
+          1.0
+        ],
+        "p_one_sided": 0.4360742705570292,
+        "n_boot_effective": 1885
+      }
+    },
+    "controls": {
+      "identity_decodability": {
+        "features": "M1n",
+        "auroc": 0.5951000000000001
+      },
+      "permutation_null": {
+        "features": "M1n",
+        "auroc_conditional": 0.46779661016949153
+      }
+    },
+    "strata": {}
+  },
+  "meta-llama/Llama-3.2-1B-Instruct|single": {
+    "n_items": 200,
+    "availability": {
+      "spectral": false,
+      "activations": true,
+      "n_input": 200,
+      "n_used": 200,
+      "dropped_no_spectral": 0,
+      "dropped_no_activation": 0
+    },
+    "health": {
+      "accuracy": 0.56,
+      "pred_rate_No": 0.51,
+      "per_stratum": {
+        "No": {
+          "n": 100,
+          "accuracy": 0.57
+        },
+        "Yes": {
+          "n": 100,
+          "accuracy": 0.55
+        }
+      },
+      "degenerate": false
+    },
+    "auroc_conditional": {
+      "Mn": 0.43199350385708485,
+      "M1": 0.4868047097036135,
+      "M1n": 0.4585870889159562,
+      "M3": 0.47340641494112873
+    },
+    "auroc_pooled": {
+      "Mn": 0.4323762175324675,
+      "M1": 0.49335430194805197,
+      "M1n": 0.46590909090909094,
+      "M3": 0.4747362012987013
+    },
+    "contrasts": {
+      "M1n - M1": {
+        "metric_a": 0.4868047097036135,
+        "metric_b": 0.4585870889159562,
+        "delta": -0.028217620787657327,
+        "ci95": [
+          -0.06611888138365536,
+          0.008033958888934838
+        ],
+        "p_one_sided": 0.9365,
+        "n_boot_effective": 2000
+      },
+      "M3 - M1n": {
+        "metric_a": 0.4585870889159562,
+        "metric_b": 0.47340641494112873,
+        "delta": 0.014819326025172552,
+        "ci95": [
+          -0.07638542427941991,
+          0.11041597186550832
+        ],
+        "p_one_sided": 0.39,
+        "n_boot_effective": 2000
+      }
+    },
+    "controls": {
+      "identity_decodability": {
+        "features": "M1n",
+        "auroc": 0.5517999999999998
+      },
+      "permutation_null": {
+        "features": "M1n",
+        "auroc_conditional": 0.4650832318311003
+      }
+    },
+    "strata": {}
+  }
+}
