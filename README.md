@@ -93,14 +93,27 @@ Every run also produces:
 ```bash
 pip install -e .            # or: pip install -r requirements.txt
 huggingface-cli login       # or set HF_TOKEN (gated: Llama, Gemma)
+```
 
+The runner knows which stage belongs in which interpreter, and treats the
+confound audit as a gate — a FAIL stops the run before any GPU time:
+
+```powershell
+.\scripts\run_pipeline.ps1 -Mode pilot -Datasets llmbar          # <4B, fast
+.\scripts\run_pipeline.ps1 -Mode main  -Datasets llmbar judgebench
+```
+
+Or stage by stage:
+
+```bash
 python scripts/00_download_datasets.py
 python scripts/01_build_judge_banks.py
-python scripts/02_audit_confounds.py        # must be free of FAIL
+python scripts/02_audit_confounds.py --pilot     # must be free of FAIL
 
-# GPU pilot (<4B models, fast end-to-end validation)
-conda run -n gemma_spectral python scripts/11_run_judge.py --pilot --limit 400 --only llmbar
-conda run -n gemma_spectral python scripts/12_run_judge_spectral.py --pilot --dry-run 400 --only llmbar
+GPU=C:/Users/valno/anaconda3/envs/gemma_spectral/python.exe
+$GPU scripts/11_run_judge.py          --pilot --limit 400   --only llmbar
+$GPU scripts/12_run_judge_spectral.py --pilot --dry-run 400 --only llmbar
+
 python scripts/20_analyse.py --only llmbar
 ```
 
