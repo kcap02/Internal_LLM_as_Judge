@@ -276,6 +276,54 @@ def check_single_label_validity(dataset: str, items: list[dict]) -> dict:
                     "and report single-format results as secondary."}
 
 
+# ── C-NUM: per-model spectral coverage in the RESULTS ─────────────────────────
+def audit_spectral_coverage(rows: list[dict]) -> dict:
+    """Spectral success/failure per model, with the failure reasons.
+
+    A model whose spectral rows all carry an `error` contributes nothing to
+    M2/M4 while every summary still looks healthy — this is how fp16 overflow
+    silently removed a quarter of the pilot panel (C-NUM). Coverage is
+    therefore reported per model, and zero coverage is a FAIL, not a note.
+    """
+    per_model: dict = {}
+    for r in rows:
+        m = r["model"]
+        d = per_model.setdefault(m, {"rows": 0, "with_layers": 0, "skipped": 0,
+                                     "errors": Counter()})
+        d["rows"] += 1
+        if r.get("skipped"):
+            d["skipped"] += 1
+            continue
+        sp = r.get("spectral") or {}
+        if sp.get("layers"):
+            d["with_layers"] += 1
+        elif sp.get("error"):
+            d["errors"][str(sp["error"])[:120]] += 1
+
+    worst = "PASS"
+    out = {}
+    for m, d in per_model.items():
+        scored = d["rows"] - d["skipped"]
+        cov = d["with_layers"] / scored if scored else 0.0
+        attempted = d["with_layers"] + sum(d["errors"].values())
+        if attempted == 0:
+            status = "PASS"          # behavioural-only run: nothing to judge
+        elif cov == 0:
+            status = "FAIL"
+        elif cov < 0.98:
+            status = "WARN"
+        else:
+            status = "PASS"
+        if status == "FAIL":
+            worst = "FAIL"
+        elif status == "WARN" and worst == "PASS":
+            worst = "WARN"
+        out[m] = {"status": status, "coverage": cov, "rows": d["rows"],
+                  "with_layers": d["with_layers"], "skipped": d["skipped"],
+                  "errors": dict(d["errors"])}
+    return {"status": worst, "per_model": out}
+
+
 def run_bank_audit(dataset: str, bank: dict, tokenizer=None,
                    window: int = 4096, judge_models: list[str] | None = None,
                    distractor_panel: list[str] | None = None) -> dict:

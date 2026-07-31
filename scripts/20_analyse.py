@@ -28,6 +28,7 @@ import numpy as np
 from llm_judge.analysis.cv import compare, difficulty_strata
 from llm_judge.analysis.stats import benjamini_hochberg
 from llm_judge.config import RESULTS_DIR, Config, tagged
+from llm_judge.diagnostics import audit_spectral_coverage
 from llm_judge.io_utils import atomic_write_json, read_json, read_rows
 from llm_judge.log_utils import setup_logging
 
@@ -128,6 +129,21 @@ def main() -> None:
         if not rows:
             log.info("%s: no judge results yet — skipping", name)
             continue
+
+        # Spectral coverage per model BEFORE modelling: a model whose spectral
+        # rows all failed would otherwise vanish from M2/M4 while every
+        # summary still looked healthy (C-NUM).
+        cov = audit_spectral_coverage(rows)
+        for m, d in sorted(cov["per_model"].items()):
+            if d["with_layers"] or d["errors"]:
+                log.info("  spectral coverage %-28s %-5s %.0f%% (%d/%d)%s",
+                         m.split("/")[-1], d["status"], d["coverage"] * 100,
+                         d["with_layers"], d["rows"] - d["skipped"],
+                         f" errors={d['errors']}" if d["errors"] else "")
+        if cov["status"] == "FAIL":
+            log.warning("  a model produced NO valid spectral rows — check "
+                        "model_dtype (fp16 overflow) before trusting any "
+                        "spectral comparison")
 
         rows = usable(rows)
         n_peer = add_peer_difficulty(rows)
