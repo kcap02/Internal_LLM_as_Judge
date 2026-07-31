@@ -5,8 +5,8 @@
       "per_format": {
         "mcq": {
           "counts": {
-            "Yes": 2000,
-            "No": 2000
+            "Yes": 400,
+            "No": 400
           },
           "rates": {
             "Yes": 0.5,
@@ -18,40 +18,38 @@
     },
     "C-DUP  duplicate questions": {
       "status": "PASS",
-      "n_duplicate_texts": 4,
-      "n_unique_texts": 1993,
-      "fraction": 0.002007024586051179,
+      "n_duplicate_texts": 0,
+      "n_unique_texts": 400,
+      "fraction": 0.0,
       "group_id_present": true,
       "neutralised_by_text_grouping": true,
-      "examples": [
-        [
-          "mmlu-clinical_knowledge-617",
-          "mmlu-college_medicine-1280"
-        ],
-        [
-          "mmlu-college_medicine-1366",
-          "mmlu-high_school_statistics-5573"
-        ]
-      ]
+      "examples": []
     },
     "C-SUBJ subject concentration": {
       "status": "PASS",
       "n_subjects": 57,
       "top_subject": "professional_law",
-      "top_share": 0.11,
-      "normalized_entropy": 0.9253830465834095
+      "top_share": 0.1175,
+      "normalized_entropy": 0.9156607030029998
     },
     "C-PAIR pairwise counterbalance": {
       "status": "PASS",
       "note": "no pairwise items"
     },
     "C-SELF distractor provenance": {
-      "status": "WARN",
-      "mode": "synthetic",
+      "status": "PASS",
+      "mode": "logprob",
       "sources": {
-        "synthetic": 4000
+        "panel_pred": 552,
+        "panel_logprob": 248
       },
-      "note": "random distractors: no self-preference exposure, but distractors are often trivial (ceiling effect). Run the solver and rebuild for ecological validity."
+      "distractor_panel": [
+        "Qwen/Qwen2.5-0.5B-Instruct",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "meta-llama/Llama-3.2-1B-Instruct",
+        "Qwen/Qwen2.5-3B-Instruct"
+      ],
+      "note": "distractor panel is disjoint from the judge panel"
     },
     "C-LABEL single-format validity": {
       "status": "PASS",
@@ -61,7 +59,7 @@
       "status": "PASS",
       "per_format": {
         "mcq": {
-          "auc_length_predicts_verdict": 0.498428875,
+          "auc_length_predicts_verdict": 0.50174375,
           "positive_label": "No",
           "median_len": 124.0,
           "status": "PASS"
@@ -74,8 +72,8 @@
       "per_format": {
         "mcq": {
           "median": 124,
-          "p90": 301,
-          "max": 1052,
+          "p90": 304,
+          "max": 652,
           "frac_over_window": 0.0,
           "status": "PASS"
         }
@@ -85,466 +83,6 @@
       "status": "PASS",
       "per_format": {
         "mcq": {
-          "status": "PASS",
-          "n_distinct_id_maps": 1,
-          "n_probed": 32
-        }
-      }
-    }
-  },
-  "mmlu_pro": {
-    "C-BAL  class balance": {
-      "status": "PASS",
-      "per_format": {
-        "mcq": {
-          "counts": {
-            "Yes": 2000,
-            "No": 2000
-          },
-          "rates": {
-            "Yes": 0.5,
-            "No": 0.5
-          },
-          "status": "PASS"
-        }
-      }
-    },
-    "C-DUP  duplicate questions": {
-      "status": "PASS",
-      "n_duplicate_texts": 8,
-      "n_unique_texts": 1991,
-      "fraction": 0.004018081366147665,
-      "group_id_present": true,
-      "neutralised_by_text_grouping": true,
-      "examples": [
-        [
-          "mmlupro-law-1865",
-          "mmlupro-law-1866"
-        ],
-        [
-          "mmlupro-biology-3189",
-          "mmlupro-biology-3417"
-        ]
-      ]
-    },
-    "C-SUBJ subject concentration": {
-      "status": "PASS",
-      "n_subjects": 14,
-      "top_subject": "math",
-      "top_share": 0.113,
-      "normalized_entropy": 0.9779766272755371
-    },
-    "C-PAIR pairwise counterbalance": {
-      "status": "PASS",
-      "note": "no pairwise items"
-    },
-    "C-SELF distractor provenance": {
-      "status": "WARN",
-      "mode": "synthetic",
-      "sources": {
-        "synthetic": 4000
-      },
-      "note": "random distractors: no self-preference exposure, but distractors are often trivial (ceiling effect). Run the solver and rebuild for ecological validity."
-    },
-    "C-LABEL single-format validity": {
-      "status": "PASS",
-      "note": "no single-format items"
-    },
-    "C-LEN  length->verdict leak": {
-      "status": "PASS",
-      "per_format": {
-        "mcq": {
-          "auc_length_predicts_verdict": 0.496969875,
-          "positive_label": "No",
-          "median_len": 210.0,
-          "status": "PASS"
-        }
-      }
-    },
-    "C-WIN  spectral window": {
-      "status": "PASS",
-      "window": 4096,
-      "per_format": {
-        "mcq": {
-          "median": 210,
-          "p90": 421,
-          "max": 1664,
-          "frac_over_window": 0.0,
-          "status": "PASS"
-        }
-      }
-    },
-    "C-TOK  verdict-token stability": {
-      "status": "PASS",
-      "per_format": {
-        "mcq": {
-          "status": "PASS",
-          "n_distinct_id_maps": 1,
-          "n_probed": 32
-        }
-      }
-    }
-  },
-  "judgebench": {
-    "C-BAL  class balance": {
-      "status": "PASS",
-      "per_format": {
-        "pairwise": {
-          "counts": {
-            "A": 620,
-            "B": 620
-          },
-          "rates": {
-            "A": 0.5,
-            "B": 0.5
-          },
-          "status": "PASS"
-        },
-        "single": {
-          "counts": {
-            "Yes": 620,
-            "No": 620
-          },
-          "rates": {
-            "Yes": 0.5,
-            "No": 0.5
-          },
-          "status": "PASS"
-        }
-      }
-    },
-    "C-DUP  duplicate questions": {
-      "status": "PASS",
-      "n_duplicate_texts": 92,
-      "n_unique_texts": 528,
-      "fraction": 0.17424242424242425,
-      "group_id_present": true,
-      "neutralised_by_text_grouping": true,
-      "examples": [
-        [
-          "judgebench-claude-97c53ddb-0acc-56a1-9216-bb6727e8f586",
-          "judgebench-gpt-138e503c-b09d-5d19-82ff-0b5ddc3e7bf6"
-        ],
-        [
-          "judgebench-claude-bbdcd0e8-c9f8-5d3d-bf42-7bd74bd75273",
-          "judgebench-gpt-a4eff39a-4f2e-5cee-a6de-b8e74625269f"
-        ]
-      ]
-    },
-    "C-SUBJ subject concentration": {
-      "status": "PASS",
-      "n_subjects": 17,
-      "top_subject": "livebench-reasoning",
-      "top_share": 0.2403225806451613,
-      "normalized_entropy": 0.8941235911658569
-    },
-    "C-PAIR pairwise counterbalance": {
-      "status": "PASS",
-      "n_questions": 620,
-      "n_unbalanced": 0,
-      "verdict_counts": {
-        "A": 620,
-        "B": 620
-      }
-    },
-    "C-SELF distractor provenance": {
-      "status": "PASS",
-      "mode": "native",
-      "note": "free-text bank; ground truth is dataset-native"
-    },
-    "C-LABEL single-format validity": {
-      "status": "PASS",
-      "dataset": "judgebench",
-      "note": "labels are objective (correct vs incorrect)"
-    },
-    "C-LEN  length->verdict leak": {
-      "status": "PASS",
-      "per_format": {
-        "pairwise": {
-          "auc_length_predicts_verdict": 0.5,
-          "positive_label": "A",
-          "median_len": 1121.0,
-          "status": "PASS"
-        },
-        "single": {
-          "auc_length_predicts_verdict": 0.5041246097814777,
-          "positive_label": "No",
-          "median_len": 720.0,
-          "status": "PASS"
-        }
-      }
-    },
-    "C-WIN  spectral window": {
-      "status": "PASS",
-      "window": 4096,
-      "per_format": {
-        "pairwise": {
-          "median": 1121,
-          "p90": 1952,
-          "max": 3131,
-          "frac_over_window": 0.0,
-          "status": "PASS"
-        },
-        "single": {
-          "median": 720,
-          "p90": 1193,
-          "max": 1916,
-          "frac_over_window": 0.0,
-          "status": "PASS"
-        }
-      }
-    },
-    "C-TOK  verdict-token stability": {
-      "status": "PASS",
-      "per_format": {
-        "pairwise": {
-          "status": "PASS",
-          "n_distinct_id_maps": 1,
-          "n_probed": 32
-        },
-        "single": {
-          "status": "PASS",
-          "n_distinct_id_maps": 1,
-          "n_probed": 32
-        }
-      }
-    }
-  },
-  "llmbar": {
-    "C-BAL  class balance": {
-      "status": "PASS",
-      "per_format": {
-        "pairwise": {
-          "counts": {
-            "A": 419,
-            "B": 419
-          },
-          "rates": {
-            "A": 0.5,
-            "B": 0.5
-          },
-          "status": "PASS"
-        },
-        "single": {
-          "counts": {
-            "Yes": 419,
-            "No": 419
-          },
-          "rates": {
-            "Yes": 0.5,
-            "No": 0.5
-          },
-          "status": "PASS"
-        }
-      }
-    },
-    "C-DUP  duplicate questions": {
-      "status": "PASS",
-      "n_duplicate_texts": 1,
-      "n_unique_texts": 418,
-      "fraction": 0.0023923444976076554,
-      "group_id_present": true,
-      "neutralised_by_text_grouping": true,
-      "examples": [
-        [
-          "llmbar-Adversarial_GPTInst-78",
-          "llmbar-Adversarial_Neighbor-94"
-        ]
-      ]
-    },
-    "C-SUBJ subject concentration": {
-      "status": "PASS",
-      "n_subjects": 5,
-      "top_subject": "Adversarial_Neighbor",
-      "top_share": 0.3198090692124105,
-      "normalized_entropy": 0.9489984674064684
-    },
-    "C-PAIR pairwise counterbalance": {
-      "status": "PASS",
-      "n_questions": 419,
-      "n_unbalanced": 0,
-      "verdict_counts": {
-        "A": 419,
-        "B": 419
-      }
-    },
-    "C-SELF distractor provenance": {
-      "status": "PASS",
-      "mode": "native",
-      "note": "free-text bank; ground truth is dataset-native"
-    },
-    "C-LABEL single-format validity": {
-      "status": "WARN",
-      "dataset": "llmbar",
-      "note": "single-format labels come from a relative preference; the 'No' class is noisy. Prefer the pairwise arm here, and report single-format results as secondary."
-    },
-    "C-LEN  length->verdict leak": {
-      "status": "WARN",
-      "per_format": {
-        "pairwise": {
-          "auc_length_predicts_verdict": 0.5,
-          "positive_label": "A",
-          "median_len": 200.0,
-          "status": "PASS"
-        },
-        "single": {
-          "auc_length_predicts_verdict": 0.6261498852250784,
-          "positive_label": "No",
-          "median_len": 128.0,
-          "status": "WARN"
-        }
-      }
-    },
-    "C-WIN  spectral window": {
-      "status": "PASS",
-      "window": 4096,
-      "per_format": {
-        "pairwise": {
-          "median": 200,
-          "p90": 657,
-          "max": 1119,
-          "frac_over_window": 0.0,
-          "status": "PASS"
-        },
-        "single": {
-          "median": 128,
-          "p90": 426,
-          "max": 854,
-          "frac_over_window": 0.0,
-          "status": "PASS"
-        }
-      }
-    },
-    "C-TOK  verdict-token stability": {
-      "status": "PASS",
-      "per_format": {
-        "pairwise": {
-          "status": "PASS",
-          "n_distinct_id_maps": 1,
-          "n_probed": 32
-        },
-        "single": {
-          "status": "PASS",
-          "n_distinct_id_maps": 1,
-          "n_probed": 32
-        }
-      }
-    }
-  },
-  "rewardbench2": {
-    "C-BAL  class balance": {
-      "status": "PASS",
-      "per_format": {
-        "pairwise": {
-          "counts": {
-            "A": 1000,
-            "B": 1000
-          },
-          "rates": {
-            "A": 0.5,
-            "B": 0.5
-          },
-          "status": "PASS"
-        },
-        "single": {
-          "counts": {
-            "Yes": 1000,
-            "No": 1000
-          },
-          "rates": {
-            "Yes": 0.5,
-            "No": 0.5
-          },
-          "status": "PASS"
-        }
-      }
-    },
-    "C-DUP  duplicate questions": {
-      "status": "PASS",
-      "n_duplicate_texts": 1,
-      "n_unique_texts": 999,
-      "fraction": 0.001001001001001001,
-      "group_id_present": true,
-      "neutralised_by_text_grouping": true,
-      "examples": [
-        [
-          "rewardbench2-Focus-1545",
-          "rewardbench2-Focus-1712"
-        ]
-      ]
-    },
-    "C-SUBJ subject concentration": {
-      "status": "PASS",
-      "n_subjects": 5,
-      "top_subject": "Focus",
-      "top_share": 0.29,
-      "normalized_entropy": 0.9341809522012284
-    },
-    "C-PAIR pairwise counterbalance": {
-      "status": "PASS",
-      "n_questions": 1000,
-      "n_unbalanced": 0,
-      "verdict_counts": {
-        "A": 1000,
-        "B": 1000
-      }
-    },
-    "C-SELF distractor provenance": {
-      "status": "PASS",
-      "mode": "native",
-      "note": "free-text bank; ground truth is dataset-native"
-    },
-    "C-LABEL single-format validity": {
-      "status": "WARN",
-      "dataset": "rewardbench2",
-      "note": "single-format labels come from a relative preference; the 'No' class is noisy. Prefer the pairwise arm here, and report single-format results as secondary."
-    },
-    "C-LEN  length->verdict leak": {
-      "status": "WARN",
-      "per_format": {
-        "pairwise": {
-          "auc_length_predicts_verdict": 0.5,
-          "positive_label": "A",
-          "median_len": 827.0,
-          "status": "PASS"
-        },
-        "single": {
-          "auc_length_predicts_verdict": 0.5647725,
-          "positive_label": "No",
-          "median_len": 445.0,
-          "status": "WARN"
-        }
-      }
-    },
-    "C-WIN  spectral window": {
-      "status": "PASS",
-      "window": 4096,
-      "per_format": {
-        "pairwise": {
-          "median": 827,
-          "p90": 1489,
-          "max": 2441,
-          "frac_over_window": 0.0,
-          "status": "PASS"
-        },
-        "single": {
-          "median": 445,
-          "p90": 846,
-          "max": 1439,
-          "frac_over_window": 0.0,
-          "status": "PASS"
-        }
-      }
-    },
-    "C-TOK  verdict-token stability": {
-      "status": "PASS",
-      "per_format": {
-        "pairwise": {
-          "status": "PASS",
-          "n_distinct_id_maps": 1,
-          "n_probed": 32
-        },
-        "single": {
           "status": "PASS",
           "n_distinct_id_maps": 1,
           "n_probed": 32

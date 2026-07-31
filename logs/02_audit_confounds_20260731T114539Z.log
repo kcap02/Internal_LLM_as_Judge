@@ -1,0 +1,18 @@
+13:45:39 INFO stage=02_audit_confounds | commit=b51c51b | logfile=02_audit_confounds_20260731T114539Z.log
+13:45:39 INFO versions={"python": "3.11.9", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.5.1+cu124", "transformers": "4.46.2", "datasets": "4.8.5", "sklearn": "1.5.2", "numpy": "1.26.4", "spectral_trust": "not installed"}
+13:45:39 INFO config={"seed": 42, "judge_models_pilot": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen2.5-1.5B-Instruct", "meta-llama/Llama-3.2-1B-Instruct", "Qwen/Qwen2.5-3B-Instruct"], "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "distractor_panel": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen2.5-1.5B-Instruct", "meta-llama/Llama-3.2-1B-Instruct", "Qwen/Qwen2.5-3B-Instruct"], "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "model_dtype": "bfloat16", "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 4096, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_probe": "full", "activation_pca_dims": 24}
+13:45:43 INFO tokenizer for length checks: Qwen/Qwen2.5-0.5B-Instruct
+13:45:43 INFO ========================================================================
+13:45:43 INFO BANK mmlu  (800 items, mode=logprob)
+13:45:43 INFO   [PASS] C-BAL  class balance             {"per_format": {"mcq": {"counts": {"Yes": 400, "No": 400}, "rates": {"Yes": 0.5, "No": 0.5}, "status": "PASS"}}}
+13:45:43 INFO   [PASS] C-DUP  duplicate questions       {"n_duplicate_texts": 0, "n_unique_texts": 400, "fraction": 0.0, "group_id_present": true, "neutralised_by_text_grouping": true, "examples": []}
+13:45:43 INFO   [PASS] C-SUBJ subject concentration     {"n_subjects": 57, "top_subject": "professional_law", "top_share": 0.1175, "normalized_entropy": 0.9156607030029998}
+13:45:43 INFO   [PASS] C-PAIR pairwise counterbalance   {"note": "no pairwise items"}
+13:45:43 INFO   [PASS] C-SELF distractor provenance     {"mode": "logprob", "sources": {"panel_pred": 552, "panel_logprob": 248}, "distractor_panel": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen2.5-1.5B-Instruct", "meta-llama/Llama-3.2-1B-Instruct", "Qwen/Qwen2.5-3B-Instruct"], "note": "distractor panel is disjoint from the judge panel"}
+13:45:43 INFO   [PASS] C-LABEL single-format validity   {"note": "no single-format items"}
+13:45:43 INFO   [PASS] C-LEN  length->verdict leak      {"per_format": {"mcq": {"auc_length_predicts_verdict": 0.50174375, "positive_label": "No", "median_len": 124.0, "status": "PASS"}}}
+13:45:43 INFO   [PASS] C-WIN  spectral window           {"window": 4096, "per_format": {"mcq": {"median": 124, "p90": 304, "max": 652, "frac_over_window": 0.0, "status": "PASS"}}}
+13:45:43 INFO   [PASS] C-TOK  verdict-token stability   {"per_format": {"mcq": {"status": "PASS", "n_distinct_id_maps": 1, "n_probed": 32}}}
+13:45:43 INFO ========================================================================
+13:45:43 INFO OVERALL BANK AUDIT: PASS   -> audit_banks.json
+13:45:43 INFO WARN entries are documented limitations, not blockers; FAIL entries must be fixed before GPU stages.

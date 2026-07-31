@@ -30,16 +30,15 @@ time). Analysis-level controls run inside `scripts/20_analyse.py`.
 | C-STAGE | stage 11/12 drift | NEUTRALISED | agreement monitored (0.00% observed) |
 | C-FORMAT | raw prompts on instruct models | RESOLVED | ablation: no material effect |
 | C-LEN | length gives the verdict away | MEASURED | pairwise immune (0.500); nuisance regressor for `single` |
-| C-SELF | self-preference in distractors | MEASURED | fix ready: `configs/main.json` disjoint panel |
+| C-SELF | self-preference in distractors | NEUTRALISED | distractor panel disjoint from judges (`configs/main.json`) |
 | C-LABEL | `single` = preference as absolute truth | MEASURED | inherent; pairwise is primary |
 
 No FAIL-level confound remains, and no analysis-level confound is merely
 "noted" — each is either removed by construction or has a control that would
-expose it. The three MEASURED items are properties of the source datasets
-rather than of this pipeline: they are quantified and reported, and two of
-them (C-LEN, C-LABEL) are the reason **pairwise is the primary free-text
-format**. C-SELF flips to PASS as soon as the solver run lands and the MCQ
-banks are rebuilt with the disjoint panel in `configs/main.json`.
+expose it. The MMLU bank audits **PASS on every check**. The two remaining
+MEASURED items are properties of the source datasets rather than of this
+pipeline: they are quantified, reported, and are exactly why **pairwise is
+the primary free-text format**.
 
 Four of these were found by *running* the pilot, not by reading the code:
 C-DUP (JudgeBench reusing 92 questions across splits), C-DEGEN (two artefact
@@ -199,17 +198,37 @@ reported per dataset.
 
 ## C-SELF — Self-preference in MCQ distractors
 
-**Status: MEASURED, fix available**
+**Status: NEUTRALISED (demonstrated)**
 
 MCQ distractors are the wrong answer the solver panel finds most tempting. If
-the judging model is in that panel, it is being shown a trap it helped
-select — its own inclinations, not a neutral distractor.
+the judging model sits in that panel, it is being shown a trap it helped
+select — its own inclinations rather than a neutral distractor, which
+inflates or deflates its score for reasons that have nothing to do with
+judging.
 
-*Fix available.* `config.distractor_panel` restricts distractor construction
-to a named model set. Set it **disjoint from the judge panel** (e.g. build
-distractors with the <4B pilot panel, judge with the 7–27B panel) and the
-audit flips to PASS. Currently the MCQ banks are `synthetic` (no solver run
-yet), which has no self-preference exposure but produces easier distractors.
+*Fix.* `config.distractor_panel` restricts distractor construction to a named
+model set; `configs/main.json` sets it to the **<4B pilot panel, disjoint from
+the 7–27B judge panel**. Distractors are then chosen by models that never
+judge them.
+
+*Demonstrated.* Solver run over the pilot panel → rebuild → audit:
+
+```
+[PASS] C-SELF  {"mode": "logprob",
+                "sources": {"panel_pred": 552, "panel_logprob": 248},
+                "note": "distractor panel is disjoint from the judge panel"}
+OVERALL BANK AUDIT: PASS
+```
+
+Two-thirds of the distractors were options a panel model actually chose; the
+rest are the wrong option the panel leaned toward most without selecting it.
+Both are ecologically valid, and the split is recorded per item in
+`neg_source` so the analysis can condition on it.
+
+*Operational note.* The bank only covers questions for which solver logprobs
+exist, so the solver must run over the **whole** question set before the final
+rebuild — a partial solver pass silently shrinks the bank (it reports the
+count, e.g. `400/2000 questions kept`).
 
 ---
 
