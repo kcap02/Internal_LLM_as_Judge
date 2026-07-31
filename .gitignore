@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# Data & results.
+# Banks are committed (they define what every judge scored). Per-item result
+# streams and activations are NOT: they are large, they grow with every run,
+# and they are fully regenerable from (commit, config, bank). The small JSON
+# summaries under results/ — analyses and audits — are committed, because
+# those are the artefacts a reader actually needs.
+data/raw/
+data/hf_cache/
+results/*.jsonl
+results/activations/
+offload/
+gsp_out/
+
+# Logs are kept in git for replicability EXCEPT bulky per-item streams
+logs/*.tmp
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

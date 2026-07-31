@@ -1,0 +1,62 @@
+13:37:34 INFO stage=02_audit_confounds | commit=b813a7d | logfile=02_audit_confounds_20260731T113734Z.log
+13:37:34 INFO versions={"python": "3.11.9", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.5.1+cu124", "transformers": "4.46.2", "datasets": "4.8.5", "sklearn": "1.5.2", "numpy": "1.26.4", "spectral_trust": "not installed"}
+13:37:34 INFO config={"seed": 42, "judge_models_pilot": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen2.5-1.5B-Instruct", "meta-llama/Llama-3.2-1B-Instruct", "Qwen/Qwen2.5-3B-Instruct"], "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "distractor_panel": null, "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "model_dtype": "bfloat16", "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 4096, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_probe": "full", "activation_pca_dims": 24}
+13:37:37 INFO tokenizer for length checks: Qwen/Qwen2.5-0.5B-Instruct
+13:37:37 INFO ========================================================================
+13:37:37 INFO BANK mmlu  (4000 items, mode=synthetic)
+13:37:40 INFO   [PASS] C-BAL  class balance             {"per_format": {"mcq": {"counts": {"Yes": 2000, "No": 2000}, "rates": {"Yes": 0.5, "No": 0.5}, "status": "PASS"}}}
+13:37:40 INFO   [PASS] C-DUP  duplicate questions       {"n_duplicate_texts": 4, "n_unique_texts": 1993, "fraction": 0.002007024586051179, "group_id_present": true, "neutralised_by_text_grouping": true, "examples": [["mmlu-clinical_knowledge-617", "mmlu-college_medicine-1280"], ["mmlu-college_medicine-1366", "mmlu-high_school_statistics-5573"]]}
+13:37:40 INFO   [PASS] C-SUBJ subject concentration     {"n_subjects": 57, "top_subject": "professional_law", "top_share": 0.11, "normalized_entropy": 0.9253830465834095}
+13:37:40 INFO   [PASS] C-PAIR pairwise counterbalance   {"note": "no pairwise items"}
+13:37:40 INFO   [WARN] C-SELF distractor provenance     {"mode": "synthetic", "sources": {"synthetic": 4000}, "note": "random distractors: no self-preference exposure, but distractors are often trivial (ceiling effect). Run the solver and rebuild for ecological validity."}
+13:37:40 INFO   [PASS] C-LABEL single-format validity   {"note": "no single-format items"}
+13:37:40 INFO   [PASS] C-LEN  length->verdict leak      {"per_format": {"mcq": {"auc_length_predicts_verdict": 0.498428875, "positive_label": "No", "median_len": 124.0, "status": "PASS"}}}
+13:37:40 INFO   [PASS] C-WIN  spectral window           {"window": 4096, "per_format": {"mcq": {"median": 124, "p90": 301, "max": 1052, "frac_over_window": 0.0, "status": "PASS"}}}
+13:37:40 INFO   [PASS] C-TOK  verdict-token stability   {"per_format": {"mcq": {"status": "PASS", "n_distinct_id_maps": 1, "n_probed": 32}}}
+13:37:40 INFO ========================================================================
+13:37:40 INFO BANK mmlu_pro  (4000 items, mode=synthetic)
+13:37:43 INFO   [PASS] C-BAL  class balance             {"per_format": {"mcq": {"counts": {"Yes": 2000, "No": 2000}, "rates": {"Yes": 0.5, "No": 0.5}, "status": "PASS"}}}
+13:37:43 INFO   [PASS] C-DUP  duplicate questions       {"n_duplicate_texts": 8, "n_unique_texts": 1991, "fraction": 0.004018081366147665, "group_id_present": true, "neutralised_by_text_grouping": true, "examples": [["mmlupro-law-1865", "mmlupro-law-1866"], ["mmlupro-biology-3189", "mmlupro-biology-3417"]]}
+13:37:43 INFO   [PASS] C-SUBJ subject concentration     {"n_subjects": 14, "top_subject": "math", "top_share": 0.113, "normalized_entropy": 0.9779766272755371}
+13:37:43 INFO   [PASS] C-PAIR pairwise counterbalance   {"note": "no pairwise items"}
+13:37:43 INFO   [WARN] C-SELF distractor provenance     {"mode": "synthetic", "sources": {"synthetic": 4000}, "note": "random distractors: no self-preference exposure, but distractors are often trivial (ceiling effect). Run the solver and rebuild for ecological validity."}
+13:37:43 INFO   [PASS] C-LABEL single-format validity   {"note": "no single-format items"}
+13:37:43 INFO   [PASS] C-LEN  length->verdict leak      {"per_format": {"mcq": {"auc_length_predicts_verdict": 0.496969875, "positive_label": "No", "median_len": 210.0, "status": "PASS"}}}
+13:37:43 INFO   [PASS] C-WIN  spectral window           {"window": 4096, "per_format": {"mcq": {"median": 210, "p90": 421, "max": 1664, "frac_over_window": 0.0, "status": "PASS"}}}
+13:37:43 INFO   [PASS] C-TOK  verdict-token stability   {"per_format": {"mcq": {"status": "PASS", "n_distinct_id_maps": 1, "n_probed": 32}}}
+13:37:44 INFO ========================================================================
+13:37:44 INFO BANK judgebench  (2480 items, mode=native)
+13:37:59 INFO   [PASS] C-BAL  class balance             {"per_format": {"pairwise": {"counts": {"A": 620, "B": 620}, "rates": {"A": 0.5, "B": 0.5}, "status": "PASS"}, "single": {"counts": {"Yes": 620, "No": 620}, "rates": {"Yes": 0.5, "No": 0.5}, "status": "PASS"}}}
+13:37:59 INFO   [PASS] C-DUP  duplicate questions       {"n_duplicate_texts": 92, "n_unique_texts": 528, "fraction": 0.17424242424242425, "group_id_present": true, "neutralised_by_text_grouping": true, "examples": [["judgebench-claude-97c53ddb-0acc-56a1-9216-bb6727e8f586", "judgebench-gpt-138e503c-b09d-5d19-82ff-0b5ddc3e7bf6"], ["judgebench-claude-bbdcd0e8-c9f8-5d3d-bf42-7bd74bd75273", "judgebench-gpt-a4eff39a-4f2e-5cee-a6de-b8e74625269f"]]}
+13:37:59 INFO   [PASS] C-SUBJ subject concentration     {"n_subjects": 17, "top_subject": "livebench-reasoning", "top_share": 0.2403225806451613, "normalized_entropy": 0.8941235911658569}
+13:37:59 INFO   [PASS] C-PAIR pairwise counterbalance   {"n_questions": 620, "n_unbalanced": 0, "verdict_counts": {"A": 620, "B": 620}}
+13:37:59 INFO   [PASS] C-SELF distractor provenance     {"mode": "native", "note": "free-text bank; ground truth is dataset-native"}
+13:37:59 INFO   [PASS] C-LABEL single-format validity   {"dataset": "judgebench", "note": "labels are objective (correct vs incorrect)"}
+13:37:59 INFO   [PASS] C-LEN  length->verdict leak      {"per_format": {"pairwise": {"auc_length_predicts_verdict": 0.5, "positive_label": "A", "median_len": 1121.0, "status": "PASS"}, "single": {"auc_length_predicts_verdict": 0.5041246097814777, "positive_label": "No", "median_len": 720.0, "status": "PASS"}}}
+13:37:59 INFO   [PASS] C-WIN  spectral window           {"window": 4096, "per_format": {"pairwise": {"median": 1121, "p90": 1952, "max": 3131, "frac_over_window": 0.0, "status": "PASS"}, "single": {"median": 720, "p90": 1193, "max": 1916, "frac_over_window": 0.0, "status": "PASS"}}}
+13:37:59 INFO   [PASS] C-TOK  verdict-token stability   {"per_format": {"pairwise": {"status": "PASS", "n_distinct_id_maps": 1, "n_probed": 32}, "single": {"status": "PASS", "n_distinct_id_maps": 1, "n_probed": 32}}}
+13:37:59 INFO ========================================================================
+13:37:59 INFO BANK llmbar  (1676 items, mode=native)
+13:38:01 INFO   [PASS] C-BAL  class balance             {"per_format": {"pairwise": {"counts": {"A": 419, "B": 419}, "rates": {"A": 0.5, "B": 0.5}, "status": "PASS"}, "single": {"counts": {"Yes": 419, "No": 419}, "rates": {"Yes": 0.5, "No": 0.5}, "status": "PASS"}}}
+13:38:01 INFO   [PASS] C-DUP  duplicate questions       {"n_duplicate_texts": 1, "n_unique_texts": 418, "fraction": 0.0023923444976076554, "group_id_present": true, "neutralised_by_text_grouping": true, "examples": [["llmbar-Adversarial_GPTInst-78", "llmbar-Adversarial_Neighbor-94"]]}
+13:38:01 INFO   [PASS] C-SUBJ subject concentration     {"n_subjects": 5, "top_subject": "Adversarial_Neighbor", "top_share": 0.3198090692124105, "normalized_entropy": 0.9489984674064684}
+13:38:01 INFO   [PASS] C-PAIR pairwise counterbalance   {"n_questions": 419, "n_unbalanced": 0, "verdict_counts": {"A": 419, "B": 419}}
+13:38:01 INFO   [PASS] C-SELF distractor provenance     {"mode": "native", "note": "free-text bank; ground truth is dataset-native"}
+13:38:01 INFO   [WARN] C-LABEL single-format validity   {"dataset": "llmbar", "note": "single-format labels come from a relative preference; the 'No' class is noisy. Prefer the pairwise arm here, and report single-format results as secondary."}
+13:38:01 INFO   [WARN] C-LEN  length->verdict leak      {"per_format": {"pairwise": {"auc_length_predicts_verdict": 0.5, "positive_label": "A", "median_len": 200.0, "status": "PASS"}, "single": {"auc_length_predicts_verdict": 0.6261498852250784, "positive_label": "No", "median_len": 128.0, "status": "WARN"}}}
+13:38:01 INFO   [PASS] C-WIN  spectral window           {"window": 4096, "per_format": {"pairwise": {"median": 200, "p90": 657, "max": 1119, "frac_over_window": 0.0, "status": "PASS"}, "single": {"median": 128, "p90": 426, "max": 854, "frac_over_window": 0.0, "status": "PASS"}}}
+13:38:01 INFO   [PASS] C-TOK  verdict-token stability   {"per_format": {"pairwise": {"status": "PASS", "n_distinct_id_maps": 1, "n_probed": 32}, "single": {"status": "PASS", "n_distinct_id_maps": 1, "n_probed": 32}}}
+13:38:01 INFO ========================================================================
+13:38:01 INFO BANK rewardbench2  (4000 items, mode=native)
+13:38:12 INFO   [PASS] C-BAL  class balance             {"per_format": {"pairwise": {"counts": {"A": 1000, "B": 1000}, "rates": {"A": 0.5, "B": 0.5}, "status": "PASS"}, "single": {"counts": {"Yes": 1000, "No": 1000}, "rates": {"Yes": 0.5, "No": 0.5}, "status": "PASS"}}}
+13:38:12 INFO   [PASS] C-DUP  duplicate questions       {"n_duplicate_texts": 1, "n_unique_texts": 999, "fraction": 0.001001001001001001, "group_id_present": true, "neutralised_by_text_grouping": true, "examples": [["rewardbench2-Focus-1545", "rewardbench2-Focus-1712"]]}
+13:38:12 INFO   [PASS] C-SUBJ subject concentration     {"n_subjects": 5, "top_subject": "Focus", "top_share": 0.29, "normalized_entropy": 0.9341809522012284}
+13:38:12 INFO   [PASS] C-PAIR pairwise counterbalance   {"n_questions": 1000, "n_unbalanced": 0, "verdict_counts": {"A": 1000, "B": 1000}}
+13:38:12 INFO   [PASS] C-SELF distractor provenance     {"mode": "native", "note": "free-text bank; ground truth is dataset-native"}
+13:38:12 INFO   [WARN] C-LABEL single-format validity   {"dataset": "rewardbench2", "note": "single-format labels come from a relative preference; the 'No' class is noisy. Prefer the pairwise arm here, and report single-format results as secondary."}
+13:38:12 INFO   [WARN] C-LEN  length->verdict leak      {"per_format": {"pairwise": {"auc_length_predicts_verdict": 0.5, "positive_label": "A", "median_len": 827.0, "status": "PASS"}, "single": {"auc_length_predicts_verdict": 0.5647725, "positive_label": "No", "median_len": 445.0, "status": "WARN"}}}
+13:38:12 INFO   [PASS] C-WIN  spectral window           {"window": 4096, "per_format": {"pairwise": {"median": 827, "p90": 1489, "max": 2441, "frac_over_window": 0.0, "status": "PASS"}, "single": {"median": 445, "p90": 846, "max": 1439, "frac_over_window": 0.0, "status": "PASS"}}}
+13:38:12 INFO   [PASS] C-TOK  verdict-token stability   {"per_format": {"pairwise": {"status": "PASS", "n_distinct_id_maps": 1, "n_probed": 32}, "single": {"status": "PASS", "n_distinct_id_maps": 1, "n_probed": 32}}}
+13:38:12 INFO ========================================================================
+13:38:12 INFO OVERALL BANK AUDIT: WARN   -> audit_banks.json
+13:38:12 INFO WARN entries are documented limitations, not blockers; FAIL entries must be fixed before GPU stages.

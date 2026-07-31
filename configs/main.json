@@ -1,0 +1,16 @@
+{
+  "_comment": [
+    "Main-run configuration for the 7-27B judge panel.",
+    "distractor_panel is the <4B pilot set and is DISJOINT from judge_models:",
+    "MCQ distractors are therefore chosen by models that never judge them,",
+    "which closes the self-preference confound (C-SELF).",
+    "Requires: stage 10 solver run over these four models first, then",
+    "scripts/01_build_judge_banks.py --force --only mmlu mmlu_pro."
+  ],
+  "distractor_panel": [
+    "Qwen/Qwen2.5-0.5B-Instruct",
+    "Qwen/Qwen2.5-1.5B-Instruct",
+    "meta-llama/Llama-3.2-1B-Instruct",
+    "Qwen/Qwen2.5-3B-Instruct"
+  ]
+}

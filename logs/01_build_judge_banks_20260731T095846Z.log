@@ -1,0 +1,11 @@
+11:58:46 INFO stage=01_build_judge_banks | commit=febd25e | logfile=01_build_judge_banks_20260731T095846Z.log
+11:58:48 INFO versions={"python": "3.11.9", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.5.1+cu124", "transformers": "4.46.2", "datasets": "4.8.5", "sklearn": "1.5.2", "numpy": "1.26.4", "spectral_trust": "not installed"}
+11:58:48 INFO config={"seed": 42, "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 1024, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_pca_dims": 24}
+11:58:48 WARNING mmlu: no solver results yet — SYNTHETIC distractors (random wrong letters). Rebuild with --force after stage 10 for ecologically valid distractors.
+11:58:48 INFO mmlu: bank written (4000 items, 2000 questions, mode=synthetic) -> bank_mmlu.json
+11:58:48 WARNING mmlu_pro: no solver results yet — SYNTHETIC distractors (random wrong letters). Rebuild with --force after stage 10 for ecologically valid distractors.
+11:58:48 INFO mmlu_pro: bank written (4000 items, 2000 questions, mode=synthetic) -> bank_mmlu_pro.json
+11:58:48 INFO judgebench: bank written (2480 items, 620 questions, mode=native) -> bank_judgebench.json
+11:58:48 INFO llmbar: bank written (1676 items, 419 questions, mode=native) -> bank_llmbar.json
+11:58:49 INFO rewardbench2: bank written (4000 items, 1000 questions, mode=native) -> bank_rewardbench2.json
+11:58:49 INFO done.

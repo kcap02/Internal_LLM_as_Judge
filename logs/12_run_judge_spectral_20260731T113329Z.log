@@ -1,0 +1,113 @@
+13:33:29 INFO stage=12_run_judge_spectral | commit=e2ad403 | logfile=12_run_judge_spectral_20260731T113329Z.log
+13:33:29 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.5.0", "datasets": "4.8.4", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.1"}
+13:33:29 INFO config={"seed": 42, "judge_models_pilot": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen2.5-1.5B-Instruct", "meta-llama/Llama-3.2-1B-Instruct", "Qwen/Qwen2.5-3B-Instruct"], "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "distractor_panel": null, "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "model_dtype": "bfloat16", "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 4096, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_probe": "full", "activation_pca_dims": 24}
+13:33:31 INFO order:   0.5 B params  Qwen/Qwen2.5-0.5B-Instruct
+13:33:31 INFO order:   1.3 B params  meta-llama/Llama-3.2-1B-Instruct
+13:33:32 INFO order:   1.7 B params  Qwen/Qwen2.5-1.5B-Instruct
+13:33:32 INFO order:   3.3 B params  Qwen/Qwen2.5-3B-Instruct
+13:33:32 INFO === dataset llmbar: 1676 items (bank mode=native), resume=4 ===
+13:33:32 INFO Qwen2.5-0.5B-Instruct: 1672 items
+13:33:34 INFO Qwen2.5-0.5B-Instruct: longest prompt 1119 tokens -> ~0.8 GB retained attention; reserving 2.0 GB of the 14.7 GB free
+13:33:37 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+13:33:52 INFO   [20/400] median 0.8 s/item
+13:34:29 INFO   [40/400] median 0.9 s/item
+13:34:59 INFO   [60/400] median 1.1 s/item
+13:35:28 INFO   [80/400] median 1.1 s/item
+13:35:56 INFO   [100/400] median 1.1 s/item
+13:36:07 INFO   [120/400] median 0.8 s/item
+13:36:15 INFO   [140/400] median 0.8 s/item
+13:36:23 INFO   [160/400] median 0.6 s/item
+13:36:29 INFO   [180/400] median 0.5 s/item
+13:36:58 INFO   [200/400] median 0.5 s/item
+13:37:31 INFO   [220/400] median 0.6 s/item
+13:38:20 INFO   [240/400] median 0.6 s/item
+13:38:36 INFO   [260/400] median 0.6 s/item
+13:38:50 INFO   [280/400] median 0.6 s/item
+13:39:09 INFO   [300/400] median 0.6 s/item
+13:39:23 INFO   [320/400] median 0.6 s/item
+13:39:38 INFO   [340/400] median 0.6 s/item
+13:39:54 INFO   [360/400] median 0.6 s/item
+13:40:15 INFO   [380/400] median 0.6 s/item
+13:40:24 INFO   [400/400] median 0.5 s/item
+13:40:24 INFO   median 0.5 s/item -> ~15 min for 1672 items
+13:40:24 INFO   DRY RUN (400 items) — drop --dry-run for the full campaign.
+13:40:25 INFO Qwen2.5-0.5B-Instruct: unloaded, 13.7 GB VRAM free
+13:40:25 INFO Llama-3.2-1B-Instruct: 1676 items
+13:40:27 INFO Llama-3.2-1B-Instruct: longest prompt 1120 tokens -> ~1.2 GB retained attention; reserving 2.6 GB of the 13.7 GB free
+13:40:30 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+13:40:54 INFO   [20/400] median 1.2 s/item
+13:41:30 INFO   [40/400] median 1.2 s/item
+13:42:01 INFO   [60/400] median 1.3 s/item
+13:42:32 INFO   [80/400] median 1.3 s/item
+13:42:58 INFO   [100/400] median 1.3 s/item
+13:43:12 INFO   [120/400] median 1.1 s/item
+13:43:23 INFO   [140/400] median 1.0 s/item
+13:43:35 INFO   [160/400] median 0.8 s/item
+13:43:46 INFO   [180/400] median 0.7 s/item
+13:44:12 INFO   [200/400] median 0.7 s/item
+13:44:42 INFO   [220/400] median 0.7 s/item
+13:45:19 INFO   [240/400] median 0.7 s/item
+13:45:44 INFO   [260/400] median 0.7 s/item
+13:45:56 INFO   [280/400] median 0.7 s/item
+13:46:17 INFO   [300/400] median 0.7 s/item
+13:46:31 INFO   [320/400] median 0.7 s/item
+13:46:49 INFO   [340/400] median 0.7 s/item
+13:47:07 INFO   [360/400] median 0.7 s/item
+13:47:23 INFO   [380/400] median 0.7 s/item
+13:47:43 INFO   [400/400] median 0.7 s/item
+13:47:43 INFO   median 0.7 s/item -> ~20 min for 1676 items
+13:47:43 INFO   DRY RUN (400 items) — drop --dry-run for the full campaign.
+13:47:43 INFO Llama-3.2-1B-Instruct: unloaded, 13.7 GB VRAM free
+13:47:43 INFO Qwen2.5-1.5B-Instruct: 1676 items
+13:47:45 INFO Qwen2.5-1.5B-Instruct: longest prompt 1119 tokens -> ~0.8 GB retained attention; reserving 2.0 GB of the 13.7 GB free
+13:47:48 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+13:48:19 INFO   [20/400] median 1.4 s/item
+13:49:12 INFO   [40/400] median 1.7 s/item
+14:00:58 INFO   [60/400] median 1.8 s/item
+14:01:48 INFO   [80/400] median 2.0 s/item
+14:02:34 INFO   [100/400] median 1.8 s/item
+14:03:03 INFO   [120/400] median 1.7 s/item
+14:03:29 INFO   [140/400] median 1.6 s/item
+14:03:52 INFO   [160/400] median 1.4 s/item
+14:04:11 INFO   [180/400] median 1.3 s/item
+14:04:55 INFO   [200/400] median 1.3 s/item
+14:05:47 INFO   [220/400] median 1.3 s/item
+14:06:53 INFO   [240/400] median 1.3 s/item
+14:07:34 INFO   [260/400] median 1.3 s/item
+14:07:51 INFO   [280/400] median 1.2 s/item
+14:08:22 INFO   [300/400] median 1.2 s/item
+14:08:41 INFO   [320/400] median 1.2 s/item
+14:09:05 INFO   [340/400] median 1.2 s/item
+14:09:29 INFO   [360/400] median 1.2 s/item
+14:09:54 INFO   [380/400] median 1.2 s/item
+14:10:21 INFO   [400/400] median 1.1 s/item
+14:10:21 INFO   median 1.1 s/item -> ~31 min for 1676 items
+14:10:21 INFO   DRY RUN (400 items) — drop --dry-run for the full campaign.
+14:10:21 INFO Qwen2.5-1.5B-Instruct: unloaded, 13.7 GB VRAM free
+14:10:21 INFO Qwen2.5-3B-Instruct: 1676 items
+14:10:24 INFO Qwen2.5-3B-Instruct: longest prompt 1119 tokens -> ~1.3 GB retained attention; reserving 2.7 GB of the 13.7 GB free
+14:10:31 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+14:11:35 INFO   [20/400] median 3.0 s/item
+14:13:15 INFO   [40/400] median 3.5 s/item
+14:14:32 INFO   [60/400] median 3.5 s/item
+14:16:03 INFO   [80/400] median 3.6 s/item
+14:17:22 INFO   [100/400] median 3.5 s/item
+14:18:09 INFO   [120/400] median 3.2 s/item
+14:18:47 INFO   [140/400] median 2.8 s/item
+14:19:23 INFO   [160/400] median 2.5 s/item
+14:19:59 INFO   [180/400] median 2.3 s/item
+14:21:19 INFO   [200/400] median 2.3 s/item
+14:22:43 INFO   [220/400] median 2.4 s/item
+14:24:39 INFO   [240/400] median 2.5 s/item
+14:25:51 INFO   [260/400] median 2.5 s/item
+14:26:30 INFO   [280/400] median 2.4 s/item
+14:27:34 INFO   [300/400] median 2.4 s/item
+14:28:13 INFO   [320/400] median 2.3 s/item
+14:29:00 INFO   [340/400] median 2.3 s/item
+14:29:49 INFO   [360/400] median 2.3 s/item
+14:30:31 INFO   [380/400] median 2.3 s/item
+14:31:22 INFO   [400/400] median 2.2 s/item
+14:31:22 INFO   median 2.2 s/item -> ~61 min for 1676 items
+14:31:22 INFO   DRY RUN (400 items) — drop --dry-run for the full campaign.
+14:31:23 INFO Qwen2.5-3B-Instruct: unloaded, 13.7 GB VRAM free
+14:31:23 INFO done. Next: python scripts/20_analyse.py
