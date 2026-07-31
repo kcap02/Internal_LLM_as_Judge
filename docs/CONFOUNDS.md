@@ -33,10 +33,19 @@ time). Analysis-level controls run inside `scripts/20_analyse.py`.
 | C-SELF | self-preference in distractors | MEASURED | fix ready: `configs/main.json` disjoint panel |
 | C-LABEL | `single` = preference as absolute truth | MEASURED | inherent; pairwise is primary |
 
-No FAIL-level confound remains. The two MEASURED-only items are inherent
-properties of the source datasets, quantified and reported rather than
-hidden; C-SELF flips to PASS as soon as the solver run lands and the MCQ
-banks are rebuilt with the disjoint panel.
+No FAIL-level confound remains, and no analysis-level confound is merely
+"noted" — each is either removed by construction or has a control that would
+expose it. The three MEASURED items are properties of the source datasets
+rather than of this pipeline: they are quantified and reported, and two of
+them (C-LEN, C-LABEL) are the reason **pairwise is the primary free-text
+format**. C-SELF flips to PASS as soon as the solver run lands and the MCQ
+banks are rebuilt with the disjoint panel in `configs/main.json`.
+
+Four of these were found by *running* the pilot, not by reading the code:
+C-DUP (JudgeBench reusing 92 questions across splits), C-DEGEN (two artefact
+contrasts surviving FDR), C-NUM (fp16 silently deleting a model's spectral
+data), and the VRAM half of C-WIN. That is the argument for keeping the
+pilot cheap and the audits standing rather than one-off.
 
 ---
 
