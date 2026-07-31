@@ -16,7 +16,7 @@ import argparse
 
 import torch
 
-from llm_judge.config import DATA_DIR, RESULTS_DIR, Config
+from llm_judge.config import DATA_DIR, RESULTS_DIR, Config, tagged
 from llm_judge.io_utils import ResumableResults, read_json
 from llm_judge.log_utils import setup_logging
 from llm_judge.model_loading import free_vram, load_model_safe, unload, vram_free_gb
@@ -26,7 +26,8 @@ from llm_judge.scoring import ActivationStore, margin, score_targets
 from llm_judge.token_ids import resolve_target_token_ids
 
 
-def run_model(model_name, items, dataset, store, cfg, log, limit=None):
+def run_model(model_name, items, dataset, store, cfg, log, limit=None,
+              tag=None):
     short = model_name.split("/")[-1]
     todo = [it for it in items if not store.is_done(model_name, it["item_id"])]
     if limit:
@@ -36,7 +37,8 @@ def run_model(model_name, items, dataset, store, cfg, log, limit=None):
         return
     log.info("%s: %d items to judge", short, len(todo))
 
-    acts = ActivationStore(RESULTS_DIR / "activations" / f"{dataset}_{short}.npz")
+    acts = ActivationStore(RESULTS_DIR / "activations"
+                           / f"{tagged(dataset, tag)}_{short}.npz")
     model = tokenizer = None
     try:
         model, tokenizer, info = load_model_safe(
@@ -129,6 +131,9 @@ def main() -> None:
                     help="use the <4B pilot panel instead of the main panel")
     ap.add_argument("--limit", type=int, default=None,
                     help="cap items per model (pilot runs)")
+    ap.add_argument("--tag", default=None,
+                    help="variant tag; keeps ablation runs in their own "
+                         "result stream instead of colliding with the main one")
     args = ap.parse_args()
 
     cfg = Config.load(args.config)
@@ -142,7 +147,8 @@ def main() -> None:
             log.error("%s: run stages 00+01 first", name)
             continue
         items = bank["items"]
-        store = ResumableResults(RESULTS_DIR / f"judge_{name}.json")
+        store = ResumableResults(
+            RESULTS_DIR / f"{tagged('judge_' + name, args.tag)}.jsonl")
         log.info("=== dataset %s: %d items (bank mode=%s), resume=%d rows ===",
                  name, len(items), bank.get("mode"), len(store))
         if bank.get("mode") == "synthetic":
@@ -151,7 +157,8 @@ def main() -> None:
                         name)
         for model_name in models:
             run_model(model_name, items, name, store, cfg, log,
-                      limit=args.limit)
+                      limit=args.limit, tag=args.tag)
+        store.close()
 
     log.info("done.")
 

@@ -122,7 +122,7 @@ def main() -> None:
         dev_by_subject = {}
         for r in dev:
             dev_by_subject.setdefault(r["subject"], []).append(r)
-        store = ResumableResults(RESULTS_DIR / f"solver_{name}.json",
+        store = ResumableResults(RESULTS_DIR / f"solver_{name}.jsonl",
                                  key_fields=("model", "question_id"))
         log.info("=== dataset %s: %d questions, resume=%d rows ===",
                  name, len(questions), len(store))

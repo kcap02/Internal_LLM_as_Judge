@@ -54,15 +54,29 @@ JudgeBench validated every stage end to end. Measured throughput:
 | 12 (spectral) | ~2–3 s/item at 0.5B on LLMBar | scales with tokens³ and depth |
 
 Pilot findings that shape the main run:
-- Small judges are **behaviourally degenerate**: Qwen2.5-0.5B answered "Yes"
-  to 100% of `single` items; Llama-3.2-1B chose "B" on 98.5% of `pairwise`.
-  Pooled AUROC still printed ~0.57 for the first of these — the conditional
-  metric correctly returned `n/a`. **Judges below ~3B are not usable** as
-  measurement subjects; they are useful only as pipeline tests and as
-  distractor panels.
+
+- **Judges below ~3B are unusable as measurement subjects.** Verdict
+  behaviour is degenerate: Qwen2.5-1.5B answers one way on 100% of items in
+  both formats, Qwen2.5-0.5B says "Yes" to 99.5% of `single` items,
+  Llama-3.2-1B picks "B" on 98.4% of `pairwise`. Only **Qwen2.5-3B** is
+  competent (83.5% pairwise, 41.5% verdict bias). Small models remain useful
+  as pipeline tests and as the distractor panel.
+- **The degeneracy is a capability limit, not a prompt artefact.** A
+  chat-template ablation (`--tag chat`) moved nothing that mattered: 1.5B
+  stayed 100% degenerate under both formats, and the competent judge agreed
+  to within 1.5 points. Raw prompts are kept; the table is in CONFOUNDS.md
+  under C-FORMAT.
+- **`pairwise` is the primary format.** For the competent judge it is far
+  more accurate than `single` (83.5% vs 64.0%) and it is structurally immune
+  to the length confound, since both orders contain the same two responses
+  (C-LEN AUC exactly 0.500).
+- **Degenerate judges manufacture false discoveries if unguarded.** Two
+  contrasts initially survived BH-FDR purely because a conditional AUROC was
+  estimated from a stratum holding one minority-class item. After the
+  three-layer fix (C-DEGEN) the same data yields 0 of 16 survivors.
 - Permutation nulls landed at 0.46–0.53 → no leakage in the CV.
-- Identity-decodability ran 0.55–0.70 → pooled AUROC is inflated exactly as
-  predicted; do not report it as the headline.
+- Identity-decodability ran 0.55–0.90 → pooled AUROC is inflated exactly as
+  predicted; never report it as the headline.
 
 **Main run order.**
 1. `10_run_solver.py --only mmlu mmlu_pro` on the pilot panel — these models

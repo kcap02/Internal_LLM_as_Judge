@@ -27,7 +27,7 @@ import numpy as np
 
 from llm_judge.analysis.cv import compare, difficulty_strata
 from llm_judge.analysis.stats import benjamini_hochberg
-from llm_judge.config import RESULTS_DIR, Config
+from llm_judge.config import RESULTS_DIR, Config, tagged
 from llm_judge.io_utils import atomic_write_json, read_json, read_rows
 from llm_judge.log_utils import setup_logging
 
@@ -97,9 +97,9 @@ def add_peer_difficulty(rows: list[dict]) -> int:
     return n
 
 
-def load_activations(dataset: str, model: str):
+def load_activations(dataset: str, model: str, tag: str | None = None):
     short = model.split("/")[-1]
-    path = RESULTS_DIR / "activations" / f"{dataset}_{short}.npz"
+    path = RESULTS_DIR / "activations" / f"{tagged(dataset, tag)}_{short}.npz"
     return np.load(path) if path.exists() else None
 
 
@@ -109,6 +109,8 @@ def main() -> None:
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--no-permutation", action="store_true",
                     help="skip the permutation-null control (faster)")
+    ap.add_argument("--tag", default=None,
+                    help="analyse a tagged variant run instead of the main one")
     args = ap.parse_args()
 
     cfg = Config.load(args.config)
@@ -118,9 +120,11 @@ def main() -> None:
     reports = {}
 
     for name in (args.only or cfg.datasets):
-        rows = merge_sources(read_rows(RESULTS_DIR / f"judge_{name}.jsonl"),
-                             read_rows(RESULTS_DIR / f"judge_spectral_{name}.jsonl"),
-                             log)
+        rows = merge_sources(
+            read_rows(RESULTS_DIR / f"{tagged('judge_' + name, args.tag)}.jsonl"),
+            read_rows(RESULTS_DIR
+                      / f"{tagged('judge_spectral_' + name, args.tag)}.jsonl"),
+            log)
         if not rows:
             log.info("%s: no judge results yet — skipping", name)
             continue
@@ -141,7 +145,7 @@ def main() -> None:
                          name, model, fmt, len(rs))
                 continue
             log.info("### %s | %s | format=%s", name, model.split("/")[-1], fmt)
-            npz = load_activations(name, model)
+            npz = load_activations(name, model, args.tag)
             res = compare(rs, n_splits=cfg.n_splits, n_boot=cfg.n_bootstrap,
                           pca_dims=cfg.activation_pca_dims,
                           activations_npz=npz, seed=cfg.seed,
@@ -184,8 +188,9 @@ def main() -> None:
             report[f"{model}|{fmt}"] = {**res, "strata": strata}
 
         reports[name] = report
-        atomic_write_json(RESULTS_DIR / f"analysis_{name}.json", report)
-        log.info("%s: analysis written -> analysis_%s.json", name, name)
+        out = RESULTS_DIR / f"{tagged('analysis_' + name, args.tag)}.json"
+        atomic_write_json(out, report)
+        log.info("%s: analysis written -> %s", name, out.name)
 
     # ── Multiplicity control across every contrast in this run ───────────
     if all_contrasts:

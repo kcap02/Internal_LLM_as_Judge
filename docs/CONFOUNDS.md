@@ -276,17 +276,40 @@ escalates to a warning above 1%.
 
 ## C-FORMAT — Raw prompts on instruct models
 
-**Status: OPEN (deliberate, revisit after pilot)**
+**Status: RESOLVED — measured, no material effect**
 
-`use_chat_template=False` applies raw Hendrycks-style prompts uniformly to all
-models, which is comparable across the panel but off-distribution for
-instruct models. If pilot judges land near chance, verdict labels are mostly
-noise and no feature can show a lift — a *power* problem, not a negative
-result.
+`use_chat_template=False` applies raw Hendrycks-style prompts uniformly to
+all models: comparable across the panel, but off-distribution for instruct
+models. The worry was that the pilot's verdict degeneracy was a *format*
+artefact, which would make every downstream null a power problem rather than
+a result.
 
-*Plan.* Compare both settings on the pilot panel (`use_chat_template` is a
-config key) and adopt whichever gives non-degenerate verdict behaviour;
-report the choice.
+*Test.* The same 400 LLMBar items, both settings, four pilot judges
+(`--tag chat` keeps the variant in its own stream). Bias = P(pred == first
+label); 50% is unbiased, 0/100% is degenerate.
+
+| model | format | raw acc | raw bias | chat acc | chat bias |
+|---|---|---|---|---|---|
+| Qwen2.5-0.5B | pairwise | 54.0% | 40.0% | 53.5% | 33.5% |
+| Qwen2.5-0.5B | single | 50.5% | 0.5% | 55.0% | 9.0% |
+| Qwen2.5-1.5B | pairwise | 50.0% | 100.0% | 50.0% | 100.0% |
+| Qwen2.5-1.5B | single | 50.0% | 0.0% | 50.0% | 0.0% |
+| Llama-3.2-1B | pairwise | 49.5% | 1.5% | 53.5% | 19.5% |
+| Llama-3.2-1B | single | 56.0% | 51.0% | 49.5% | 96.5% |
+| **Qwen2.5-3B** | **pairwise** | **83.5%** | **41.5%** | 82.0% | 44.0% |
+| Qwen2.5-3B | single | 64.0% | 65.0% | 61.0% | 74.0% |
+
+*Conclusion.* The chat template does not rescue the small models —
+Qwen2.5-1.5B is fully degenerate under **both** formats, so the degeneracy is
+a capability limit, not a prompting artefact. For the one competent judge the
+two formats agree to within 1.5 points. **Raw prompts are kept** for
+uniformity across base and instruct models, and this table is the
+justification.
+
+*Two design conclusions fall out.* Judges must be ≳3B to be measurable at
+all; and **pairwise is the primary format** — it is both far more accurate
+for a competent judge (83.5% vs 64.0%) and structurally immune to the length
+confound (C-LEN AUC exactly 0.500 by counterbalancing).
 
 ---
 

@@ -19,6 +19,17 @@ RESULTS_DIR = REPO_ROOT / "results"
 LOGS_DIR = REPO_ROOT / "logs"
 
 
+def tagged(name: str, tag: str | None) -> str:
+    """Suffix a results filename with a variant tag.
+
+    Ablations (chat template on/off, a different window, a different
+    distractor panel) must never append into the same stream as the main run:
+    the resume key is (model, item_id), so a variant would silently be
+    treated as already-done work. `--tag` gives each variant its own stream.
+    """
+    return name if not tag else f"{name}__{tag}"
+
+
 @dataclass
 class Config:
     # ── Reproducibility ──────────────────────────────────────────────────────

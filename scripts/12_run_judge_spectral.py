@@ -27,7 +27,7 @@ os.environ.setdefault("TQDM_DISABLE", "1")  # one tqdm bar per item otherwise
 import numpy as np
 import torch
 
-from llm_judge.config import DATA_DIR, RESULTS_DIR, Config
+from llm_judge.config import DATA_DIR, RESULTS_DIR, Config, tagged
 from llm_judge.io_utils import ResumableResults, read_json
 from llm_judge.log_utils import setup_logging
 from llm_judge.model_loading import (estimate_params_billions, free_vram,
@@ -179,6 +179,9 @@ def main() -> None:
                     help="use the <4B pilot panel instead of the main panel")
     ap.add_argument("--dry-run", type=int, default=None,
                     help="stop after N items per model to estimate duration")
+    ap.add_argument("--tag", default=None,
+                    help="variant tag; keeps ablation runs in their own "
+                         "result stream instead of colliding with the main one")
     args = ap.parse_args()
 
     cfg = Config.load(args.config)
@@ -199,12 +202,14 @@ def main() -> None:
             log.error("%s: run stages 00+01 first", name)
             continue
         items = bank["items"]
-        store = ResumableResults(RESULTS_DIR / f"judge_spectral_{name}.json")
+        store = ResumableResults(
+            RESULTS_DIR / f"{tagged('judge_spectral_' + name, args.tag)}.jsonl")
         log.info("=== dataset %s: %d items (bank mode=%s), resume=%d ===",
                  name, len(items), bank.get("mode"), len(store))
         for model_name in models:
             run_model(model_name, items, name, store, cfg, log,
                       dry_run=args.dry_run)
+        store.close()
 
     log.info("done. Next: python scripts/20_analyse.py")
 
