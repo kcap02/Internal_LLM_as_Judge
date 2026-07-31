@@ -69,6 +69,29 @@ def nuisance_features(rows: list[dict]) -> tuple[np.ndarray, list[str]]:
     return _finite(np.column_stack(cols)), names
 
 
+def peer_difficulty_features(rows: list[dict]) -> np.ndarray | None:
+    """Leave-one-model-out difficulty of each item, from the OTHER judges.
+
+    The sharpest objection to any positive result: maybe the features encode
+    how HARD the item is, not anything about this judge. Item difficulty is a
+    property of the item, shared by every model, and a probe that only
+    recovers it has learned nothing self-referential.
+
+    `peer_difficulty` is the fraction of *other* judges that got the same
+    item right. Adding it to the baseline forces spectral and activation
+    families to beat "how hard is this item for models in general" before
+    they can be called internal self-knowledge.
+
+    Returns None when the field is absent (single-model run: the control is
+    simply unavailable, which the report states).
+    """
+    vals = [r.get("peer_difficulty") for r in rows]
+    if any(v is None for v in vals):
+        return None
+    v = np.asarray(vals, float)
+    return _finite(np.c_[v, v * v])
+
+
 def _profile(spectral_layers: list[dict]) -> np.ndarray:
     n = len(spectral_layers)
     late = slice(int(2 * n / 3), n)

@@ -33,23 +33,36 @@ def _auc_or_none(y: np.ndarray, s: np.ndarray) -> float | None:
     return float(roc_auc_score(y, s))
 
 
-def stratified_auroc(y: np.ndarray, scores: np.ndarray,
-                     strata: np.ndarray) -> float | None:
+# A stratum needs at least this many items of EACH class before its AUROC
+# means anything. Below it, one or two minority items drive the estimate to
+# an arbitrary value — and the bootstrap, resampling the same one or two
+# items, reports a narrow CI around that arbitrary value. That combination
+# manufactures false discoveries that survive FDR, so such strata are
+# excluded rather than down-weighted.
+MIN_CLASS_PER_STRATUM = 5
+
+
+def stratified_auroc(y: np.ndarray, scores: np.ndarray, strata: np.ndarray,
+                     min_class_n: int = MIN_CLASS_PER_STRATUM) -> float | None:
     """AUROC computed WITHIN strata, pooled by discordant-pair weight.
 
     Equivalent to the probability that a randomly chosen correct item scores
     above a randomly chosen incorrect item **drawn from the same stratum**.
     With strata = gt_verdict this is the item-identity-free metric.
+
+    Returns None when no stratum has enough of both classes to estimate.
     """
     num = den = 0.0
     for s in np.unique(strata):
         m = strata == s
+        n_pos = int((y[m] == 1).sum())
+        n_neg = int((y[m] == 0).sum())
+        if min(n_pos, n_neg) < min_class_n:
+            continue
         auc = _auc_or_none(y[m], scores[m])
         if auc is None:
             continue
-        n_pos = float((y[m] == 1).sum())
-        n_neg = float((y[m] == 0).sum())
-        w = n_pos * n_neg          # number of comparable pairs in the stratum
+        w = float(n_pos * n_neg)   # number of comparable pairs in the stratum
         num += auc * w
         den += w
     return (num / den) if den > 0 else None

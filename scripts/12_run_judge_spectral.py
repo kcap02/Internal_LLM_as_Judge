@@ -103,12 +103,12 @@ def run_model(model_name, items, dataset, store, cfg, log, dry_run=None):
                 start = task_token_start(h, b, tokenizer, prompt)
                 spectral = None
                 if framework is not None:
-                    sub = None
-                    if cfg.spectral_task_subgraph:
-                        total = len(tokenizer(prompt)["input_ids"])
-                        sub = list(range(start, total))
+                    total = len(tokenizer(prompt)["input_ids"])
+                    sub = (list(range(start, total))
+                           if cfg.spectral_task_subgraph else None)
                     spectral = analyze_prompt(framework, prompt,
-                                              subgraph_indices=sub)
+                                              subgraph_indices=sub,
+                                              expected_n_tokens=total)
                     if "error" in (spectral or {}):
                         log.warning("%s spectral: %s", it["item_id"],
                                     spectral["error"])

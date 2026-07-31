@@ -74,19 +74,35 @@ def attach_model(framework, model, tokenizer, model_name: str):
 
 
 def analyze_prompt(framework, prompt: str,
-                   subgraph_indices: list[int] | None = None) -> dict:
+                   subgraph_indices: list[int] | None = None,
+                   expected_n_tokens: int | None = None) -> dict:
     """Run the instrumented forward and extract JSON-safe scalars.
 
     Returns {"layers": [...], "velocity": {...} | None} or {"error": ...}.
     The raw analysis dict also holds 'model_outputs' (full attentions +
     hidden states) which must never be serialized, and 'layer_diagnostics'
     holds dataclass objects, not dicts — hence the explicit extraction.
+
+    `expected_n_tokens` guards the subgraph: the indices are computed against
+    OUR tokenisation, while the library re-tokenises internally (truncating
+    at config.max_length). The two agree today — same tokenizer, same
+    add_special_tokens default, prompts capped below the window — but a
+    silent divergence would point every subgraph index at the wrong token,
+    so the invariant is checked rather than assumed.
     """
     try:
         analysis = framework.analyze_text(prompt, save_results=False,
                                           subgraph_indices=subgraph_indices)
     except Exception as e:  # verdict must survive a spectral failure
         return {"error": f"{type(e).__name__}: {e}"}
+
+    if expected_n_tokens is not None:
+        got = len(analysis.get("tokens") or [])
+        if got and got != expected_n_tokens:
+            del analysis
+            return {"error": f"token count mismatch: framework saw {got}, "
+                             f"caller indexed {expected_n_tokens} — subgraph "
+                             f"indices would be misaligned"}
 
     layers = []
     for i, d in enumerate(analysis.get("layer_diagnostics") or []):

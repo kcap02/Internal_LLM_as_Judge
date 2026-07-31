@@ -72,6 +72,31 @@ def usable(rows):
             if not r.get("skipped") and r.get("margin") is not None]
 
 
+def add_peer_difficulty(rows: list[dict]) -> int:
+    """Annotate each row with leave-one-model-out peer correctness.
+
+    `peer_difficulty` = fraction of the OTHER judges that got this same item
+    right. It becomes a baseline regressor so that spectral/activation
+    families must beat "how hard is this item for models in general" before
+    the result can be called self-knowledge rather than difficulty tracking.
+
+    Needs >= 2 models on the item; rows without enough peers are left
+    unannotated, which disables the control for that slice.
+    """
+    by_item = defaultdict(list)
+    for r in rows:
+        by_item[(r["dataset"], r["item_id"])].append(r)
+    n = 0
+    for group in by_item.values():
+        if len(group) < 2:
+            continue
+        total = sum(bool(r["is_correct"]) for r in group)
+        for r in group:
+            r["peer_difficulty"] = (total - bool(r["is_correct"])) / (len(group) - 1)
+            n += 1
+    return n
+
+
 def load_activations(dataset: str, model: str):
     short = model.split("/")[-1]
     path = RESULTS_DIR / "activations" / f"{dataset}_{short}.npz"
@@ -100,8 +125,13 @@ def main() -> None:
             log.info("%s: no judge results yet — skipping", name)
             continue
 
+        rows = usable(rows)
+        n_peer = add_peer_difficulty(rows)
+        log.info("%s: %d rows, peer-difficulty available for %d",
+                 name, len(rows), n_peer)
+
         by_key = defaultdict(list)
-        for r in usable(rows):
+        for r in rows:
             by_key[(r["model"], r.get("format", "mcq"))].append(r)
 
         report = {}
@@ -136,7 +166,11 @@ def main() -> None:
                 log.info("  %-10s delta=%+.3f  CI95=[%+.3f, %+.3f]  p=%.4f",
                          cname, c["delta"], c["ci95"][0], c["ci95"][1],
                          c["p_one_sided"])
-                all_contrasts.append((name, f"{model}|{fmt}", cname, c))
+                # Unreliable slices never enter the FDR family: including a
+                # degenerate judge's contrasts would let an artefact consume
+                # the error budget and be reported as a discovery.
+                if not res.get("unreliable"):
+                    all_contrasts.append((name, f"{model}|{fmt}", cname, c))
 
             strata = {}
             if fmt == "mcq":

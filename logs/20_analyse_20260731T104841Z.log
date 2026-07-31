@@ -1,0 +1,157 @@
+12:48:41 INFO stage=20_analyse | commit=2e8cf5f | logfile=20_analyse_20260731T104841Z.log
+12:48:41 INFO versions={"python": "3.11.9", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.5.1+cu124", "transformers": "4.46.2", "datasets": "4.8.5", "sklearn": "1.5.2", "numpy": "1.26.4", "spectral_trust": "not installed"}
+12:48:41 INFO config={"seed": 42, "judge_models_pilot": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen2.5-1.5B-Instruct", "meta-llama/Llama-3.2-1B-Instruct", "Qwen/Qwen2.5-3B-Instruct"], "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "distractor_panel": null, "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 4096, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_probe": "full", "activation_pca_dims": 24}
+12:48:41 INFO   stage11/stage12 overlap 630 items, verdict disagreement 0 (0.00%)
+12:48:41 INFO llmbar: 1605 rows, peer-difficulty available for 1600
+12:48:41 INFO ### llmbar | Qwen2.5-0.5B-Instruct | format=pairwise
+12:48:41 INFO   common subset: 200/202 rows (dropped 0 without spectral, 2 without activations) — all rungs are scored on these same rows
+12:48:41 INFO   n=200 items, 100 CV groups (100 question_ids)
+12:48:41 INFO   verdict behaviour: accuracy 54.0%, P(pred=A) 40.0%, acc|gt=A 44.0% (n=100), acc|gt=B 64.0% (n=100)
+12:48:41 INFO   families: Mn, M1, M1n, M1nd, M2, M3, M4 | nuisance cols: 3 | baseline to beat: M1nd
+12:49:08 INFO   control identity-decodability (M4): 0.570 (high is expected; it is why pooled AUROC is not the headline)
+12:49:08 INFO   control permutation-null: 0.503 +/- 0.035 over 5 permutations (must be ~0.500)
+12:49:08 INFO   rung  conditional  pooled      
+12:49:08 INFO   Mn    0.437        0.439       
+12:49:08 INFO   M1    0.478        0.489       
+12:49:08 INFO   M1n   0.476        0.487       
+12:49:08 INFO   M1nd  0.460        0.468       
+12:49:08 INFO   M2    0.458        0.463       
+12:49:08 INFO   M3    0.540        0.538       
+12:49:08 INFO   M4    0.541        0.537       
+12:49:08 INFO   M1n - M1   delta=-0.001  CI95=[-0.053, +0.054]  p=0.5460
+12:49:08 INFO   M1nd - M1n delta=-0.016  CI95=[-0.056, +0.023]  p=0.7830
+12:49:08 INFO   M2 - M1nd  delta=-0.003  CI95=[-0.077, +0.072]  p=0.5115
+12:49:08 INFO   M3 - M1nd  delta=+0.080  CI95=[-0.007, +0.167]  p=0.0350
+12:49:08 INFO   M4 - M3    delta=+0.000  CI95=[-0.012, +0.013]  p=0.5010
+12:49:08 INFO ### llmbar | Qwen2.5-0.5B-Instruct | format=single
+12:49:08 INFO   common subset: 200/203 rows (dropped 0 without spectral, 3 without activations) — all rungs are scored on these same rows
+12:49:08 INFO   n=200 items, 100 CV groups (100 question_ids)
+12:49:08 INFO   verdict behaviour: accuracy 50.5%, P(pred=No) 0.5%, acc|gt=No 1.0% (n=100), acc|gt=Yes 100.0% (n=100)
+12:49:08 INFO   DEGENERATE: a gt_verdict stratum has zero outcome variance (the judge answers one way regardless) — conditional AUROC is undefined there; this model carries no measurable signal.
+12:49:08 INFO   families: Mn, M1, M1n, M1nd, M2, M3, M4 | nuisance cols: 3 | baseline to beat: M1nd
+12:49:19 INFO   control identity-decodability (M4): 0.652 (high is expected; it is why pooled AUROC is not the headline)
+12:49:19 INFO   control permutation-null: 0.513 +/- 0.285 over 5 permutations (must be ~0.500)
+12:49:19 INFO   rung  conditional  pooled      
+12:49:19 INFO   Mn    1.000        0.487       
+12:49:19 INFO   M1    0.010        0.523       
+12:49:19 INFO   M1n   0.990        0.533       
+12:49:19 INFO   M1nd  1.000        0.715       
+12:49:19 INFO   M2    0.879        0.738       
+12:49:19 INFO   M3    0.162        0.639       
+12:49:19 INFO   M4    0.182        0.643       
+12:49:19 INFO   M1n - M1   delta=+0.980  CI95=[+0.949, +1.000]  p=0.0008
+12:49:19 INFO   M1nd - M1n delta=+0.010  CI95=[-0.000, +0.031]  p=0.3532
+12:49:19 INFO   M2 - M1nd  delta=-0.121  CI95=[-0.186, -0.061]  p=1.0000
+12:49:19 INFO   M3 - M1nd  delta=-0.838  CI95=[-0.899, -0.765]  p=1.0000
+12:49:19 INFO   M4 - M3    delta=+0.020  CI95=[-0.021, +0.071]  p=0.2553
+12:49:19 INFO ### llmbar | Qwen2.5-1.5B-Instruct | format=pairwise
+12:49:19 INFO   n=200 items, 100 CV groups (100 question_ids)
+12:49:19 INFO   verdict behaviour: accuracy 50.0%, P(pred=A) 100.0%, acc|gt=A 100.0% (n=100), acc|gt=B 0.0% (n=100)
+12:49:19 INFO   DEGENERATE: a gt_verdict stratum has zero outcome variance (the judge answers one way regardless) — conditional AUROC is undefined there; this model carries no measurable signal.
+12:49:19 INFO   families: Mn, M1, M1n, M1nd, M3 | nuisance cols: 3 | baseline to beat: M1nd
+12:49:20 INFO   control identity-decodability (M3): 0.898 (high is expected; it is why pooled AUROC is not the headline)
+12:49:20 INFO   control permutation-null: n/a +/- n/a over 0 permutations (must be ~0.500)
+12:49:20 INFO   rung  conditional  pooled      
+12:49:20 INFO   Mn    n/a          0.500       
+12:49:20 INFO   M1    n/a          0.500       
+12:49:20 INFO   M1n   n/a          0.500       
+12:49:20 INFO   M1nd  n/a          0.890       
+12:49:20 INFO   M3    n/a          0.898       
+12:49:20 INFO   M1n - M1   n/a (degenerate stratum)
+12:49:20 INFO   M1nd - M1n n/a (degenerate stratum)
+12:49:20 INFO   M3 - M1nd  n/a (degenerate stratum)
+12:49:20 INFO ### llmbar | Qwen2.5-1.5B-Instruct | format=single
+12:49:20 INFO   n=200 items, 100 CV groups (100 question_ids)
+12:49:20 INFO   verdict behaviour: accuracy 50.0%, P(pred=No) 0.0%, acc|gt=No 0.0% (n=100), acc|gt=Yes 100.0% (n=100)
+12:49:20 INFO   DEGENERATE: a gt_verdict stratum has zero outcome variance (the judge answers one way regardless) — conditional AUROC is undefined there; this model carries no measurable signal.
+12:49:20 INFO   families: Mn, M1, M1n, M1nd, M3 | nuisance cols: 3 | baseline to beat: M1nd
+12:49:22 INFO   control identity-decodability (M3): 0.694 (high is expected; it is why pooled AUROC is not the headline)
+12:49:22 INFO   control permutation-null: n/a +/- n/a over 0 permutations (must be ~0.500)
+12:49:22 INFO   rung  conditional  pooled      
+12:49:22 INFO   Mn    n/a          0.460       
+12:49:22 INFO   M1    n/a          0.500       
+12:49:22 INFO   M1n   n/a          0.460       
+12:49:22 INFO   M1nd  n/a          0.697       
+12:49:22 INFO   M3    n/a          0.694       
+12:49:22 INFO   M1n - M1   n/a (degenerate stratum)
+12:49:22 INFO   M1nd - M1n n/a (degenerate stratum)
+12:49:22 INFO   M3 - M1nd  n/a (degenerate stratum)
+12:49:22 INFO ### llmbar | Qwen2.5-3B-Instruct | format=pairwise
+12:49:22 INFO   n=200 items, 100 CV groups (100 question_ids)
+12:49:22 INFO   verdict behaviour: accuracy 83.5%, P(pred=A) 41.5%, acc|gt=A 75.0% (n=100), acc|gt=B 92.0% (n=100)
+12:49:22 INFO   families: Mn, M1, M1n, M1nd, M3 | nuisance cols: 3 | baseline to beat: M1nd
+12:49:40 INFO   control identity-decodability (M3): 0.853 (high is expected; it is why pooled AUROC is not the headline)
+12:49:40 INFO   control permutation-null: 0.476 +/- 0.067 over 5 permutations (must be ~0.500)
+12:49:40 INFO   rung  conditional  pooled      
+12:49:40 INFO   Mn    0.392        0.398       
+12:49:40 INFO   M1    0.692        0.684       
+12:49:40 INFO   M1n   0.686        0.670       
+12:49:40 INFO   M1nd  0.671        0.674       
+12:49:40 INFO   M3    0.697        0.676       
+12:49:40 INFO   M1n - M1   delta=-0.006  CI95=[-0.033, +0.021]  p=0.6955
+12:49:40 INFO   M1nd - M1n delta=-0.015  CI95=[-0.043, +0.012]  p=0.8565
+12:49:40 INFO   M3 - M1nd  delta=+0.026  CI95=[-0.081, +0.140]  p=0.3280
+12:49:40 INFO ### llmbar | Qwen2.5-3B-Instruct | format=single
+12:49:40 INFO   n=200 items, 100 CV groups (100 question_ids)
+12:49:40 INFO   verdict behaviour: accuracy 64.0%, P(pred=No) 65.0%, acc|gt=No 79.0% (n=100), acc|gt=Yes 49.0% (n=100)
+12:49:40 INFO   families: Mn, M1, M1n, M1nd, M3 | nuisance cols: 3 | baseline to beat: M1nd
+12:49:59 INFO   control identity-decodability (M3): 0.922 (high is expected; it is why pooled AUROC is not the headline)
+12:49:59 INFO   control permutation-null: 0.490 +/- 0.103 over 5 permutations (must be ~0.500)
+12:49:59 INFO   rung  conditional  pooled      
+12:49:59 INFO   Mn    0.474        0.478       
+12:49:59 INFO   M1    0.620        0.627       
+12:49:59 INFO   M1n   0.620        0.625       
+12:49:59 INFO   M1nd  0.568        0.675       
+12:49:59 INFO   M3    0.607        0.624       
+12:49:59 INFO   M1n - M1   delta=-0.000  CI95=[-0.020, +0.020]  p=0.4975
+12:49:59 INFO   M1nd - M1n delta=-0.051  CI95=[-0.098, -0.001]  p=0.9765
+12:49:59 INFO   M3 - M1nd  delta=+0.038  CI95=[-0.054, +0.123]  p=0.2065
+12:49:59 INFO ### llmbar | Llama-3.2-1B-Instruct | format=pairwise
+12:49:59 INFO   common subset: 114/200 rows (dropped 86 without spectral, 0 without activations) — all rungs are scored on these same rows
+12:49:59 INFO   n=114 items, 57 CV groups (57 question_ids)
+12:49:59 INFO   verdict behaviour: accuracy 50.9%, P(pred=A) 0.9%, acc|gt=A 1.8% (n=57), acc|gt=B 100.0% (n=57)
+12:49:59 INFO   DEGENERATE: a gt_verdict stratum has zero outcome variance (the judge answers one way regardless) — conditional AUROC is undefined there; this model carries no measurable signal.
+12:49:59 INFO   families: Mn, M1, M1n, M1nd, M2, M3, M4 | nuisance cols: 3 | baseline to beat: M1nd
+12:50:10 INFO   control identity-decodability (M4): 0.627 (high is expected; it is why pooled AUROC is not the headline)
+12:50:10 INFO   control permutation-null: 0.296 +/- 0.287 over 5 permutations (must be ~0.500)
+12:50:10 INFO   LOW POWER: 114 items — contrasts here are indicative only; CIs will be too wide to support a claim.
+12:50:10 INFO   rung  conditional  pooled      
+12:50:10 INFO   Mn    0.393        0.496       
+12:50:10 INFO   M1    0.000        0.603       
+12:50:10 INFO   M1n   0.000        0.611       
+12:50:10 INFO   M1nd  0.375        0.765       
+12:50:10 INFO   M2    0.214        0.721       
+12:50:10 INFO   M3    0.554        0.630       
+12:50:10 INFO   M4    0.571        0.635       
+12:50:10 INFO   M1n - M1   delta=+0.000  CI95=[+0.000, +0.000]  p=1.0000
+12:50:10 INFO   M1nd - M1n delta=+0.375  CI95=[+0.241, +0.500]  p=0.0008
+12:50:10 INFO   M2 - M1nd  delta=-0.161  CI95=[-0.268, -0.071]  p=1.0000
+12:50:10 INFO   M3 - M1nd  delta=+0.179  CI95=[+0.018, +0.340]  p=0.0177
+12:50:10 INFO   M4 - M3    delta=+0.018  CI95=[+0.000, +0.056]  p=0.3537
+12:50:10 INFO ### llmbar | Llama-3.2-1B-Instruct | format=single
+12:50:10 INFO   common subset: 116/200 rows (dropped 84 without spectral, 0 without activations) — all rungs are scored on these same rows
+12:50:10 INFO   n=116 items, 58 CV groups (58 question_ids)
+12:50:10 INFO   verdict behaviour: accuracy 53.4%, P(pred=No) 55.2%, acc|gt=No 58.6% (n=58), acc|gt=Yes 48.3% (n=58)
+12:50:10 INFO   families: Mn, M1, M1n, M1nd, M2, M3, M4 | nuisance cols: 3 | baseline to beat: M1nd
+12:50:41 INFO   control identity-decodability (M4): 0.765 (high is expected; it is why pooled AUROC is not the headline)
+12:50:41 INFO   control permutation-null: 0.483 +/- 0.071 over 5 permutations (must be ~0.500)
+12:50:41 INFO   LOW POWER: 116 items — contrasts here are indicative only; CIs will be too wide to support a claim.
+12:50:41 INFO   rung  conditional  pooled      
+12:50:41 INFO   Mn    0.474        0.479       
+12:50:41 INFO   M1    0.470        0.475       
+12:50:41 INFO   M1n   0.464        0.469       
+12:50:41 INFO   M1nd  0.444        0.448       
+12:50:41 INFO   M2    0.438        0.441       
+12:50:41 INFO   M3    0.522        0.529       
+12:50:41 INFO   M4    0.519        0.526       
+12:50:41 INFO   M1n - M1   delta=-0.005  CI95=[-0.051, +0.040]  p=0.6000
+12:50:41 INFO   M1nd - M1n delta=-0.021  CI95=[-0.092, +0.051]  p=0.7310
+12:50:41 INFO   M2 - M1nd  delta=-0.005  CI95=[-0.092, +0.082]  p=0.5485
+12:50:41 INFO   M3 - M1nd  delta=+0.079  CI95=[-0.027, +0.189]  p=0.0795
+12:50:41 INFO   M4 - M3    delta=-0.003  CI95=[-0.015, +0.008]  p=0.7115
+12:50:41 INFO llmbar: analysis written -> analysis_llmbar.json
+12:50:41 INFO ========================================================================
+12:50:41 INFO BH-FDR over 26 contrasts (alpha=0.05): 2 survive
+12:50:41 INFO   SURVIVES  llmbar       Qwen2.5-0.5B-Instruct|single M1n - M1   delta=+0.980 p=0.0008
+12:50:41 INFO   SURVIVES  llmbar       Llama-3.2-1B-Instruct|pairwise M1nd - M1n delta=+0.375 p=0.0008
+12:50:41 INFO Reading guide: the CONDITIONAL AUROC is the headline — it only compares items sharing a gt_verdict, so a feature cannot score by merely telling a pos item from a neg one. Pooled AUROC is reported for completeness and is inflated by exactly that. A family contributes only if its contrast over M1n is positive, its CI clears zero, and it survives BH-FDR.

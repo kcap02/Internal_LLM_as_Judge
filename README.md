@@ -68,10 +68,14 @@ reuses 92 questions across its `claude`/`gpt` splits.
 |---|---|---|
 | Mn | length + task-start position + subject | is the "signal" just the prompt? |
 | M1 | logprob margin | what does behaviour alone predict? |
-| M1n | margin + nuisance | **the baseline every internal claim must clear** |
+| M1n | margin + nuisance | is it length, position or topic? |
+| M1nd | + peer difficulty (leave-one-model-out) | **the baseline every internal claim must clear** — is it just a hard item? |
 | M2 | + spectral profile & Fiedler velocity | does the attention graph add anything? |
 | M3 | + activation probe (per-fold) | does a cheap linear probe already do it? |
 | M4 | everything | headroom |
+
+The baseline is M1nd wherever ≥2 judges scored the same items, M1n
+otherwise; which one was used is printed per slice and stored in the report.
 
 **The headline metric is the conditional AUROC** — computed only between
 items sharing a `gt_verdict`. Pooling pos and neg items would let any feature

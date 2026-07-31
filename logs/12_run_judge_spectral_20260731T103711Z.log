@@ -1,3 +1,483 @@
 12:37:11 INFO stage=12_run_judge_spectral | commit=d2c48f4 | logfile=12_run_judge_spectral_20260731T103711Z.log
 12:37:11 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.5.0", "datasets": "4.8.4", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.1"}
 12:37:11 INFO config={"seed": 42, "judge_models_pilot": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen2.5-1.5B-Instruct", "meta-llama/Llama-3.2-1B-Instruct", "Qwen/Qwen2.5-3B-Instruct"], "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "distractor_panel": null, "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 4096, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_probe": "full", "activation_pca_dims": 24}
+12:37:12 INFO order:   0.5 B params  Qwen/Qwen2.5-0.5B-Instruct
+12:37:12 INFO order:   1.3 B params  meta-llama/Llama-3.2-1B-Instruct
+12:37:12 INFO order:   1.7 B params  Qwen/Qwen2.5-1.5B-Instruct
+12:37:12 INFO === dataset llmbar: 1676 items (bank mode=native), resume=5 ===
+12:37:12 INFO Qwen2.5-0.5B-Instruct: 1671 items
+12:37:15 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+12:37:31 INFO   [20/400] median 0.8 s/item
+12:38:09 INFO   [40/400] median 1.0 s/item
+12:38:38 INFO   [60/400] median 1.1 s/item
+12:39:08 INFO   [80/400] median 1.1 s/item
+12:39:37 INFO   [100/400] median 1.1 s/item
+12:39:49 INFO   [120/400] median 0.9 s/item
+12:39:57 INFO   [140/400] median 0.8 s/item
+12:40:05 INFO   [160/400] median 0.6 s/item
+12:40:12 INFO   [180/400] median 0.5 s/item
+12:40:40 INFO   [200/400] median 0.6 s/item
+12:41:12 INFO   [220/400] median 0.6 s/item
+12:42:01 INFO   [240/400] median 0.6 s/item
+12:42:16 INFO   [260/400] median 0.6 s/item
+12:42:29 INFO   [280/400] median 0.6 s/item
+12:42:44 INFO   [300/400] median 0.6 s/item
+12:42:56 INFO   [320/400] median 0.6 s/item
+12:43:08 INFO   [340/400] median 0.6 s/item
+12:43:21 INFO   [360/400] median 0.6 s/item
+12:43:39 INFO   [380/400] median 0.6 s/item
+12:43:47 INFO   [400/400] median 0.5 s/item
+12:43:47 INFO   median 0.5 s/item -> ~15 min for 1671 items
+12:43:47 INFO   DRY RUN (400 items) — drop --dry-run for the full campaign.
+12:43:48 INFO Qwen2.5-0.5B-Instruct: unloaded, 13.7 GB VRAM free
+12:43:48 INFO Llama-3.2-1B-Instruct: 1676 items
+12:43:51 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+12:44:15 INFO   [20/400] median 1.2 s/item
+12:44:52 INFO   [40/400] median 1.2 s/item
+12:45:22 INFO   [60/400] median 1.4 s/item
+12:45:55 INFO   [80/400] median 1.4 s/item
+12:46:24 INFO   [100/400] median 1.3 s/item
+12:46:40 INFO   [120/400] median 1.2 s/item
+12:46:55 INFO   [140/400] median 1.1 s/item
+12:47:08 INFO   [160/400] median 0.9 s/item
+12:47:20 INFO   [180/400] median 0.8 s/item
+12:47:49 INFO   [200/400] median 0.8 s/item
+12:48:22 INFO   [220/400] median 0.8 s/item
+12:49:03 INFO   [240/400] median 0.9 s/item
+12:49:32 INFO   [260/400] median 0.9 s/item
+12:49:47 INFO   [280/400] median 0.8 s/item
+12:50:09 INFO   [300/400] median 0.8 s/item
+12:50:22 INFO   [320/400] median 0.8 s/item
+12:50:38 INFO   [340/400] median 0.8 s/item
+12:50:58 INFO   [360/400] median 0.8 s/item
+12:51:17 INFO   [380/400] median 0.8 s/item
+12:51:37 INFO   [400/400] median 0.8 s/item
+12:51:37 INFO   median 0.8 s/item -> ~22 min for 1676 items
+12:51:37 INFO   DRY RUN (400 items) — drop --dry-run for the full campaign.
+12:51:37 INFO Llama-3.2-1B-Instruct: unloaded, 13.7 GB VRAM free
+12:51:37 INFO Qwen2.5-1.5B-Instruct: 1676 items
+12:51:41 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+12:51:41 WARNING llmbar-Natural-0_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:41 WARNING llmbar-Natural-0_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:42 WARNING llmbar-Natural-0_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:42 WARNING llmbar-Natural-0_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:42 WARNING llmbar-Natural-1_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:42 WARNING llmbar-Natural-1_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:42 WARNING llmbar-Natural-1_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:42 WARNING llmbar-Natural-1_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:42 WARNING llmbar-Natural-2_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:42 WARNING llmbar-Natural-2_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:42 WARNING llmbar-Natural-2_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:43 WARNING llmbar-Natural-2_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:43 WARNING llmbar-Natural-3_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:43 WARNING llmbar-Natural-3_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:43 WARNING llmbar-Natural-3_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:43 WARNING llmbar-Natural-3_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:43 WARNING llmbar-Natural-4_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:43 WARNING llmbar-Natural-4_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:43 WARNING llmbar-Natural-4_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:44 WARNING llmbar-Natural-4_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:44 INFO   [20/400] median 0.1 s/item
+12:51:44 WARNING llmbar-Natural-5_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:44 WARNING llmbar-Natural-5_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:44 WARNING llmbar-Natural-5_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:44 WARNING llmbar-Natural-5_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:44 WARNING llmbar-Natural-6_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:44 WARNING llmbar-Natural-6_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:45 WARNING llmbar-Natural-6_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:45 WARNING llmbar-Natural-6_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:45 WARNING llmbar-Natural-7_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:45 WARNING llmbar-Natural-7_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:45 WARNING llmbar-Natural-7_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:46 WARNING llmbar-Natural-7_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:46 WARNING llmbar-Natural-8_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:46 WARNING llmbar-Natural-8_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:46 WARNING llmbar-Natural-8_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:46 WARNING llmbar-Natural-8_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:46 WARNING llmbar-Natural-9_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:46 WARNING llmbar-Natural-9_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:47 WARNING llmbar-Natural-9_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:47 WARNING llmbar-Natural-9_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:47 INFO   [40/400] median 0.1 s/item
+12:51:47 WARNING llmbar-Natural-10_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:47 WARNING llmbar-Natural-10_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:47 WARNING llmbar-Natural-10_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:47 WARNING llmbar-Natural-10_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:48 WARNING llmbar-Natural-11_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:48 WARNING llmbar-Natural-11_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:48 WARNING llmbar-Natural-11_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:48 WARNING llmbar-Natural-11_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:48 WARNING llmbar-Natural-12_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:48 WARNING llmbar-Natural-12_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:48 WARNING llmbar-Natural-12_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:49 WARNING llmbar-Natural-12_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:49 WARNING llmbar-Natural-13_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:49 WARNING llmbar-Natural-13_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:49 WARNING llmbar-Natural-13_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:49 WARNING llmbar-Natural-13_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:49 WARNING llmbar-Natural-14_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:49 WARNING llmbar-Natural-14_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:49 WARNING llmbar-Natural-14_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:49 WARNING llmbar-Natural-14_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:50 INFO   [60/400] median 0.1 s/item
+12:51:50 WARNING llmbar-Natural-15_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:50 WARNING llmbar-Natural-15_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:50 WARNING llmbar-Natural-15_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:50 WARNING llmbar-Natural-15_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:50 WARNING llmbar-Natural-16_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:50 WARNING llmbar-Natural-16_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:50 WARNING llmbar-Natural-16_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:50 WARNING llmbar-Natural-16_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:51 WARNING llmbar-Natural-17_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:51 WARNING llmbar-Natural-17_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:51 WARNING llmbar-Natural-17_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:51 WARNING llmbar-Natural-17_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:51 WARNING llmbar-Natural-18_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:51 WARNING llmbar-Natural-18_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:51 WARNING llmbar-Natural-18_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:51 WARNING llmbar-Natural-18_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:52 WARNING llmbar-Natural-19_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:52 WARNING llmbar-Natural-19_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:52 WARNING llmbar-Natural-19_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:52 WARNING llmbar-Natural-19_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:52 INFO   [80/400] median 0.1 s/item
+12:51:52 WARNING llmbar-Natural-20_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:52 WARNING llmbar-Natural-20_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:53 WARNING llmbar-Natural-20_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:53 WARNING llmbar-Natural-20_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:53 WARNING llmbar-Natural-21_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:53 WARNING llmbar-Natural-21_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:53 WARNING llmbar-Natural-21_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:53 WARNING llmbar-Natural-21_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:53 WARNING llmbar-Natural-22_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:53 WARNING llmbar-Natural-22_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:54 WARNING llmbar-Natural-22_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:54 WARNING llmbar-Natural-22_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:54 WARNING llmbar-Natural-23_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:54 WARNING llmbar-Natural-23_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:54 WARNING llmbar-Natural-23_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:54 WARNING llmbar-Natural-23_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:54 WARNING llmbar-Natural-24_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:55 WARNING llmbar-Natural-24_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:55 WARNING llmbar-Natural-24_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:55 WARNING llmbar-Natural-24_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:55 INFO   [100/400] median 0.1 s/item
+12:51:55 WARNING llmbar-Natural-25_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:55 WARNING llmbar-Natural-25_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:55 WARNING llmbar-Natural-25_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:55 WARNING llmbar-Natural-25_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:55 WARNING llmbar-Natural-26_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-26_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-26_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-26_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-27_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-27_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-27_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-27_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-28_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-28_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:56 WARNING llmbar-Natural-28_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:57 WARNING llmbar-Natural-28_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:57 WARNING llmbar-Natural-29_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:57 WARNING llmbar-Natural-29_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:57 WARNING llmbar-Natural-29_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:57 WARNING llmbar-Natural-29_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:57 INFO   [120/400] median 0.1 s/item
+12:51:57 WARNING llmbar-Natural-30_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:57 WARNING llmbar-Natural-30_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:57 WARNING llmbar-Natural-30_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:57 WARNING llmbar-Natural-30_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-31_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-31_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-31_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-31_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-32_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-32_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-32_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-32_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-33_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:58 WARNING llmbar-Natural-33_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:59 WARNING llmbar-Natural-33_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:59 WARNING llmbar-Natural-33_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:59 WARNING llmbar-Natural-34_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:59 WARNING llmbar-Natural-34_neg spectral: ValueError: array must not contain infs or NaNs
+12:51:59 WARNING llmbar-Natural-34_ab spectral: ValueError: array must not contain infs or NaNs
+12:51:59 WARNING llmbar-Natural-34_ba spectral: ValueError: array must not contain infs or NaNs
+12:51:59 INFO   [140/400] median 0.1 s/item
+12:51:59 WARNING llmbar-Natural-35_pos spectral: ValueError: array must not contain infs or NaNs
+12:51:59 WARNING llmbar-Natural-35_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-35_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-35_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-36_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-36_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-36_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-36_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-37_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-37_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-37_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-37_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:00 WARNING llmbar-Natural-38_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:01 WARNING llmbar-Natural-38_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:01 WARNING llmbar-Natural-38_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:01 WARNING llmbar-Natural-38_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:01 WARNING llmbar-Natural-39_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:01 WARNING llmbar-Natural-39_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:01 WARNING llmbar-Natural-39_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:01 WARNING llmbar-Natural-39_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:01 INFO   [160/400] median 0.1 s/item
+12:52:01 WARNING llmbar-Natural-40_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:01 WARNING llmbar-Natural-40_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:01 WARNING llmbar-Natural-40_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-40_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-41_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-41_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-41_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-41_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-42_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-42_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-42_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-42_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-43_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:02 WARNING llmbar-Natural-43_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:03 WARNING llmbar-Natural-43_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:03 WARNING llmbar-Natural-43_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:03 WARNING llmbar-Natural-44_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:03 WARNING llmbar-Natural-44_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:03 WARNING llmbar-Natural-44_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:03 WARNING llmbar-Natural-44_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:03 INFO   [180/400] median 0.1 s/item
+12:52:03 WARNING llmbar-Natural-45_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:03 WARNING llmbar-Natural-45_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:03 WARNING llmbar-Natural-45_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:04 WARNING llmbar-Natural-45_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:04 WARNING llmbar-Natural-46_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:04 WARNING llmbar-Natural-46_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:04 WARNING llmbar-Natural-46_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:04 WARNING llmbar-Natural-46_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:04 WARNING llmbar-Natural-47_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:04 WARNING llmbar-Natural-47_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:04 WARNING llmbar-Natural-47_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:04 WARNING llmbar-Natural-47_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:05 WARNING llmbar-Natural-48_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:05 WARNING llmbar-Natural-48_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:05 WARNING llmbar-Natural-48_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:05 WARNING llmbar-Natural-48_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:05 WARNING llmbar-Natural-49_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:05 WARNING llmbar-Natural-49_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:05 WARNING llmbar-Natural-49_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:06 WARNING llmbar-Natural-49_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:06 INFO   [200/400] median 0.1 s/item
+12:52:06 WARNING llmbar-Natural-50_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:06 WARNING llmbar-Natural-50_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:06 WARNING llmbar-Natural-50_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:06 WARNING llmbar-Natural-50_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:06 WARNING llmbar-Natural-51_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:06 WARNING llmbar-Natural-51_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-51_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-51_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-52_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-52_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-52_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-52_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-53_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-53_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-53_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:07 WARNING llmbar-Natural-53_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:08 WARNING llmbar-Natural-54_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:08 WARNING llmbar-Natural-54_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:08 WARNING llmbar-Natural-54_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:09 WARNING llmbar-Natural-54_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:09 INFO   [220/400] median 0.1 s/item
+12:52:09 WARNING llmbar-Natural-55_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:09 WARNING llmbar-Natural-55_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:09 WARNING llmbar-Natural-55_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:09 WARNING llmbar-Natural-55_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:09 WARNING llmbar-Natural-56_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:10 WARNING llmbar-Natural-56_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:10 WARNING llmbar-Natural-56_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:10 WARNING llmbar-Natural-56_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:10 WARNING llmbar-Natural-57_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:10 WARNING llmbar-Natural-57_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:11 WARNING llmbar-Natural-57_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:11 WARNING llmbar-Natural-57_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:11 WARNING llmbar-Natural-58_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:11 WARNING llmbar-Natural-58_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:11 WARNING llmbar-Natural-58_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:11 WARNING llmbar-Natural-58_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:11 WARNING llmbar-Natural-59_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:11 WARNING llmbar-Natural-59_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:11 WARNING llmbar-Natural-59_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:12 WARNING llmbar-Natural-59_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:12 INFO   [240/400] median 0.1 s/item
+12:52:12 WARNING llmbar-Natural-60_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:12 WARNING llmbar-Natural-60_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:12 WARNING llmbar-Natural-60_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:12 WARNING llmbar-Natural-60_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-61_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-61_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-61_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-61_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-62_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-62_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-62_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-62_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-63_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:13 WARNING llmbar-Natural-63_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:14 WARNING llmbar-Natural-63_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:14 WARNING llmbar-Natural-63_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:14 WARNING llmbar-Natural-64_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:14 WARNING llmbar-Natural-64_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:14 WARNING llmbar-Natural-64_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:14 WARNING llmbar-Natural-64_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:14 INFO   [260/400] median 0.1 s/item
+12:52:14 WARNING llmbar-Natural-65_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:14 WARNING llmbar-Natural-65_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:14 WARNING llmbar-Natural-65_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-65_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-66_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-66_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-66_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-66_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-67_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-67_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-67_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-67_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:15 WARNING llmbar-Natural-68_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:16 WARNING llmbar-Natural-68_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:16 WARNING llmbar-Natural-68_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:16 WARNING llmbar-Natural-68_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:16 WARNING llmbar-Natural-69_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:16 WARNING llmbar-Natural-69_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:16 WARNING llmbar-Natural-69_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:16 WARNING llmbar-Natural-69_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:16 INFO   [280/400] median 0.1 s/item
+12:52:16 WARNING llmbar-Natural-70_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-70_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-70_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-70_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-71_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-71_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-71_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-71_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-72_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-72_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:17 WARNING llmbar-Natural-72_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:18 WARNING llmbar-Natural-72_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:18 WARNING llmbar-Natural-73_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:18 WARNING llmbar-Natural-73_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:18 WARNING llmbar-Natural-73_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:18 WARNING llmbar-Natural-73_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:18 WARNING llmbar-Natural-74_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:18 WARNING llmbar-Natural-74_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:18 WARNING llmbar-Natural-74_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:18 WARNING llmbar-Natural-74_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:19 INFO   [300/400] median 0.1 s/item
+12:52:19 WARNING llmbar-Natural-75_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:19 WARNING llmbar-Natural-75_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:19 WARNING llmbar-Natural-75_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:19 WARNING llmbar-Natural-75_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:19 WARNING llmbar-Natural-76_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:19 WARNING llmbar-Natural-76_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:19 WARNING llmbar-Natural-76_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:19 WARNING llmbar-Natural-76_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:19 WARNING llmbar-Natural-77_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-77_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-77_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-77_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-78_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-78_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-78_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-78_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-79_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-79_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-79_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:20 WARNING llmbar-Natural-79_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:21 INFO   [320/400] median 0.1 s/item
+12:52:21 WARNING llmbar-Natural-80_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:21 WARNING llmbar-Natural-80_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:21 WARNING llmbar-Natural-80_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:21 WARNING llmbar-Natural-80_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:21 WARNING llmbar-Natural-81_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:21 WARNING llmbar-Natural-81_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:21 WARNING llmbar-Natural-81_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:21 WARNING llmbar-Natural-81_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-82_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-82_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-82_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-82_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-83_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-83_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-83_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-83_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-84_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-84_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:22 WARNING llmbar-Natural-84_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:23 WARNING llmbar-Natural-84_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:23 INFO   [340/400] median 0.1 s/item
+12:52:23 WARNING llmbar-Natural-85_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:23 WARNING llmbar-Natural-85_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:23 WARNING llmbar-Natural-85_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:23 WARNING llmbar-Natural-85_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:23 WARNING llmbar-Natural-86_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:23 WARNING llmbar-Natural-86_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:23 WARNING llmbar-Natural-86_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:23 WARNING llmbar-Natural-86_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-87_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-87_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-87_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-87_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-88_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-88_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-88_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-88_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-89_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:24 WARNING llmbar-Natural-89_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:25 WARNING llmbar-Natural-89_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:25 WARNING llmbar-Natural-89_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:25 INFO   [360/400] median 0.1 s/item
+12:52:25 WARNING llmbar-Natural-90_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:25 WARNING llmbar-Natural-90_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:25 WARNING llmbar-Natural-90_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:25 WARNING llmbar-Natural-90_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:25 WARNING llmbar-Natural-91_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:26 WARNING llmbar-Natural-91_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:26 WARNING llmbar-Natural-91_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:26 WARNING llmbar-Natural-91_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:26 WARNING llmbar-Natural-92_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:26 WARNING llmbar-Natural-92_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:26 WARNING llmbar-Natural-92_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:26 WARNING llmbar-Natural-92_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:26 WARNING llmbar-Natural-93_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:26 WARNING llmbar-Natural-93_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:27 WARNING llmbar-Natural-93_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:27 WARNING llmbar-Natural-93_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:27 WARNING llmbar-Natural-94_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:27 WARNING llmbar-Natural-94_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:27 WARNING llmbar-Natural-94_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:27 WARNING llmbar-Natural-94_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:27 INFO   [380/400] median 0.1 s/item
+12:52:27 WARNING llmbar-Natural-95_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:28 WARNING llmbar-Natural-95_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:28 WARNING llmbar-Natural-95_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:28 WARNING llmbar-Natural-95_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:28 WARNING llmbar-Natural-96_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:28 WARNING llmbar-Natural-96_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:28 WARNING llmbar-Natural-96_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:28 WARNING llmbar-Natural-96_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:28 WARNING llmbar-Natural-97_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:29 WARNING llmbar-Natural-97_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:29 WARNING llmbar-Natural-97_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:29 WARNING llmbar-Natural-97_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:29 WARNING llmbar-Natural-98_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:29 WARNING llmbar-Natural-98_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:29 WARNING llmbar-Natural-98_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:29 WARNING llmbar-Natural-98_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:29 WARNING llmbar-Natural-99_pos spectral: ValueError: array must not contain infs or NaNs
+12:52:29 WARNING llmbar-Natural-99_neg spectral: ValueError: array must not contain infs or NaNs
+12:52:30 WARNING llmbar-Natural-99_ab spectral: ValueError: array must not contain infs or NaNs
+12:52:30 WARNING llmbar-Natural-99_ba spectral: ValueError: array must not contain infs or NaNs
+12:52:30 INFO   [400/400] median 0.1 s/item
+12:52:30 INFO   median 0.1 s/item -> ~3 min for 1676 items
+12:52:30 INFO   DRY RUN (400 items) — drop --dry-run for the full campaign.
+12:52:30 INFO Qwen2.5-1.5B-Instruct: unloaded, 13.7 GB VRAM free
+12:52:30 INFO done. Next: python scripts/20_analyse.py

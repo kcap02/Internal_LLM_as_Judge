@@ -38,6 +38,29 @@ flat conditional AUROC is exactly the failure mode this prevents.
 
 ---
 
+## C-DIFF — Item difficulty impersonating self-knowledge
+
+**Status: NEUTRALISED** (when ≥2 judges score the same items)
+
+The sharpest objection to a positive result: perhaps the features encode how
+*hard the item is*, not anything about this particular judge. Difficulty is a
+property of the item shared by every model — a probe that only recovers it
+has learned nothing self-referential, even though it would look like a
+genuine internal signal on the conditional metric.
+
+*Fix.* `peer_difficulty` — the fraction of the **other** judges that got the
+same item right, computed leave-one-model-out in `20_analyse.py` — enters the
+baseline rung as **M1nd**. When it is available, the ladder's baseline
+becomes M1nd rather than M1n, so spectral (M2) and activation (M3) families
+must beat *"how hard is this item for models in general"* before anything may
+be called self-knowledge. The active baseline is printed per slice and stored
+as `baseline` in the report.
+
+*Limitation.* Needs at least two judges over the same items; single-model
+slices fall back to M1n and say so explicitly.
+
+---
+
 ## C-DUP — Duplicate questions straddling CV folds
 
 **Status: NEUTRALISED** (was FAIL)
@@ -141,18 +164,37 @@ and caps achievable accuracy.
 
 ---
 
-## C-DEGEN — Judges with no verdict variance
+## C-DEGEN — Judges with no verdict variance manufacturing discoveries
 
-**Status: NEUTRALISED**
+**Status: NEUTRALISED** (caught by the pilot, three layers of fix)
 
 A judge that always answers "Yes" has `is_correct` exactly equal to
-`gt_verdict == Yes`; within-stratum outcome variance is zero and conditional
-AUROC is undefined. Pooled AUROC would still print a confident-looking
-number.
+`gt_verdict == Yes`: within-stratum outcome variance is zero and conditional
+AUROC is undefined. Pooled AUROC still prints a confident-looking number.
 
-*Fix.* `health_checks()` reports accuracy, verdict rate and per-stratum
-accuracy, and flags `degenerate: true`. Undefined contrasts are reported as
-`n/a`, never silently filled.
+The pilot showed this is not hypothetical and is *worse* than it looks.
+Qwen2.5-0.5B answered "Yes" to 99.5% of LLMBar `single` items and
+Llama-3.2-1B chose "B" on 98.4% of `pairwise` items. The conditional AUROC
+was then estimated from a stratum containing **one** minority-class item; the
+bootstrap, resampling that same item, returned a *narrow* CI around an
+arbitrary value. Two such contrasts (`delta=+0.980`, `delta=+0.375`)
+**survived BH-FDR and were reported as discoveries.**
+
+*Fix, in three layers.*
+1. `stratified_auroc` ignores any stratum with fewer than
+   `MIN_CLASS_PER_STRATUM = 5` items of either class; if none qualifies it
+   returns `None`.
+2. `health_checks()` flags `degenerate` (zero variance) and `extreme_bias`
+   (verdict rate <5% or >95%); `compare()` then **suppresses every contrast**
+   for that slice rather than estimating one.
+3. Unreliable slices are excluded from the BH-FDR family, so an artefact
+   cannot consume the error budget.
+
+After the fix the same pilot data yields **0 of 16 surviving contrasts** —
+the correct answer for judges this small.
+
+*Consequence for the study.* Judges below ~3B are not usable as measurement
+subjects; they serve only as pipeline tests and as distractor panels.
 
 ---
 

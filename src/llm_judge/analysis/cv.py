@@ -39,13 +39,15 @@ from sklearn.preprocessing import StandardScaler
 from . import features as F
 from .stats import paired_bootstrap, pooled_auroc, stratified_auroc
 
-# Contrasts that carry the paper's claims, evaluated in this order.
-CONTRASTS = [
-    ("M1", "M1n"),    # does length/position/subject add to raw confidence?
-    ("M1n", "M2"),    # does the attention graph add beyond that?
-    ("M1n", "M3"),    # does a plain activation probe add beyond that?
-    ("M3", "M4"),     # does spectral add anything activations did not?
-]
+def contrasts_for(baseline: str) -> list[tuple[str, str]]:
+    """Contrasts that carry the paper's claims, against the live baseline."""
+    out = [("M1", "M1n")]          # does length/position/subject add to confidence?
+    if baseline != "M1n":
+        out.append(("M1n", baseline))   # does peer difficulty add beyond that?
+    out += [(baseline, "M2"),      # does the attention graph add beyond ALL that?
+            (baseline, "M3"),      # does a plain activation probe?
+            ("M3", "M4")]          # does spectral add anything activations did not?
+    return out
 
 
 def _pipeline(n_dense: int, n_act: int, pca_dims: int,
@@ -93,18 +95,40 @@ def oof_scores(X: np.ndarray, y: np.ndarray, groups: np.ndarray,
 
 
 def select_rows(rows: list[dict], activations_npz=None,
-                act_layer_frac: str = "1", log=print) -> tuple[list[dict], dict]:
-    """Restrict to rows usable by EVERY rung, and report what was dropped."""
+                act_layer_frac: str = "1", min_coverage: float = 0.5,
+                log=print) -> tuple[list[dict], dict]:
+    """Restrict to rows usable by EVERY rung, and report what was dropped.
+
+    All rungs must be scored on identical rows or their AUROCs are not
+    comparable. But a partially finished spectral run would then delete most
+    of the behavioural data too, so a family covering less than
+    `min_coverage` of the rows is DROPPED instead: better to report the
+    ladder without M2 on all rows than the full ladder on a tenth of them.
+    """
     n0 = len(rows)
-    want_spectral = any(F.has_spectral(r) for r in rows)
-    keep = [r for r in rows if (not want_spectral or F.has_spectral(r))]
+    cov_spec = sum(F.has_spectral(r) for r in rows) / max(1, n0)
+    use_spectral = cov_spec >= min_coverage
+    if 0 < cov_spec < min_coverage:
+        log(f"  spectral covers only {cov_spec:.0%} of rows (< {min_coverage:.0%})"
+            f" — dropping the spectral family rather than discarding "
+            f"{n0 - int(cov_spec * n0)} rows from every other rung")
+    keep = [r for r in rows if (not use_spectral or F.has_spectral(r))]
     n_after_spec = len(keep)
-    want_act = activations_npz is not None and any(
-        F.has_activation(r, activations_npz, act_layer_frac) for r in keep)
-    if want_act:
+
+    cov_act = 0.0
+    if activations_npz is not None and keep:
+        cov_act = sum(F.has_activation(r, activations_npz, act_layer_frac)
+                      for r in keep) / len(keep)
+    use_act = cov_act >= min_coverage
+    if 0 < cov_act < min_coverage:
+        log(f"  activations cover only {cov_act:.0%} of rows — dropping the "
+            f"activation family rather than discarding rows")
+    if use_act:
         keep = [r for r in keep
                 if F.has_activation(r, activations_npz, act_layer_frac)]
-    avail = {"spectral": want_spectral, "activations": want_act,
+
+    avail = {"spectral": use_spectral, "activations": use_act,
+             "spectral_coverage": cov_spec, "activation_coverage": cov_act,
              "n_input": n0, "n_used": len(keep),
              "dropped_no_spectral": n0 - n_after_spec,
              "dropped_no_activation": n_after_spec - len(keep)}
@@ -117,26 +141,38 @@ def select_rows(rows: list[dict], activations_npz=None,
 
 
 def build_feature_sets(rows: list[dict], activations_npz=None,
-                       act_layer_frac: str = "1") -> tuple[dict, list[str]]:
-    """Return ({name: (X, n_activation_cols)}, nuisance column names)."""
+                       act_layer_frac: str = "1") -> tuple[dict, list, str]:
+    """Return ({name: (X, n_act_cols)}, nuisance names, baseline rung name).
+
+    The baseline the internal families must clear is M1nd (margin + nuisance
+    + peer difficulty) when peer difficulty is available, otherwise M1n.
+    """
     Xm = F.margin_features(rows)
     Xn, nuis_names = F.nuisance_features(rows)
+    base = np.c_[Xm, Xn]
     sets = {
         "Mn": (Xn, 0),
         "M1": (Xm, 0),
-        "M1n": (np.c_[Xm, Xn], 0),
+        "M1n": (base, 0),
     }
+    baseline = "M1n"
+    Xd = F.peer_difficulty_features(rows)
+    if Xd is not None:
+        base = np.c_[base, Xd]
+        sets["M1nd"] = (base, 0)
+        baseline = "M1nd"
+
     Xs = None
     if all(F.has_spectral(r) for r in rows):
         Xs = F.spectral_features(rows)
-        sets["M2"] = (np.c_[Xm, Xn, Xs], 0)
+        sets["M2"] = (np.c_[base, Xs], 0)
     if activations_npz is not None and all(
             F.has_activation(r, activations_npz, act_layer_frac) for r in rows):
         Xa = F.activation_features(rows, activations_npz, act_layer_frac)
-        sets["M3"] = (np.c_[Xm, Xn, Xa], Xa.shape[1])
+        sets["M3"] = (np.c_[base, Xa], Xa.shape[1])
         if Xs is not None:
-            sets["M4"] = (np.c_[Xm, Xn, Xs, Xa], Xa.shape[1])
-    return sets, nuis_names
+            sets["M4"] = (np.c_[base, Xs, Xa], Xa.shape[1])
+    return sets, nuis_names, baseline
 
 
 def health_checks(rows: list[dict], log=print) -> dict:
@@ -187,11 +223,14 @@ def compare(rows: list[dict], n_splits: int = 5, n_boot: int = 2000,
             pca_dims: int = 24, activations_npz=None, seed: int = 42,
             activation_probe: str = "full", act_layer_frac: str = "1",
             run_permutation_null: bool = True, n_permutations: int = 5,
-            log=print) -> dict:
+            min_coverage: float = 0.5, log=print) -> dict:
     """Full ladder, conditional-AUROC primary metric, bootstrap contrasts."""
-    rows, avail = select_rows(rows, activations_npz, act_layer_frac, log)
+    rows, avail = select_rows(rows, activations_npz, act_layer_frac,
+                              min_coverage, log)
     if len(rows) < 40:
         return {"skipped": f"only {len(rows)} usable rows"}
+    if not avail["spectral"]:
+        activations_npz = activations_npz if avail["activations"] else None
 
     y = np.array([float(r["is_correct"]) for r in rows])
     # Group on the text-derived group_id when the bank provides one: some
@@ -205,8 +244,13 @@ def compare(rows: list[dict], n_splits: int = 5, n_boot: int = 2000,
         f"({n_qid} question_ids)")
     health = health_checks(rows, log)
 
-    sets, nuis_names = build_feature_sets(rows, activations_npz, act_layer_frac)
-    log(f"  families: {', '.join(sets)} | nuisance cols: {len(nuis_names)}")
+    sets, nuis_names, baseline = build_feature_sets(rows, activations_npz,
+                                                    act_layer_frac)
+    log(f"  families: {', '.join(sets)} | nuisance cols: {len(nuis_names)} | "
+        f"baseline to beat: {baseline}")
+    if baseline == "M1n":
+        log("  (no peer_difficulty available — the 'is it just item "
+            "difficulty?' control needs >=2 judges scoring the same items)")
 
     oof = {name: oof_scores(X, y, groups, n_splits, n_act, pca_dims,
                             activation_probe)
@@ -217,24 +261,36 @@ def compare(rows: list[dict], n_splits: int = 5, n_boot: int = 2000,
     oof_v = {k: v[valid] for k, v in oof.items()}
 
     report = {"n_items": int(valid.sum()), "availability": avail,
-              "health": health, "auroc_conditional": {}, "auroc_pooled": {},
+              "health": health, "baseline": baseline,
+              "auroc_conditional": {}, "auroc_pooled": {},
               "contrasts": {}, "controls": {}}
 
     for name, s in oof_v.items():
         report["auroc_conditional"][name] = stratified_auroc(y_v, s, st_v)
         report["auroc_pooled"][name] = pooled_auroc(y_v, s)
 
-    for a, b in CONTRASTS:
-        if a in oof_v and b in oof_v:
-            report["contrasts"][f"{b} - {a}"] = paired_bootstrap(
-                y_v, g_v, oof_v[a], oof_v[b], strata=st_v,
-                n_boot=n_boot, seed=seed)
+    # A judge whose verdict is (near-)constant cannot support any contrast:
+    # its conditional AUROC rests on a handful of minority-class items, and a
+    # bootstrap that keeps resampling those same items returns a narrow CI
+    # around an arbitrary value. Suppress the contrasts outright and mark the
+    # slice unreliable so it is also excluded from the FDR family.
+    report["unreliable"] = bool(health["degenerate"] or health["extreme_bias"])
+    if report["unreliable"]:
+        log("  contrasts SUPPRESSED: verdict behaviour is (near-)constant, so "
+            "no conditional contrast here is estimable — report the verdict "
+            "bias itself, not an AUROC.")
+    else:
+        for a, b in contrasts_for(baseline):
+            if a in oof_v and b in oof_v:
+                report["contrasts"][f"{b} - {a}"] = paired_bootstrap(
+                    y_v, g_v, oof_v[a], oof_v[b], strata=st_v,
+                    n_boot=n_boot, seed=seed)
 
     # ── Control 1: item-identity decodability ────────────────────────────
     # How well do the SAME features predict gt_verdict (i.e. merely tell a
     # pos item from a neg one)? High values here are expected and harmless —
     # they are precisely why the pooled AUROC must not be the headline.
-    best = "M4" if "M4" in sets else ("M2" if "M2" in sets else "M1n")
+    best = next(m for m in ("M4", "M2", "M3", baseline) if m in sets)
     X_best, n_act_best = sets[best]
     y_id = (strata == sorted(set(strata))[0]).astype(float)
     s_id = oof_scores(X_best, y_id, groups, n_splits, n_act_best, pca_dims,
