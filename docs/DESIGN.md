@@ -183,6 +183,14 @@ for judges this small.
 
 ## Compute bookkeeping
 
+**Run one GPU stage at a time.** Stage 12 reserves headroom for retained
+attention, so a second GPU job (even a light one like stage 10) can push the
+card to its limit: observed 15.7 GB of 16 GB with both running, at which
+point *neither* made progress. Every stage is resumable, so serialising costs
+nothing — stop one, let the other finish, restart. `run_pipeline.ps1`
+sequences them deliberately.
+
+
 Every run's log in `logs/` records commit + config + versions. Results files
 are keyed by dataset name only (no config hash), so **never** change `seed`,
 sampling sizes, or `spectral_max_len` mid-campaign — start a new `results/`
