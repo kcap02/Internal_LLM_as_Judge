@@ -9,3 +9,11 @@
 13:33:32 INFO Qwen2.5-0.5B-Instruct: 1672 items
 13:33:34 INFO Qwen2.5-0.5B-Instruct: longest prompt 1119 tokens -> ~0.8 GB retained attention; reserving 2.0 GB of the 14.7 GB free
 13:33:37 INFO   prompt capped at 4088 tokens | formats=['pairwise', 'single']
+13:33:52 INFO   [20/400] median 0.8 s/item
+13:34:29 INFO   [40/400] median 0.9 s/item
+13:34:59 INFO   [60/400] median 1.1 s/item
+13:35:28 INFO   [80/400] median 1.1 s/item
+13:35:56 INFO   [100/400] median 1.1 s/item
+13:36:07 INFO   [120/400] median 0.8 s/item
+13:36:15 INFO   [140/400] median 0.8 s/item
+13:36:23 INFO   [160/400] median 0.6 s/item

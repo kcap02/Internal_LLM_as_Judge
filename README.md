@@ -124,13 +124,21 @@ item_id)` resume keys and be silently skipped as already-done work.
 ```
 src/llm_judge/        library (datasets/, analysis/, diagnostics, grouping, ...)
 scripts/              numbered pipeline stages (thin wrappers over the library)
-data/                 normalized datasets + judge banks
-results/              *.jsonl result streams, activations (.npz), analyses, audits
-logs/                 one provenance log per stage run (kept in git)
-docs/CONFOUNDS.md     every confound: neutralised / measured / open
+configs/              config overrides (main run, ablations)
+data/                 normalized datasets + judge banks   [committed]
+results/*.json        analyses and audits                 [committed]
+results/*.jsonl       per-item result streams             [ignored: regenerable]
+results/activations/  last-token hidden states (.npz)     [ignored: large]
+logs/                 one provenance log per stage run    [committed]
+docs/CONFOUNDS.md     every confound: neutralised / measured / resolved
 docs/DESIGN.md        research design + phased compute plan
 legacy/               original monolithic scripts (superseded, kept for reference)
 ```
+
+Result-stream names carry their variant: `judge_llmbar.jsonl` is the main run,
+`__chat` the chat-template ablation, `__fp16` the archived float16 pilot kept
+as evidence for C-NUM. A stream is fully reproducible from its commit, config
+and bank, which is why the streams themselves are not in git.
 
 ## Key methodological decisions
 
