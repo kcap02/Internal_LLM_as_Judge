@@ -1,12 +1,15 @@
 # Preregistration
 
-**Status: DRAFT — NOT FROZEN.** Two numbers from the corrected-estimator
-re-analysis gate the wording (§7). Once they land, resolve §7, commit, and
-record the commit hash below. After that: no edits.
+**Status: DRAFT — NOT FROZEN.** Three inputs are still open: the two numbers
+from the corrected-estimator re-analysis (§7), and the three exact judge
+checkpoints plus the hardware decision behind them (§3). Resolve all three,
+then commit and record the hash here. After that: no edits.
 
     Frozen at commit: ____________  (fill on freeze; leave blank until then)
 
-Everything below is decided. §7 is the only open text.
+Everything else is decided. The decision rules for the open items are already
+written and numeric — resolving them is reading a table, not exercising
+judgement after seeing one.
 
 ---
 
@@ -29,11 +32,63 @@ labelled as such in the same table.
    Reported as **coverage at fixed risk**, not ΔAUROC — a 0.02 AUROC
    difference has no operational meaning and a coverage change does.
 
+### 2.1 What each outcome licenses
+
+Every primary test has **three** branches, not two. The third is the one that
+needs preregistering, because it is the most likely outcome for test 1 and the
+easiest to quietly report as a null.
+
+| | test 1 (internals > baseline) | test 2 (spectral > activations) | test 3 (selective prediction) |
+|---|---|---|---|
+| **effect clears `MDE_FREEZE` and survives BH-FDR** | internals carry correctness information beyond first-order performance, expressed confidence and peer difficulty | spectral adds beyond a linear activation probe | the internal signal buys usable coverage at fixed risk |
+| **TOST rejects into ±0.02** | we rule out an internal contribution of 0.02 or more — a **measured** negative | spectral is redundant with activations at the stated band | no operationally meaningful coverage gain |
+| **neither** | **UNRESOLVED.** Reported as unresolved, with the interval and the MDE, and explicitly **not** as evidence of absence | same | same |
+
+The third row is a commitment, not a caveat: a contrast that is neither
+significant nor equivalent is reported in those words, in the abstract as well
+as the results, and never described as "no effect". The pilot's 0/30 was
+exactly this case and was nearly written up as a negative result.
+
 ## 3. Panel and data
 
-- **Three judges** spanning scale for the spectral arm; one at ~1.5B, one at
-  7–8B, one at 27–32B. Fixed spectral window across all three, sized so the
-  eigendecomposition is affordable at the **largest** model, not the smallest.
+- **Three judges** spanning scale for the spectral arm. Fixed spectral window
+  across all three, sized so the eigendecomposition is affordable at the
+  **largest** model, not the smallest.
+
+  **OPEN — the exact checkpoints must be named before freezing**, because
+  `N_FREEZE` (§8) cannot be derived without them: the largest model sets the
+  VRAM ceiling, the ceiling sets the window, and the window sets what is
+  affordable per item. An undetermined panel leaves §8 with an undetermined
+  input.
+
+  Proposed, pending the hardware decision below — **one family, three scales**,
+  so that scale is not confounded with vendor or tokenizer:
+
+  | role | checkpoint | note |
+  |---|---|---|
+  | small | `Qwen/Qwen2.5-1.5B-Instruct` | the pilot's usable-judge floor (73.5% pairwise) |
+  | mid | `Qwen/Qwen2.5-7B-Instruct` | already in `config.judge_models` |
+  | large | `Qwen/Qwen2.5-32B-Instruct` | already in `config.judge_models_large` |
+
+  **Hardware dependency, stated plainly.** The 16 GB card cannot run the
+  spectral arm at 7B, let alone 32B: `output_attentions=True` retains a
+  `[heads, N, N]` tensor per layer, so a 7B model needs ~6.1 GB at 2048 tokens
+  and ~24.5 GB at 4096 on top of ~14 GB of bf16 weights. On current hardware
+  the largest feasible spectral judge is ~3B. So one of the following must be
+  chosen and written here before the freeze:
+
+  1. **rent a larger card** for the spectral arm and keep the panel above; or
+  2. **keep the spectral arm at ≤3B** and name the three checkpoints
+     accordingly (e.g. 0.5B / 1.5B / 3B), accepting that the scale span is
+     narrow and saying so; or
+  3. **decouple the arms** — run the *cheap* arm (activations only, no
+     retained attention, no VRAM ceiling) over the full 1.5B/7B/32B ladder,
+     and the spectral arm over whatever the available card permits, reporting
+     the two panels separately rather than pretending they are one.
+
+  Option 3 is the cheapest and is consistent with §10's split, but it changes
+  what primary test 2 generalises over, so it must be a preregistered choice
+  and not a retrospective description of what fitted.
 - **Five banks** (MMLU, MMLU-Pro, JudgeBench, LLMBar, RewardBench 2), entering
   the hierarchical model as a **random effect** — pooled, not tested
   separately.
@@ -81,16 +136,33 @@ that would undo the discipline the rest of this document encodes.
 
 ## 7. OPEN — resolve before freezing
 
-**(a) `M2only` under the corrected estimator.** Near 0.50 → primary test 2
-preregisters as a clean **absence** claim. Materially above 0.50 → the claim is
-**redundancy**, a different and stronger sentence, and test 2's wording
-changes. Do not skip past this once the tables print; the freeze was held for
-it.
+The two numbers below are the only open text. **The decision rules are already
+numeric**, so resolving them is reading a table, not exercising judgement:
+"near 0.50" and "well above" are the words that let a preregistration be
+reinterpreted afterwards, and they do not appear here.
 
-**(b) Per-slice verdict-leakage floors.** If the floor comes back well above
-0.50 on the biased slices, `floor_to_clear` stops being a formality and starts
-excluding rungs. State **which floor is primary when the two disagree** — the
-default is the larger, but it must be written down before the data decides it.
+**(a) `M2only` under the corrected estimator**, compared against that slice's
+own `floor_to_clear` (§5), pooled across slices by the same hierarchical
+specification as the primary tests:
+
+| observed | conclusion for primary test 2 |
+|---|---|
+| `M2only − floor_to_clear` ≤ **0.02** | **absence** — spectral carries no correctness information; test 2 preregisters as a clean equivalence claim |
+| `M2only − floor_to_clear` ≥ **0.05** | **redundancy** — spectral carries information activations already contain; test 2's wording changes to the stronger sentence |
+| strictly between | **indeterminate** — reported as indeterminate, not rounded to whichever side is convenient |
+
+0.02 is the preregistered equivalence band (§8); 0.05 is the upper end of the
+plausible target effect. Both are constants this document already uses.
+
+**(b) Per-slice verdict-leakage floors.** A slice's floor is **binding** when
+`verdict_only_null.leak_auroc_p95 ≥ 0.53` — the same threshold the
+implementation already uses for its `clean` flag, reused rather than invented
+so the document and the code cannot drift. Below it, `floor_to_clear` is a
+formality; at or above it, the floor genuinely excludes rungs and that
+exclusion is reported per slice.
+
+**When the two floors disagree, the larger is primary.** A rung must clear
+`max(SDT p95, verdict-leak p95)`. Written down here before the data decides it.
 
 ## 8. Power commitment
 
@@ -118,7 +190,31 @@ with a stated band** rather than superiority tests. Both are defensible.
 Choosing between them after seeing the data is not, and it is the most
 reviewer-visible decision in a paper about measurement discipline.
 
-## 9. Sequencing after the freeze
+## 9. Stopping rule — what the freeze changes
+
+**The analysis is run once, on the specification above.** Any confound
+discovered after the freeze is reported in Limitations as a named hazard with a
+proposed measurement. It is **not** fixed and re-run.
+
+This is a deliberate change of regime, and it is the thing the freeze marks.
+Six of this paper's findings arrived by re-running the analysis after each
+discovery — C-DUP, C-DEGEN, C-NUM, C-WIN's VRAM half, C-LADDER, C-SDT. That
+loop was correct during development: each iteration removed an artefact, and
+the confound register exists because of it. The identical loop after the freeze
+is a garden of forking paths, because from here the thing being iterated
+against is the result rather than the machinery.
+
+A reader should be able to see that we knew the difference. The register
+records which findings came from which regime, and every post-freeze hazard is
+labelled as such with its measurement left undone and stated.
+
+Two narrow exceptions, both of which must be declared in the paper if used:
+an outright **implementation bug** (a computation not doing what this document
+says it does) may be fixed and the analysis re-run, with the bug and the
+before/after both reported; and a **run that fails to complete** may be
+resumed. Neither licenses a change to the specification.
+
+## 10. Sequencing after the freeze
 
 The **cheap arm** (activations only — no retained attention, no
 eigendecomposition, no VRAM ceiling) starts the **same day** as the freeze. It
@@ -130,7 +226,7 @@ The expensive (spectral) arm does not need scale — it is already at SE
 0.005–0.009 for test 2 — and is budgeted at a few hundred items per bank across
 the three judges, for generality rather than power.
 
-## 10. Minimum viable submission
+## 11. Minimum viable submission
 
 If something slips, and something will: **five methodological findings +
 LLMBar + one published-baseline reimplementation.** Everything beyond that is
