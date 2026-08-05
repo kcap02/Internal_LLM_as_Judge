@@ -126,10 +126,19 @@ test and each failed outside the region the plant covered:
 | offset + RidgeCV | a strong planted latent | n=200, 1536 columns — returned exactly 0.000 for every block on every slice |
 | the recovery test itself, v1 | — | passed on ±0.02 jitter; its plant sat below what was recoverable at that n |
 
-The generalisation, and it is the transferable claim: **a passing test on
-planted data certifies an estimator only over the region the plant covers.**
-Every one of these failures lived outside it and was invisible from the green
-result.
+The generalisation has two halves, and both are transferable claims:
+
+1. **A passing test on planted data certifies an estimator only over the
+   region the plant covers.** Every failure above lived outside it and was
+   invisible from the green result.
+2. **A precision estimate is uninterpretable without a recovery estimate
+   beside it.** Four of this project's validations returned a healthy-looking
+   number *about a degenerate object*: the concat block diagnostic reported
+   coefficient ratios of 0.68–1.64 while the estimator the claims used
+   returned nothing; the bootstrap MDE reported a median SE of 0.006 and "72
+   items per slice" precisely *because* the rungs sat on top of the baseline.
+   A tight interval around a collapsed estimator is still tight. Precision and
+   recovery must be reported as a pair.
 
 The plant must be a **dense random direction**, not a single column: that is
 how an activation encodes anything, and a one-column plant in a wide block is
@@ -226,22 +235,51 @@ collapse.
 
 ### 8.2 `N_FREEZE` is set by the recovery curve, with the MDE as a floor
 
-Measured (`results/recovery_curve.json`, block width 1536, dense plant,
-detection at |delta| ≥ 0.02):
+**The measurement is indexed on the *planted* strength, not on a recovered
+one.** Reading the threshold off block-only AUROC at each n is ill-posed:
+block-only is itself estimated at that n and is biased downward by the same
+shrinkage that suppresses the delta, so a threshold read at n=800 and the
+pilot's `M3only` read at n=200 are two different estimation regimes compared
+as though they were one. Instead:
 
-| n per stratum | detection threshold (block-only AUROC) |
-|---|---|
-| 200 | none — above 0.518 |
-| 400 | none — above 0.589 |
-| **800** | **0.602** |
+*Phase 1 — calibrate.* At the pilot's own n=200, measure block-only AUROC
+across plant strengths (10 seeds each) and interpolate the strength whose
+median reading equals the pilot's observed value. This is the plant that looks
+like the real data *through the same biased lens*.
 
-The largest block-only AUROC observed in the pilot is `M3only` = **0.633**
-(Qwen2.5-3B pairwise). So:
+| plant | median block-only at n=200 | IQR |
+|---|---|---|
+| 0.0 | 0.479 | [0.443, 0.520] |
+| 1.0 | 0.518 | [0.474, 0.557] |
+| 2.0 | 0.594 | [0.533, 0.636] |
+| 3.0 | 0.648 | [0.590, 0.699] |
 
-> **`N_FREEZE` is the smallest n whose measured detection threshold falls
-> below the largest block-only AUROC observed in the pilot, and never less
-> than the n the MDE calculation requires. On current measurements that is
-> `N_FREEZE` ≥ 800 items per stratum.**
+Pilot `M3only` = 0.633 (Qwen2.5-3B pairwise) → calibrated **s\* = 2.721**.
+
+*Phase 2 — sweep n at s\*.* Every cell is 10 seeds; detection is a delta
+≥ 0.02 in ≥ 80% of them, matching the power convention used elsewhere in this
+document. A single draw per cell would make the threshold — by definition the
+most seed-sensitive quantity here — a coin flip.
+
+| n per stratum | median delta | detect fraction |
+|---|---|---|
+| 200 | +0.034 | 70% |
+| **400** | **+0.070** | **100%** |
+| 800 | +0.070 | 100% |
+| 1600 | +0.082 | 100% |
+
+> **`N_FREEZE` is the smallest n detecting a plant calibrated to the pilot's
+> own block-only reading, in ≥ 80% of seeds, and never less than the n the MDE
+> calculation requires. On current measurements that is
+> `N_FREEZE` ≥ 400 items per stratum.**
+
+Two honest caveats on that number. The pilot's 0.633 is itself one draw at
+n=200, where the calibration IQR spans roughly ±0.05, so s\* carries real
+uncertainty and 400 sits one grid step above a cell that already detects at
+70%. And the median block-only in phase 2 does not rise with n (0.615, 0.680,
+0.652, 0.631), which is not what a consistent estimator should do and is worth
+understanding before the number is used to buy hardware; it does not affect the
+detection conclusion, which is clean from n=400 upward.
 
 The recovery curve is primary because it is calibrated on the estimator
 actually in use; the MDE is retained as a floor, not as the criterion.
