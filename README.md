@@ -82,6 +82,19 @@ items sharing a `gt_verdict`. Pooling pos and neg items would let any feature
 that merely distinguishes them impersonate self-knowledge (see C-ID); pooled
 AUROC is reported alongside, labelled as the inflated number.
 
+**The reference point is not 0.5.** A judge with no metacognition at all — a
+first-order signal-detection observer at the same d′ and criterion — already
+scores well above 0.5, and scores higher the more accurate it is. Every
+conditional AUROC is therefore reported against a simulated **SDT null**
+(`sdt_null_reference`, the Monte-Carlo form of meta-d′/d′), and the claim is
+the residual above that null. See C-SDT.
+
+**Rungs above the baseline are fitted as an offset**, not by concatenation:
+the baseline's out-of-fold logit enters as a fixed offset and the internal
+block fits only the residual. Concatenating a `hidden_size`-wide block onto a
+6-column baseline under a shared penalty destroys up to **0.315 AUROC of real
+signal** — measured, with pure noise as the added block. See C-LADDER.
+
 Every run also produces:
 - an **identity-decodability control** (how much of the pooled number is item identity),
 - a **permutation-null control** (labels shuffled within strata, full refit; must land at ~0.500),
@@ -110,7 +123,7 @@ python scripts/00_download_datasets.py
 python scripts/01_build_judge_banks.py
 python scripts/02_audit_confounds.py --pilot     # must be free of FAIL
 
-GPU=C:/Users/valno/anaconda3/envs/gemma_spectral/python.exe
+GPU=C:/Users/valno/miniconda3/envs/gemma_spectral/python.exe
 $GPU scripts/11_run_judge.py          --pilot --limit 400   --only llmbar
 $GPU scripts/12_run_judge_spectral.py --pilot --dry-run 400 --only llmbar
 
@@ -135,13 +148,24 @@ item_id)` resume keys and be silently skipped as already-done work.
 ## Tests
 
 ```bash
-python tests/test_stats.py          # or: python -m pytest tests/ -q
+python -m pytest tests/ -q     # or: python tests/test_stats.py; python tests/test_ladder.py
 ```
 
-Six tests on the functions that decide what may be claimed. Two encode the
-central guarantees directly: a score that only encodes the *stratum* must come
-back as unestimable rather than near-perfect (C-ID), and a stratum holding one
-minority item must not drive the estimate (C-DEGEN).
+Eleven tests on the functions that decide what may be claimed. Each encodes a
+guarantee against a case where a naive implementation gives a confident wrong
+answer:
+
+- a score that only encodes the *stratum* comes back unestimable, not
+  near-perfect (**C-ID**);
+- a stratum holding one minority item does not drive the estimate (**C-DEGEN**);
+- an underpowered null is not reported as an equivalence (**C-POWER**);
+- paired DeLong *understates* the SE by 2.17× on clustered data, which is why
+  the grouped bootstrap stays the headline test (**C-INFER**);
+- adding a 4096-column block of **pure noise** costs the offset ladder ~0.000
+  and costs concatenation up to **0.315** (**C-LADDER**);
+- a feature decoding only the judge's own verdict scores ~0.5 under the pooled
+  fit and >0.95 under a within-stratum fit — the refactor that would silently
+  break everything (**C-VERDICT**).
 
 ## Repo layout
 

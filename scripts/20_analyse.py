@@ -186,11 +186,35 @@ def main() -> None:
                 log.info("  %-10s delta=%+.3f  CI95=[%+.3f, %+.3f]  p=%.4f",
                          cname, c["delta"], c["ci95"][0], c["ci95"][1],
                          c["p_one_sided"])
+                # A non-significant contrast means nothing on its own: report
+                # what size of effect the data actually rule out, so a tight
+                # null is distinguishable from an underpowered one.
+                eq = c.get("equivalence") or {}
+                if eq.get("equivalent") is not None:
+                    log.info("             equivalence: %s |delta| < %.3f "
+                             "(TOST p=%.4f, CI90=[%+.3f, %+.3f])",
+                             "RULED OUT effects >=" if eq["equivalent"]
+                             else "CANNOT rule out effects >=",
+                             eq["band"], eq["p_tost"],
+                             eq["ci90"][0], eq["ci90"][1])
                 # Unreliable slices never enter the FDR family: including a
                 # degenerate judge's contrasts would let an artefact consume
                 # the error budget and be reported as a discovery.
                 if not res.get("unreliable"):
                     all_contrasts.append((name, f"{model}|{fmt}", cname, c))
+
+            # Clearing the first-order SDT null is a claim like any other and
+            # consumes the same error budget. Only the rungs that carry a
+            # claim enter; the diagnostic rungs (M2only/M3only) do not.
+            if not res.get("unreliable"):
+                for rung, p in (res.get("p_vs_sdt_null") or {}).items():
+                    if p is None or rung in ("Mn", "M2only", "M3only"):
+                        continue
+                    all_contrasts.append(
+                        (name, f"{model}|{fmt}", f"{rung} > SDT-null",
+                         {"delta": (res.get("auroc_conditional_vs_null")
+                                    or {}).get(rung),
+                          "ci95": (None, None), "p_one_sided": p}))
 
             strata = {}
             if fmt == "mcq":

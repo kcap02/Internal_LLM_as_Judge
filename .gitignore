@@ -26,3 +26,7 @@ logs/*.tmp
 Thumbs.db
 .vscode/
 .idea/
+
+# Reference paper kept locally for formatting conventions; not part of this work.
+paper/example.tex
+paper/example.pdf

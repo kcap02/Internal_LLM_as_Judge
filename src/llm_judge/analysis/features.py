@@ -3,7 +3,12 @@
 Families (each a matrix aligned with the result rows):
   margin      — signed verdict logprob margin + |margin|. The signed margin
                 already encodes the predicted verdict (pred = first label iff
-                margin > 0), so no separate verdict feature is needed.
+                margin > 0).
+  verdict     — the judge's own pred_verdict, made an explicit baseline
+                column. Within a gt_verdict stratum, is_correct IS
+                (pred == stratum), so anything decoding pred is a perfect
+                within-stratum predictor carrying no self-knowledge. See
+                verdict_features().
   nuisance    — everything a "signal" could trivially be instead of internal
                 self-knowledge: prompt length, task-start token index
                 (position/RoPE artifact alarm), and subject identity. Any
@@ -46,6 +51,34 @@ def _finite(a: np.ndarray) -> np.ndarray:
 def margin_features(rows: list[dict]) -> np.ndarray:
     m = np.array([r["margin"] for r in rows], float)
     return _finite(np.c_[m, np.abs(m)])
+
+
+def verdict_features(rows: list[dict]) -> np.ndarray:
+    """The judge's OWN verdict, as an explicit baseline column.
+
+    Why this belongs in the baseline. Within a `gt_verdict` stratum,
+    `is_correct` is true exactly when the judge's verdict equals that stratum
+    label. So **any representation that decodes `pred_verdict` is a perfect
+    correctness predictor inside the stratum, carrying zero self-knowledge** —
+    and the last-token hidden state decodes it essentially perfectly, because
+    it is the state the verdict logit is read from. Conditioning on
+    `gt_verdict` does not remove this channel: the thing being decoded is
+    `pred`, not `gt`.
+
+    Putting it in the baseline makes the requirement explicit: an internal
+    block must beat *"we already know what the judge said"*.
+
+    NB: the signed margin already encodes this (pred == first label iff
+    margin > 0), so this column is near-redundant with M1 by construction.
+    It is added anyway so the claim is legible rather than implicit, and so
+    that `verdict_decodability` has an obvious counterpart in the design
+    matrix.
+    """
+    labels = sorted({str(r["pred_verdict"]) for r in rows})
+    first = labels[0]
+    v = np.array([1.0 if str(r["pred_verdict"]) == first else 0.0
+                  for r in rows])
+    return _finite(v[:, None])
 
 
 def nuisance_features(rows: list[dict]) -> tuple[np.ndarray, list[str]]:

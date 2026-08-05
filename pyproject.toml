@@ -15,7 +15,7 @@ dependencies = [
     "scikit-learn",
     "numpy",
     "psutil",
-    "spectral-trust",
+    "spectral-trust==0.2.3",
 ]
 
 [tool.setuptools.packages.find]

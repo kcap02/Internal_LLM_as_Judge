@@ -127,6 +127,42 @@ metric, that is a publishable negative result — but first check the
 difficulty strata and verdict-behaviour report for a power problem (judges
 near chance ⇒ labels are mostly noise).
 
+### Power: what the pilot could and could not have detected
+
+Run `python scripts/21_power.py --only llmbar` (CPU, seconds — it reads the
+CIs the pilot bootstrap already produced). Measured on the 18 estimable
+primary contrasts, median SE 0.034 at n = 200:
+
+| level | MDE at 80% power |
+|---|---|
+| α = 0.05 uncorrected | 0.083 |
+| BH-FDR over m = 30 | **0.127** |
+
+Against a plausible target effect of 0.03–0.05, **the pilot's 0/30 null is
+uninformative** about the primary question and must not be written up as a
+negative result. See C-POWER.
+
+**Scope consequences, which override the "main run order" above.**
+
+1. **Items, not models.** ~2,000 items per slice are needed to detect a 0.04
+   lift under a 30-contrast family; ~1,240 if the family is cut to 3 primary
+   tests. Judges multiply contrasts and cost α without adding per-test power,
+   so the 7–27B panel should be cut to **three judges spanning scale** and the
+   item budget multiplied. Benchmark items are cheap; retained attentions are
+   not — this also relieves the VRAM constraint.
+2. **Pre-specify three primary tests** (one per representation family against
+   the M1nd baseline), and mark every other rung and slice as exploratory and
+   unstarred. This is the single cheapest power gain available.
+3. **`M4 - M3` is already answered.** Its SE is 0.005–0.009 (MDE ≈ 0.02–0.03
+   under FDR, n ≈ 50–150 needed) and its pilot deltas span −0.010 to +0.009.
+   *"Spectral adds nothing beyond a linear activation probe"* is an
+   adequately-powered negative today, and should be reported as one — with its
+   TOST equivalence, not as a bare non-significance.
+4. **A positive control is required before any null is defensible.** Run the
+   identical probe pipeline, same n and same estimator, on a target known to
+   be encoded (subject label, or format). If it recovers, the null is about
+   the signal; if it does not, the null is about the power. Not yet run.
+
 ## Phase 2 — larger GPU (>48 GB, later)
 
 1. Add `judge_models_large` (Qwen2.5-32B, Llama-3.3-70B) to the behavioural
@@ -164,7 +200,7 @@ python scripts/01_build_judge_banks.py
 python scripts/02_audit_confounds.py --pilot        # must show no FAIL
 
 # GPU (gemma_spectral)
-CONDA=C:/Users/valno/anaconda3/envs/gemma_spectral/python.exe
+CONDA=C:/Users/valno/miniconda3/envs/gemma_spectral/python.exe
 $CONDA scripts/11_run_judge.py --only llmbar --pilot --limit 400
 $CONDA scripts/12_run_judge_spectral.py --only llmbar --pilot --dry-run 400
 

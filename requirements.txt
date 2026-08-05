@@ -6,4 +6,9 @@ accelerate
 scikit-learn
 numpy
 psutil
-spectral-trust
+# PINNED. The pilot ran 0.2.1; 0.2.2 fixed the rw-normalization eigensolver
+# dispatch and 0.2.3 adds the hard non-finite-attention assertion (C-NUM).
+# Metrics on the sym path are unchanged across these (verified: <=0.02%), but
+# a campaign must not straddle library versions silently — the log header
+# records the version actually used.
+spectral-trust==0.2.3

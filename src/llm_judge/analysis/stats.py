@@ -75,13 +75,18 @@ def pooled_auroc(y: np.ndarray, scores: np.ndarray) -> float | None:
 def paired_bootstrap(y: np.ndarray, groups: np.ndarray,
                      scores_a: np.ndarray, scores_b: np.ndarray,
                      strata: np.ndarray | None = None,
-                     n_boot: int = 2000, seed: int = 42) -> dict:
-    """CI and one-sided p-value for metric(b) - metric(a).
+                     n_boot: int = 2000, seed: int = 42,
+                     equivalence_band: float = 0.02) -> dict:
+    """CI, one-sided p-value and TOST equivalence for metric(b) - metric(a).
 
     The metric is stratified AUROC when `strata` is given, pooled otherwise.
     Groups are resampled with replacement so correlated items (the pos/neg
     partners of one question, or the two orders of one pair) always move
     together.
+
+    `equivalence_band` is the conditional-AUROC lift treated as negligible;
+    the returned `equivalence` block says whether the data rule out an effect
+    that large, which is what turns a non-significant contrast into a claim.
     """
     rng = np.random.default_rng(seed)
     uniq = np.unique(groups)
@@ -106,7 +111,9 @@ def paired_bootstrap(y: np.ndarray, groups: np.ndarray,
     if not deltas or base_a is None or base_b is None:
         return {"metric_a": base_a, "metric_b": base_b, "delta": None,
                 "ci95": (None, None), "p_one_sided": None,
-                "n_boot_effective": len(deltas)}
+                "n_boot_effective": len(deltas),
+                "equivalence": tost_from_deltas(np.array([]),
+                                                band=equivalence_band)}
 
     deltas = np.array(deltas)
     lo, hi = np.percentile(deltas, [2.5, 97.5])
@@ -119,7 +126,143 @@ def paired_bootstrap(y: np.ndarray, groups: np.ndarray,
         # 0 is not a claim the resampling can support.
         "p_one_sided": float(max(np.mean(deltas <= 0), 1.0 / (len(deltas) + 1))),
         "n_boot_effective": int(len(deltas)),
+        # A non-significant contrast is only informative if it also says how
+        # large an effect the data rule out (see tost_from_deltas).
+        "equivalence": tost_from_deltas(deltas, band=equivalence_band),
     }
+
+
+# ── Equivalence testing ──────────────────────────────────────────────────────
+# "We failed to reject" is not a finding: a reviewer cannot distinguish it from
+# an underpowered study. TOST inverts the burden of proof — the null becomes
+# "the effect is at least as large as `band`", and rejecting it licenses the
+# positive claim *"we rule out lifts of `band` or more"*.
+#
+# The two one-sided tests are equivalent to asking whether the (1 - 2*alpha)
+# CI lies entirely inside (-band, +band), so this reads straight off the same
+# grouped bootstrap that produced the contrast: no refitting, and the grouping
+# (pos/neg partners, both orders of one pairwise item) is respected, which an
+# analytic TOST on an independence assumption would not be.
+DEFAULT_EQUIVALENCE_BAND = 0.02   # conditional-AUROC lift deemed negligible
+
+
+def tost_from_deltas(deltas, band: float = DEFAULT_EQUIVALENCE_BAND,
+                     alpha: float = 0.05) -> dict:
+    """Two one-sided tests for |effect| < band, from bootstrap deltas.
+
+    `p_tost` is the larger of the two one-sided p-values, floored at
+    1/(n_boot+1). `equivalent=True` means the data rule out an effect of
+    `band` or more in either direction — the publishable form of a null.
+    """
+    d = np.asarray(deltas, float)
+    if d.size == 0:
+        return {"band": band, "p_tost": None, "equivalent": None,
+                "ci90": (None, None)}
+    lo, hi = np.percentile(d, [100 * alpha, 100 * (1 - alpha)])
+    floor = 1.0 / (d.size + 1)
+    # H0_upper: true effect >= +band. Evidence against it is bootstrap mass
+    # at or above +band; likewise, mirrored, for H0_lower.
+    p_upper = max(float(np.mean(d >= band)), floor)
+    p_lower = max(float(np.mean(d <= -band)), floor)
+    return {
+        "band": band,
+        "p_tost": max(p_upper, p_lower),
+        "equivalent": bool(lo > -band and hi < band),
+        "ci90": (float(lo), float(hi)),
+    }
+
+
+# ── Paired DeLong (analytic cross-check on the bootstrap) ────────────────────
+# The two ROCs being compared are computed on the same items and are therefore
+# highly correlated; DeLong's covariance estimator exploits that analytically.
+#
+# IMPORTANT — it is a cross-check, not the headline test. DeLong assumes
+# INDEPENDENT items, which this design violates by construction: the pos/neg
+# partners of one question and the two orders of one pairwise item share
+# nearly all their text and live in one CV group. Ignoring that clustering
+# makes DeLong ANTI-CONSERVATIVE here. The grouped bootstrap is already paired
+# (both metrics are recomputed on identical resamples), so it captures the
+# same correlation *and* the clustering; the value of running DeLong alongside
+# is to see how much of the bootstrap's width is clustering rather than noise.
+
+
+def _delong_components(y: np.ndarray, scores: np.ndarray):
+    """Midrank-based V10/V01 structural components for one score vector."""
+    pos = scores[y == 1]
+    neg = scores[y == 0]
+    m, n = len(pos), len(neg)
+    if m == 0 or n == 0:
+        return None
+    # V10[i] = P(pos_i > neg) + 0.5 P(pos_i == neg), and mirrored for V01.
+    neg_sorted = np.sort(neg)
+    gt = np.searchsorted(neg_sorted, pos, side="left")
+    ge = np.searchsorted(neg_sorted, pos, side="right")
+    v10 = (gt + 0.5 * (ge - gt)) / n
+
+    pos_sorted = np.sort(pos)
+    lt = np.searchsorted(pos_sorted, neg, side="right")
+    le = np.searchsorted(pos_sorted, neg, side="left")
+    v01 = ((m - lt) + 0.5 * (lt - le)) / m
+    return v10, v01
+
+
+def delong_paired_stratified(y: np.ndarray, scores_a: np.ndarray,
+                             scores_b: np.ndarray,
+                             strata: np.ndarray | None = None,
+                             min_class_n: int = MIN_CLASS_PER_STRATUM) -> dict:
+    """Variance of the paired AUROC difference, combined across strata.
+
+    Strata are disjoint sets of items, so their contributions are independent
+    and the variance of the discordant-pair-weighted combination is
+    sum(w_s^2 var_s) / (sum w_s)^2.
+
+    Returns delta, its analytic SE, a 95% CI and a one-sided p-value — all
+    subject to the independence caveat above.
+    """
+    if strata is None:
+        strata = np.zeros(len(y))
+
+    num = den = 0.0
+    var_num = 0.0
+    for s in np.unique(strata):
+        m_s = strata == s
+        ys, a_s, b_s = y[m_s], scores_a[m_s], scores_b[m_s]
+        n_pos, n_neg = int((ys == 1).sum()), int((ys == 0).sum())
+        if min(n_pos, n_neg) < min_class_n:
+            continue
+        ca, cb = _delong_components(ys, a_s), _delong_components(ys, b_s)
+        if ca is None or cb is None:
+            continue
+        (a10, a01), (b10, b01) = ca, cb
+        auc_a, auc_b = float(a10.mean()), float(b10.mean())
+
+        # 2x2 covariance of (AUC_a, AUC_b) from the structural components.
+        s10 = np.cov(np.vstack([a10, b10]))
+        s01 = np.cov(np.vstack([a01, b01]))
+        cov = s10 / n_pos + s01 / n_neg
+        var_delta = float(cov[0, 0] + cov[1, 1] - 2 * cov[0, 1])
+
+        w = float(n_pos * n_neg)
+        num += (auc_b - auc_a) * w
+        den += w
+        var_num += (w ** 2) * var_delta
+
+    if den <= 0:
+        return {"delta": None, "se": None, "ci95": (None, None),
+                "p_one_sided": None}
+
+    delta = num / den
+    se = float(np.sqrt(var_num) / den)
+    if not np.isfinite(se) or se <= 0:
+        return {"delta": delta, "se": None, "ci95": (None, None),
+                "p_one_sided": None}
+    z = delta / se
+    from math import erf, sqrt
+    p = 1.0 - 0.5 * (1 + erf(z / sqrt(2)))     # H1: b > a
+    return {"delta": delta, "se": se,
+            "ci95": (delta - 1.959963985 * se, delta + 1.959963985 * se),
+            "p_one_sided": float(p),
+            "caveat": "assumes independent items; ignores CV grouping"}
 
 
 def benjamini_hochberg(pvals: list[float], alpha: float = 0.05) -> list[bool]:

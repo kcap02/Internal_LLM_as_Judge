@@ -32,6 +32,12 @@ time). Analysis-level controls run inside `scripts/20_analyse.py`.
 | C-LEN | length gives the verdict away | MEASURED | pairwise immune (0.500); nuisance regressor for `single` |
 | C-SELF | self-preference in distractors | NEUTRALISED | distractor panel disjoint from judges (`configs/main.json`) |
 | C-LABEL | `single` = preference as absolute truth | MEASURED | inherent; pairwise is primary |
+| C-POWER | an underpowered null read as a negative result | MEASURED | MDE from the pilot's own bootstrap (stage 21) + TOST equivalence |
+| C-ABSENCE | "adds nothing" vs "was never there" | NEUTRALISED | `M2only`/`M3only` rungs, spectral-block coefficient norms, positive control |
+| C-VERDICT | self-verdict decoding ≠ self-knowledge | NEUTRALISED | pooled fit (guarded by test), `pred_verdict` in the baseline, `verdict_decodability` |
+| C-LADDER | wide block swamps the baseline it extends | NEUTRALISED | offset/residual ladder (`ladder_mode="offset"`) |
+| C-SDT | margin↔competence trend is signal-detection arithmetic | MEASURED | SDT null reproduces it without any self-knowledge |
+| C-VER | library version drift mid-campaign | NEUTRALISED | `spectral-trust` pinned; sym-path metrics verified stable across 0.2.1→0.2.3 |
 
 No FAIL-level confound remains, and no analysis-level confound is merely
 "noted" — each is either removed by construction or has a control that would
@@ -294,6 +300,14 @@ the whole pilot was re-run under bf16.
 per model and FAILs at zero coverage; the fp16-vs-bf16 verdict-agreement
 comparison above is the template for validating any future dtype change.
 
+*Promoted into the library (0.2.3).* Detecting this downstream was luck. It is
+now a hard precondition inside `spectral_trust` itself:
+`assert_finite_attention()` runs on every instrumented forward pass and raises
+`NonFiniteAttentionError` at the first layer carrying NaN/Inf, naming the
+model, the dtype and the offending counts. Anyone doing attention-graph work
+gets the check for free, and this pipeline can no longer produce a run where
+the failure is visible only in a per-item `error` field. See C-VER.
+
 ---
 
 ## C-DEGEN — Judges with no verdict variance manufacturing discoveries
@@ -455,6 +469,323 @@ first pilot suggested: **Qwen2.5-1.5B is usable** (73.5% pairwise, balanced),
 while Qwen2.5-0.5B (52.0%) and Llama-3.2-1B (48.5%, 2.5% bias) remain at
 chance and degenerate. Judges must be ≳1.5B, not ≳3B — and any claim about
 scale must be made on dtype-matched data.
+
+---
+
+## C-POWER — An underpowered null read as a negative result
+
+**Status: MEASURED** (quantified by `scripts/21_power.py`)
+
+The pilot returned **0 of 30 contrasts surviving BH-FDR**. That is only a
+finding if the study could have detected the effect it was looking for. It
+could not.
+
+The pilot's own paired bootstrap already carries the answer: the width of each
+contrast's CI *is* the SE of the estimator at n=200, with the grouping and the
+stratification already priced in. Stage 21 converts it to a minimum detectable
+effect. Measured over the 18 estimable primary contrasts on LLMBar
+(median SE = 0.034 at n = 200 per slice):
+
+| level | MDE (conditional-AUROC lift, 80% power) |
+|---|---|
+| α = 0.05, no correction | **0.083** |
+| BH-FDR, m = 30 contrasts | **0.127** |
+
+The literature-plausible effect is 0.03–0.05. **The pilot null is therefore
+uninformative about the primary question** — it rules out only very large
+effects. Items needed per slice to detect a 0.04 lift at 80% power:
+
+| contrast family | items per slice |
+|---|---|
+| m = 30 (current design) | ~2,000 (10× the pilot) |
+| m = 3 primary tests only | ~1,240 |
+
+Two consequences, both design decisions rather than caveats:
+
+1. **Buy items, not models.** Each extra judge multiplies the contrast family
+   and costs α without adding per-test power. Cutting the family from 30 to 3
+   is worth ~40% of the required sample on its own.
+2. **`M4 - M3` is already adequately powered** (SE 0.005–0.009, MDE ≈ 0.02–0.03
+   under FDR, n needed ≈ 50–150). Its pilot deltas run −0.010 to +0.009. So
+   *"the attention-graph features add nothing beyond a linear activation
+   probe"* is a real, adequately-powered negative — unlike the M2/M3-vs-
+   baseline contrasts, which are simply unresolved.
+
+*Fix for reporting.* `paired_bootstrap` now returns a TOST **equivalence**
+block against a pre-specified negligible band (default ±0.02 conditional
+AUROC), read off the same bootstrap so the grouping is respected. A contrast
+is reported as *"rules out effects ≥ band"* or *"cannot rule out effects ≥
+band"* — never as a bare "not significant". Stage 20 logs it per contrast.
+
+*Why not paired DeLong.* The suggestion to replace the bootstrap with DeLong
+to recover power rests on the bootstrap being unpaired; it is not — both
+metrics are recomputed on identical resamples, so the correlation between the
+two ROCs is already captured. Measured directly
+(`tests/test_stats.py:test_delong_matches_the_bootstrap_only_without_clustering`):
+with one item per group the two SEs agree to 3 decimal places (0.0020 vs
+0.0020), and with 4 clustered rows per question **DeLong understates the SE by
+2.17×** because it assumes independent items — which this design violates by
+construction (pos/neg partners, both orders of a pairwise item). Adopting it
+as the primary test would manufacture significance of exactly the C-DEGEN
+kind. `delong_paired_stratified` is kept as a labelled cross-check: the ratio
+of the two SEs measures how much of the bootstrap's width is clustering.
+
+---
+
+## C-VERDICT — Decoding the judge's own verdict  *(the twin of C-ID)*
+
+**Status: NEUTRALISED** — but by the *pooled fit*, which must be protected
+
+C-ID covers leakage through `gt_verdict`, and the conditional metric removes
+it. This is its twin, and **the conditional metric does not remove it**.
+
+Within the stratum `gt = A`, an item is correct if and only if the judge said
+A. So any representation that decodes `pred_verdict` is a *perfect*
+within-stratum correctness predictor while carrying zero self-knowledge.
+Conditioning on `gt_verdict` cannot help: the quantity being decoded is
+`pred`, not `gt`. And the last-token hidden state decodes `pred` essentially
+perfectly — it is the state the verdict logit is read from. M3 therefore has
+a route to conditional AUROC 1.0 that has nothing to do with metacognition.
+
+*What actually protects the analysis.* Not the metric — the **pooled fit**. A
+pure verdict decoder must score 1.0 in one stratum and 0.0 in the other, so a
+single pooled model can never select that direction. That protection is real
+but fragile: it degrades with verdict bias and stratum imbalance, and it
+disappears entirely under a within-stratum fit, which is an innocuous-looking
+refactor.
+
+*Three guards.*
+
+1. **`verdict_decodability`** reported beside `identity_decodability`, same
+   estimator, target `pred_verdict`. For activations it should come back near
+   1.0 — observed exactly 1.000 on planted data. That number belongs in the
+   paper: it is what makes the hazard legible.
+2. **`pred_verdict` is a baseline column** (`F.verdict_features`), so every
+   internal block must beat *"we already know what the judge said"*. Cheap
+   under the offset ladder. Note it is near-redundant with the signed margin,
+   which already encodes the verdict — the point is to make the requirement
+   explicit rather than implicit.
+3. **A test that fails loudly on the forbidden refactor**
+   (`tests/test_ladder.py:test_pooled_fit_is_what_blocks_the_verdict_channel`):
+   on data where a feature decodes `pred` and nothing else, the pooled fit
+   must land near 0.5 and a within-stratum fit must exceed 0.95. Same class of
+   hazard as C-NUM — a silent correctness failure that produces entirely
+   plausible numbers.
+
+*Taxonomy.* Leakage into type-2 AUROC is **two-dimensional**: item identity
+(removed by conditioning) and self-verdict (removed only by the pooled fit).
+Probes controlling for neither — the norm in the correctness-probe literature
+— are exposed to both.
+
+---
+
+## C-LADDER — The ladder was not measuring addition  *(invalidates M3/M4 in the pilot)*
+
+**Status: NEUTRALISED** (`oof_scores_offset`; `ladder_mode="offset"` is now the default)
+
+Every rung above the baseline was fitted by **concatenating** the internal
+block onto the baseline columns and fitting one penalised logistic model. The
+penalty is shared across all columns, so a `hidden_size`-wide activation block
+(896–2048 columns, and 4096+ on the main panel) against a ~6-column baseline
+does not produce "baseline + activations": it produces approximately
+"activations", and the added block has to reconstruct the margin from scratch.
+When it cannot, the rung scores *below* the baseline it was supposed to extend.
+
+*The signature that exposed it.* Across the six estimable pilot slices, the
+rung delta correlates with baseline strength at **r = −0.85 for M3 − M1nd**
+(−0.59 for M2, −0.72 pooled). The better the baseline, the more the rung
+"loses" — which is a property of the estimator, not of the representation.
+
+*Planted confirmation at realistic width.* Baseline carrying real signal, plus
+an added block of **pure noise**. Correct behaviour is a delta of zero.
+
+| baseline | added block | concat | offset |
+|---|---|---|---|
+| 0.882 | 32 noise cols | 0.853 (**−0.029**) | 0.882 (−0.000) |
+| 0.882 | 4096 noise cols | 0.567 (**−0.315**) | 0.882 (+0.000) |
+| 0.745 | 32 noise cols | 0.687 (**−0.057**) | 0.744 (−0.001) |
+| 0.745 | 4096 noise cols | 0.587 (**−0.158**) | 0.745 (+0.000) |
+
+Pure noise costs a strong baseline **0.315 AUROC** under concatenation, and
+the damage is larger for the stronger baseline — reproducing the real-data
+signature exactly. The earlier planted validation missed this because its
+added block was 32 columns wide; at that width the effect is only −0.03.
+
+*Fix.* `oof_scores_offset()` fits the baseline first, carries its out-of-fold
+logit as a fixed **offset**, and lets the internal block fit only the working
+residual under RidgeCV shrinkage:
+
+    score = z_baseline + f(X_internal)
+
+If the block is uninformative, `f` shrinks to ~0 and the score reduces to the
+baseline, so addition is monotone by construction and a negative delta now
+means overfitting rather than destruction of information already in hand. The
+offset for training rows comes from an **inner** CV inside the training fold;
+using the outer OOF logit would leak the test fold into the baseline the
+second stage sees. This is one offset-GLM/boosting step — easier to defend
+than group-wise penalties, and identical in behaviour when the block is small.
+
+*Consequence for the pilot.* **Every M3 and M4 number in the LLMBar pilot is
+invalid**, and so is every contrast involving them. M2 (a 14-column block) is
+much less affected but is not clean either. The streams must be regenerated
+and the analysis re-run under `ladder_mode="offset"` before any rung above the
+baseline is interpreted.
+
+**`M4 − M3` survives unchanged**: both sides carry the same baseline and the
+same swamping, so the difference is unaffected. It remains the anchor result.
+
+*Reproducing the old numbers.* `ladder_mode="concat"` is retained and recorded
+per slice in the report, so the pre-fix analysis stays auditable.
+
+*Known cost of the fix, stated honestly.* The offset is **conservative**: the
+internal block only ever fits the baseline's residual, so where a block is far
+more informative than the baseline the rung will sit below what a jointly
+fitted model could reach. On planted data with genuinely informative
+activations, M3 reads 0.756 under offset against 0.880 under concat, with
+`M3only` at 0.876. The offset therefore answers *"what does this block add to
+the baseline?"* — the ladder's actual question — and **not** *"what is the
+best achievable score?"* The `M2only` / `M3only` rungs report the latter, which
+is why both are kept.
+
+---
+
+## C-ABSENCE — "Adds nothing" vs "was never there"
+
+**Status: NEUTRALISED** (diagnostics in `analysis/cv.py`)
+
+The powered `M4 - M3` equivalence licenses the claim *"spectral adds nothing
+beyond a linear activation probe"*. Three different states of the world
+produce that same tiny delta, and the delta cannot distinguish them:
+
+1. spectral carries no correctness information — **absence**;
+2. spectral carries information that activations already contain —
+   **redundancy**, a different and stronger sentence;
+3. the L2 penalty shrank the spectral block to ~0, so M4 is numerically M3
+   with dead columns — **an artefact of the regulariser**;
+
+and a fourth, which C-NUM proved is not hypothetical: the spectral features
+never arrived at all and the pipeline emitted healthy-looking numbers anyway.
+
+*Fixes, none of which cost multiplicity budget — they explain a null rather
+than test one, so they never enter the contrast family.*
+
+- **`M2only` / `M3only` rungs** — each family fitted alone, no baseline
+  columns. At ~0.500 conditional the claim is absence; well above it, the
+  claim is redundancy.
+- **`spectral_block_diagnostic()`** — mean |coefficient| on the spectral block
+  against the activation block, on standardised inputs, averaged over folds.
+  A ratio below 0.05 is flagged `shrunk_to_zero`: the equivalence is then
+  about the regulariser and may not be reported as evidence about spectral.
+- **`positive_control()`** — the same estimator, same CV, matched n, applied
+  to a target that is certainly encoded (prompt length, outer terciles). A
+  family that cannot recover *that* has a plumbing problem, and a null on the
+  real target means nothing. Warns below 0.70.
+
+*Validated on planted data.* Two synthetic worlds, spectral-as-noise and
+spectral-duplicating-activations, produce indistinguishable deltas
+(−0.0035 and −0.0032, both `equivalent=True` at band 0.02) — and `M2only`
+separates them cleanly at **0.504 vs 0.876**. That is the whole argument for
+these rungs in one line.
+
+---
+
+## C-SDT — The margin/competence trend is signal-detection arithmetic
+
+**Status: MEASURED — do not report the trend as self-knowledge**
+
+On pairwise, M1's conditional AUROC tracked judge competence: 0.477, 0.575,
+0.716 at accuracies 0.52, 0.73, 0.82. That reads as *"self-knowledge emerges
+with competence"*, which would be an attractive headline.
+
+*The null.* Simulate a judge with **no self-knowledge whatsoever**: one latent
+decision variable `s`, verdict `= sign(s)`, margin `= s`, discriminability `d`
+driving accuracy. Nothing in this judge knows anything about its own errors
+beyond what `sign(s)` already determines. Run the identical M1 features
+(`[margin, |margin|]`), the identical estimator and the identical conditional
+metric:
+
+| d | verdict bias | accuracy | M1 conditional AUROC |
+|---|---|---|---|
+| 0.05 | 0.0 | 0.505 | 0.466 |
+| 0.90 | 0.0 | 0.802 | **0.765** |
+| 1.40 | 0.0 | 0.943 | 0.815 |
+| 0.90 | 0.5 | 0.797 | 0.784 |
+| 1.40 | 0.5 | 0.900 | 0.879 |
+
+The null reproduces the whole trend, and the real judges sit **at or below**
+it: 0.716 observed at accuracy 0.82, against 0.765 simulated at accuracy 0.80.
+There is no self-knowledge residual to claim.
+
+*Why it is structural, not incidental.* Given the stratum, `is_correct` is a
+deterministic function of `sign(margin)` — correct iff `margin > 0` in one
+`gt_verdict` stratum and iff `margin < 0` in the other. So M1's conditional
+AUROC is largely determined by the geometry of the two strata and the verdict
+bias, and is not measuring "does expressed confidence predict error" in the
+sense the rung name implies. The two formats disagreeing (`single` runs 0.667
+at accuracy 0.58 and 0.619 at 0.64, the wrong direction) is consistent with
+this rather than with a competence effect.
+
+*Consequence.* The behavioural trend may not be a headline. If it is reported
+at all, it must be reported **against this simulated null at matched accuracy
+and matched verdict bias**, with the claim being the residual above the null —
+which on current data is zero or negative.
+
+*This is the estimand, not merely a caveat.* The quantity is meta-d′/d′ — the
+**M-ratio** of the metacognition literature (Maniscalco & Lau 2012; Fleming &
+Lau 2014), where 1.0 means no metacognitive sensitivity beyond first-order
+performance. `sdt_null_reference()` is its Monte-Carlo form: estimate the
+judge's own d′ and criterion from its hit and false-alarm rates, simulate a
+first-order observer at those values, and push it through the identical
+features, estimator and metric.
+
+*It applies to every rung, not just M1.* Internals inherit the same arithmetic
+floor, so the reference point for the whole ladder is the SDT null at matched
+d′, never 0.5. `compare()` now reports `sdt_null` and
+`auroc_conditional_vs_null` for every rung, and logs which rungs — if any —
+clear it. A conditional AUROC of 0.716 is *below* a no-metacognition observer
+at the same accuracy; reported against 0.5 it would read as a strong result.
+
+*Why this makes the negative result publishable.* A null against 0.5 is
+uninformative. A null against a matched-d′ first-order observer is a
+measurement: **"LLM judges show no metacognitive sensitivity above the
+first-order SDT null"** is a locatable, arguable, citable claim.
+
+---
+
+## C-VER — Library version drift mid-campaign
+
+**Status: NEUTRALISED**
+
+The pilot ran `spectral_trust` 0.2.1 (recorded in the stage-12 log header);
+the GPU environment has since been upgraded to 0.2.2. Comparing spectral rows
+computed by different library versions is the same class of error as mixing
+dtypes (C-NUM), and nothing in the results files would have shown it — the
+version lives only in the log.
+
+*What actually changed on the path this pipeline uses.*
+
+- **0.2.2 fixed the `rw` eigensolver dispatch.** The random-walk Laplacian is
+  non-symmetric, and `scipy.linalg.eigh` reads a single triangle, so it
+  silently diagonalised a symmetrized surrogate. **This pipeline is unaffected:
+  `spectral_normalization = "sym"` is the default, is asserted at the call
+  site in `llm_judge/spectral.py:build_gsp_config`, and is recorded as `"sym"`
+  in every pilot log header.** The pilot data never touched the defective path
+  and needs no re-run.
+- **0.2.2 promotes the adjacency to float32 before building the Laplacian**;
+  0.2.1 built it in the model's bfloat16 and upcast afterwards. Measured
+  effect on the four metrics in use, at N = 128/512/1024/3131 tokens:
+  **≤ 0.02% relative** on every metric at every length — three orders of
+  magnitude below between-item variance. Pilot rows remain poolable.
+- **0.2.3 (this repo's `spectral-trust` working tree) adds the C-NUM
+  assertion**: `assert_finite_attention` raises `NonFiniteAttentionError` on
+  the first layer of NaN/Inf attention, naming the model and dtype, instead of
+  letting it surface later as an opaque LinAlgError or as a silently absent
+  model. This makes the pilot's most consequential finding a permanent
+  property of the library rather than a lesson in a document.
+
+*Fix.* `spectral-trust==0.2.3` is pinned in `requirements.txt` and
+`pyproject.toml`. The version stays in every log header, so any future drift
+is visible in the provenance rather than inferred.
 
 ---
 

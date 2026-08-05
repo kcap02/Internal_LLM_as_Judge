@@ -37,7 +37,7 @@ $env:PYTHONIOENCODING = 'utf-8'
 
 $repo = Split-Path -Parent $PSScriptRoot
 $cpu  = 'python'
-$gpu  = 'C:\Users\valno\anaconda3\envs\gemma_spectral\python.exe'
+$gpu  = 'C:\Users\valno\miniconda3\envs\gemma_spectral\python.exe'
 if (-not (Test-Path $gpu)) { throw "GPU interpreter not found: $gpu" }
 Set-Location $repo
 

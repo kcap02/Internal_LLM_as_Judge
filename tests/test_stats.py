@@ -14,8 +14,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import numpy as np  # noqa: E402
 
 from llm_judge.analysis.stats import (benjamini_hochberg,  # noqa: E402
+                                      delong_paired_stratified,
                                       paired_bootstrap, pooled_auroc,
-                                      stratified_auroc)
+                                      stratified_auroc, tost_from_deltas)
 from llm_judge.grouping import group_key, normalize_text  # noqa: E402
 
 
@@ -107,6 +108,58 @@ def test_group_key_collapses_only_genuine_duplicates():
     assert group_key("What is 2+2?") == group_key("  what   is 2+2?  ")
     assert group_key("What is 2+2?") != group_key("What is 2+3?")
     assert normalize_text("  A  B ") == "a b"
+
+
+def test_tost_separates_a_tight_null_from_an_underpowered_one():
+    """The point of equivalence testing: 'no significant effect' must NOT be
+    reported the same way when the CI is tight and when it is merely wide."""
+    rng = np.random.default_rng(0)
+    tight_null = rng.normal(0.0, 0.004, 2000)     # effect ruled out
+    underpowered = rng.normal(0.0, 0.05, 2000)    # nothing ruled out
+    real_effect = rng.normal(0.05, 0.004, 2000)
+
+    assert tost_from_deltas(tight_null, band=0.02)["equivalent"] is True
+    # An underpowered null is the failure mode this exists to expose: same
+    # point estimate, but it cannot rule out an effect of the stated size.
+    assert tost_from_deltas(underpowered, band=0.02)["equivalent"] is False
+    assert tost_from_deltas(real_effect, band=0.02)["equivalent"] is False
+    # No bootstrap samples -> no claim either way.
+    assert tost_from_deltas(np.array([]), band=0.02)["equivalent"] is None
+
+
+def test_delong_matches_the_bootstrap_only_without_clustering():
+    """Why the grouped bootstrap stays the headline test.
+
+    DeLong assumes independent items. This design violates that (pos/neg
+    partners and the two orders of one pairwise item share a CV group), so
+    DeLong understates the SE there and its p-values are anti-conservative.
+    Adopting it as the primary test would manufacture significance.
+    """
+    rng = np.random.default_rng(0)
+
+    # (a) One item per group: DeLong's assumption holds, SEs must agree.
+    n = 4000
+    y = rng.integers(0, 2, n).astype(float)
+    noise = rng.normal(size=n)
+    a, b = 0.5 * y + noise, 1.0 * y + noise
+    st = np.zeros(n)
+    d = delong_paired_stratified(y, a, b, st)
+    bs = paired_bootstrap(y, np.arange(n), a, b, strata=st, n_boot=500, seed=1)
+    se_boot = (bs["ci95"][1] - bs["ci95"][0]) / 3.92
+    assert abs(d["se"] - se_boot) / se_boot < 0.25
+
+    # (b) Four near-duplicate rows per question: the bootstrap must be wider.
+    n_groups = 500
+    g = np.repeat(np.arange(n_groups), 4)
+    y2 = np.repeat(rng.integers(0, 2, n_groups).astype(float), 4)
+    noise2 = np.repeat(rng.normal(size=n_groups), 4) \
+        + 0.05 * rng.normal(size=len(g))
+    a2, b2 = 0.5 * y2 + noise2, 1.0 * y2 + noise2
+    st2 = np.zeros(len(g))
+    d2 = delong_paired_stratified(y2, a2, b2, st2)
+    bs2 = paired_bootstrap(y2, g, a2, b2, strata=st2, n_boot=500, seed=1)
+    se_boot2 = (bs2["ci95"][1] - bs2["ci95"][0]) / 3.92
+    assert se_boot2 > 1.5 * d2["se"]
 
 
 def _main():
