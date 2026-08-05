@@ -1,0 +1,25 @@
+00:45:56 INFO stage=22_recovery_curve | commit=7813d88 | logfile=22_recovery_curve_20260805T224556Z.log
+00:45:56 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.8.0", "datasets": "4.8.5", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.3@2149f55"}
+00:45:56 INFO width 1536 | 6 seeds/cell | detection at delta >= 0.02 in >= 80% of seeds
+00:45:56 INFO 
+=== calibration: block-only AUROC at the pilot's n=200 ===
+00:45:56 INFO   plant   median block-only              IQR
+00:45:56 INFO    0.00               0.459   [0.418, 0.512]
+00:45:57 INFO    0.10               0.461   [0.419, 0.512]
+00:45:57 INFO 
+calibrated plant strength for a pilot reading of 0.999: s* = 0.100  (target EXCEEDS the largest plant tested — extend --strengths; s* is a lower bound)
+00:45:57 INFO 
+=== sweep at s* = 0.100 ===
+00:45:57 INFO   cells are PAIRED: one realisation per seed, evaluated at every n as a nested prefix,
+  so the columns track one underlying signal rather than unrelated draws.
+00:45:57 INFO      n   median delta          delta IQR   detect   block-only          block IQR
+00:46:01 INFO     50        -0.0150   [-0.045, +0.014]      17%        0.447     [0.345, 0.503]
+00:46:01 INFO    100        -0.0100   [-0.026, +0.001]      17%        0.429     [0.404, 0.517]
+00:46:01 INFO 
+==================================================================
+00:46:01 INFO [FAIL] detection: NO tested n reaches >= 80% of seeds. If no affordable n does, primary test 1 is preregistered as UNRESOLVABLE and the abstract says so (prereg §8.2).
+00:46:01 INFO [NOTE] block-only: NO consecutive IQRs separate — NO MONOTONICITY CLAIM IS PERMITTED from this table. Any apparent rise or fall is within sampling noise.
+00:46:02 INFO [WARN] calibration self-check on 6 INDEPENDENT worlds at n=200: block-only 0.497 IQR [0.464, 0.523] against target 0.999 — target OUTSIDE the IQR; s* is not delivering the intended plant
+00:46:02 INFO wrote recovery_curve.json
+00:46:02 INFO 
+OVERALL: FAIL — do not use this sweep to set N_FREEZE.

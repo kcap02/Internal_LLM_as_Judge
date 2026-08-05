@@ -177,6 +177,53 @@ def test_pooled_fit_is_what_blocks_the_verdict_channel():
         f"{within:.3f}")
 
 
+def _load_recovery_module():
+    """Import stage 22's helpers without executing its CLI."""
+    import pathlib
+    src = (pathlib.Path(__file__).resolve().parents[1]
+           / "scripts" / "22_recovery_curve.py").read_text(encoding="utf-8")
+    src = src.split("def main()")[0].replace(
+        "import _bootstrap  # noqa: F401", "")
+    ns: dict = {}
+    exec(compile(src, "recovery_curve", "exec"), ns)
+    return ns
+
+
+def test_recovery_guard_permits_a_trend_only_when_iqrs_separate():
+    """An acceptance criterion that has only ever returned PASS is not yet
+    known to be one. This exercises the monotonicity guard in BOTH directions.
+
+    The guard exists because of the fifth error in this project: an apparent
+    monotone rise in block-only was reported as resolving an anomaly, when it
+    was 10-seed noise around a flat value. It must stay silent on overlapping
+    IQRs and must speak up when they genuinely separate.
+    """
+    sepf = _load_recovery_module()["iqr_separations"]
+
+    # Overlapping IQRs -> no claim permitted anywhere.
+    overlapping = {
+        "200": {"block_only_iqr": [0.543, 0.636]},
+        "400": {"block_only_iqr": [0.614, 0.642]},
+        "800": {"block_only_iqr": [0.617, 0.657]},
+    }
+    assert not any(s for *_, s in sepf(overlapping, [200, 400, 800]))
+
+    # Cleanly separated IQRs -> the claim IS permitted, and on the right pair.
+    separated = {
+        "200": {"block_only_iqr": [0.50, 0.55]},
+        "400": {"block_only_iqr": [0.70, 0.75]},   # disjoint from 200
+        "800": {"block_only_iqr": [0.72, 0.78]},   # overlaps 400
+    }
+    got = sepf(separated, [200, 400, 800])
+    assert got[0][2] is True, "disjoint IQRs must permit a claim"
+    assert got[1][2] is False, "overlapping IQRs must not"
+
+    # Separation in the DOWNWARD direction is also a separation.
+    falling = {"200": {"block_only_iqr": [0.70, 0.75]},
+               "400": {"block_only_iqr": [0.50, 0.55]}}
+    assert sepf(falling, [200, 400])[0][2] is True
+
+
 def _main():
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for fn in fns:

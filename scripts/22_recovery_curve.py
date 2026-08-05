@@ -70,6 +70,22 @@ from llm_judge.log_utils import setup_logging
 DETECT_DELTA = 0.02
 
 
+def iqr_separations(by_n: dict, ns: list, key: str = "block_only_iqr"):
+    """Which consecutive n-pairs have DISJOINT IQRs.
+
+    A directional claim about `key` is permitted only where a pair separates.
+    Extracted so the guard itself is unit-testable: an acceptance criterion
+    that has only ever returned PASS is not yet known to be one
+    (`tests/test_ladder.py:test_recovery_guard_*`).
+    """
+    out = []
+    for a, b in zip(ns, ns[1:]):
+        la, ha = by_n[str(a)][key]
+        lb, hb = by_n[str(b)][key]
+        out.append((a, b, bool(lb > ha or la > hb)))
+    return out
+
+
 def make_world(n_max: int, width: int, strength: float, seed: int) -> dict:
     """One realisation of the whole problem, generated ONCE at the largest n.
 
@@ -244,11 +260,7 @@ def main() -> None:
     # Monotonicity in block-only may be CLAIMED only where consecutive IQRs
     # are disjoint. Otherwise the script says so and no trend is reported.
     ns = [n for n in args.n if str(n) in by_n]
-    sep = []
-    for a, b in zip(ns, ns[1:]):
-        la, ha = by_n[str(a)]["block_only_iqr"]
-        lb, hb = by_n[str(b)]["block_only_iqr"]
-        sep.append((a, b, bool(lb > ha or la > hb)))
+    sep = iqr_separations(by_n, ns)
     verdict["block_only_trend_claimable"] = any(s for *_, s in sep)
     if verdict["block_only_trend_claimable"]:
         pairs = ", ".join(f"{a}->{b}" for a, b, s in sep if s)

@@ -302,17 +302,25 @@ delivers the intended plant.
 
 *A prefix is a valid subsample.* We checked, because the sweep's own n=200 cell
 reads 0.574 while a fresh measurement reads ≈0.63. Structurally the prefix is
-sound (200 items, 100 groups, stratum fraction 0.5), and distributionally the
-two agree: 12 fresh worlds give median 0.627 IQR [0.587, 0.711], 12 prefixes of
-n=1600 worlds give 0.648 IQR [0.625, 0.670], overlapping by 0.154. The 0.574 is
-a low draw of one seed set, not a property of prefixing, and the n-sweep is
-measuring what it claims to.
+sound (200 items, 100 groups, stratum fraction 0.5). Distributionally the two
+are **indistinguishable at this n**: 12 fresh worlds give median 0.627 IQR
+[0.587, 0.711], 12 prefixes of n=1600 worlds give 0.648 IQR [0.625, 0.670],
+ranges overlapping by 0.154. By this document's own rule (§4.1) no directional
+claim is available from those IQRs, and none is made — *consistent* is the
+finding and all that is needed. The 0.574 is a low draw of one seed set, not a
+property of prefixing, and the n-sweep measures what it claims to.
 
-*How we nearly concluded otherwise.* Two sweeps both reported 0.574 and that
-read as replication. Both used seed offset `2000+k` and shared ten seeds: it
-was the same computation twice. The calibration self-check now runs on an
-independent seed offset for exactly this reason — checking a calibration
-against a cell that shares its seeds is not a check.
+*A validator wired to its own input.* The calibration self-check originally
+compared the target against **the sweep's own n=200 cell**, which shares that
+sweep's seeds. It could therefore only ever confirm whatever that cell said: a
+low draw produced a "confirmed" low reading. This is not a misreading — it is
+the same defect as the concat block diagnostic reporting on a code path no
+claim depended on, and it is worth more to a reader than either. The check now
+draws **independent worlds at an unrelated seed offset**, and passes with the
+target at the median (0.636, IQR [0.598, 0.677]) rather than at its edge.
+
+*Separately:* two sweeps both reported 0.574 and that read as replication. Both
+used seed offset `2000+k` and shared ten seeds — the same computation twice.
 
 The consequence is that the downward bias in block-only at n=200 — the
 motivation originally given for indexing the curve on planted strength rather
@@ -338,10 +346,17 @@ detection fraction and the delta, not in block-only** — and those are what set
 > quantify and the caveats compound in one direction:
 >
 > * s\* is interpolated from the pilot's `M3only` = 0.633, itself a single
->   draw at n=200 where the calibration IQR spans roughly ±0.05;
-> * 400 sits one step above a cell that detects in only 60% of seeds;
-> * at 400 the delta IQR is [+0.046, +0.076], whose lower edge is nearer the
->   0.02 detection band than at 800, where it is [+0.059, +0.066].
+>   draw at n=200 where the block-only spread across seeds is wide
+>   (IQR ≈ [0.598, 0.677]);
+> * 400 sits one grid step above a cell that detects in only 58% of seeds, and
+>   at 400 the delta IQR's lower edge (+0.047) is nearer the 0.02 detection
+>   band than at 800 (+0.058).
+>
+> A third reason previously given — that the calibration passed only marginally,
+> with the target at the edge of its IQR — **no longer holds**: once the
+> self-check was moved onto independent worlds it passes at the median. It is
+> struck rather than left standing, so the basis for the number is not
+> overstated.
 >
 > The cost of being wrong is asymmetric: the extra items are inference on the
 > cheap arm, which has no VRAM ceiling and no eigendecomposition — hours, not
