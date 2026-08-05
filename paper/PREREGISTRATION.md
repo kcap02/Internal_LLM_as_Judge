@@ -111,6 +111,35 @@ exactly this case and was nearly written up as a negative result.
 - BH-FDR at α = 0.05 across every contrast in the run, including each rung's
   percentile against the SDT null.
 
+### 4.1 Recovery curve — required of any estimator this paper uses
+
+**No estimator enters this specification without a recovery curve**, measured
+at the n and the block width actually in use (`scripts/22_recovery_curve.py`).
+Not a planted test at one signal strength: a curve.
+
+This project produced three estimators that each passed a single-point planted
+test and each failed outside the region the plant covered:
+
+| estimator | passed at | failed at |
+|---|---|---|
+| concatenation | 32-column block | 4096 columns — destroys 0.315 AUROC of real signal |
+| offset + RidgeCV | a strong planted latent | n=200, 1536 columns — returned exactly 0.000 for every block on every slice |
+| the recovery test itself, v1 | — | passed on ±0.02 jitter; its plant sat below what was recoverable at that n |
+
+The generalisation, and it is the transferable claim: **a passing test on
+planted data certifies an estimator only over the region the plant covers.**
+Every one of these failures lived outside it and was invisible from the green
+result.
+
+The plant must be a **dense random direction**, not a single column: that is
+how an activation encodes anything, and a one-column plant in a wide block is
+near worst case for a penalised probe.
+
+**The estimator's detection threshold is reported next to every null**, and
+**block-only AUROC is reported next to every ladder delta.** A delta of zero
+with block-only at 0.63 means something entirely different from a delta of
+zero with block-only at 0.85, and neither is readable alone.
+
 ## 5. Two null references (neither is 0.5)
 
 A rung must clear **both**:
@@ -180,10 +209,54 @@ seeing the data:
 > ±0.02 for every primary test. We will not claim a positive result for any
 > effect below `MDE_FREEZE`, regardless of what BH-FDR returns.**
 
-`N_FREEZE` is derived from `21_power.py` re-run against the **offset-fitted**
-contrasts, not chosen from what looks affordable. Recomputing power against the
-corrected estimator is a prerequisite of the freeze, because the concat-fitted
-SEs are not the SEs of the estimator we will use.
+### 8.1 The bootstrap MDE is not sufficient on its own
+
+Recomputed against the offset-fitted contrasts, `21_power.py` reports a median
+SE of **0.006** and claims **72 items per slice** suffice to detect 0.04 — a
+thirtyfold improvement on the concat-fitted figure. **This number must not be
+used.**
+
+The bootstrap SE measures the precision of the *difference between two score
+vectors*. When the ladder's rungs sit almost on top of the baseline, that
+difference is tightly estimated *because the estimator is barely expressing
+the block*, not because the study can detect a real effect. A degenerate
+estimator that returned the baseline verbatim would report an SE of exactly
+zero and an MDE of zero. The MDE calculation cannot tell precision from
+collapse.
+
+### 8.2 `N_FREEZE` is set by the recovery curve, with the MDE as a floor
+
+Measured (`results/recovery_curve.json`, block width 1536, dense plant,
+detection at |delta| ≥ 0.02):
+
+| n per stratum | detection threshold (block-only AUROC) |
+|---|---|
+| 200 | none — above 0.518 |
+| 400 | none — above 0.589 |
+| **800** | **0.602** |
+
+The largest block-only AUROC observed in the pilot is `M3only` = **0.633**
+(Qwen2.5-3B pairwise). So:
+
+> **`N_FREEZE` is the smallest n whose measured detection threshold falls
+> below the largest block-only AUROC observed in the pilot, and never less
+> than the n the MDE calculation requires. On current measurements that is
+> `N_FREEZE` ≥ 800 items per stratum.**
+
+The recovery curve is primary because it is calibrated on the estimator
+actually in use; the MDE is retained as a floor, not as the criterion.
+
+**If no affordable n reaches a detection threshold below the observed
+block-only values, primary test 1 is preregistered as UNRESOLVABLE and the
+paper says so in the abstract.** That is a live possibility and it is faced
+here rather than discovered later. In that case the empirical contribution is
+the two floors, the `M2only` absence, and the estimator failures, and the
+ladder becomes a section on why the question is harder than the literature
+assumes. That is still a paper — it is a different one, and which one we are
+writing must be settled before GPU time is bought.
+
+The curve must be **re-measured at the scaled n and the scaled block width**;
+the threshold is a function of both and does not carry over from the pilot.
 
 If `N_FREEZE` is unaffordable, the primary tests become **equivalence tests
 with a stated band** rather than superiority tests. Both are defensible.

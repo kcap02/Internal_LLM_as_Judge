@@ -357,6 +357,78 @@ def build_feature_sets(rows: list[dict], activations_npz=None,
 DIAGNOSTIC_RUNGS = ("M2only", "M3only")
 
 
+def offset_block_diagnostic(y: np.ndarray, groups: np.ndarray, ladder: dict,
+                            n_splits: int, log=print) -> dict | None:
+    """Is the offset stage expressing the added block, or shrinking it away?
+
+    **This runs against the estimator the claims depend on.** The earlier
+    version fitted the *concat* pipeline and reported healthy coefficient
+    ratios (0.68-1.64) while the offset stage those claims actually used was
+    returning corrections at 0.7% of the offset's scale. A diagnostic pointed
+    at a code path no claim depends on is worse than no diagnostic, because it
+    produces reassurance.
+
+    Reports, per fold, on the M4 block (spectral + activations):
+      * the selected penalty. If it pins to the top of the grid every fold,
+        the block is being shrunk away rather than measured.
+      * `correction_to_offset_sd` - the SD of the block's contribution
+        relative to the SD of the baseline logit. This is the number that
+        would have caught the RidgeCV failure immediately: it read 0.007.
+      * the norm of the fitted weights on the spectral sub-block against the
+        activation sub-block, so "spectral adds nothing" can be distinguished
+        from "spectral was penalised to zero".
+    """
+    if "M4" not in ladder["add"] or "M2" not in ladder["add"]:
+        return None
+    Xb = ladder["base"]
+    Xs, Xa = ladder["add"]["M2"], ladder["add"]["M3"]
+    X4 = ladder["add"]["M4"]
+    n_spec = Xs.shape[1]
+
+    alphas, ratios, w_spec, w_act = [], [], [], []
+    n_splits = max(2, min(n_splits, len(np.unique(groups))))
+    for tr, te in GroupKFold(n_splits=n_splits).split(Xb, y, groups):
+        if len(np.unique(y[tr])) < 2:
+            continue
+        p = make_pipeline(StandardScaler(),
+                          LogisticRegression(max_iter=5000, C=1.0))
+        p.fit(Xb[tr], y[tr])
+        z_tr = _logit(p.predict_proba(Xb[tr])[:, 1])
+        z_te = _logit(p.predict_proba(Xb[te])[:, 1])
+        sc = StandardScaler().fit(X4[tr])
+        Xtr_s, Xte_s = sc.transform(X4[tr]), sc.transform(X4[te])
+
+        best_a, best_auc = ALPHA_GRID[-1], -np.inf
+        for a in ALPHA_GRID:
+            w = _fit_offset_logistic(Xtr_s, y[tr], z_tr, a)
+            auc = _auc_or_none(y[tr], z_tr + Xtr_s @ w)
+            if auc is not None and auc > best_auc:
+                best_auc, best_a = auc, a
+        w = _fit_offset_logistic(Xtr_s, y[tr], z_tr, best_a)
+        corr = Xte_s @ w
+        alphas.append(best_a)
+        ratios.append(float(corr.std() / max(z_te.std(), 1e-9)))
+        w_spec.append(float(np.linalg.norm(w[:n_spec])))
+        w_act.append(float(np.linalg.norm(w[n_spec:])))
+
+    if not alphas:
+        return None
+    r = float(np.mean(ratios))
+    ws, wa = float(np.mean(w_spec)), float(np.mean(w_act))
+    out = {"alphas_selected": alphas,
+           "alpha_pinned_at_max": bool(all(a == ALPHA_GRID[-1] for a in alphas)),
+           "correction_to_offset_sd": r,
+           "w_norm_spectral": ws, "w_norm_activation": wa,
+           "spectral_to_activation_ratio": ws / wa if wa > 0 else float("inf"),
+           "shrunk_to_zero": bool(r < 0.02)}
+    log(f"  offset-block diagnostic: correction/offset sd = {r:.4f}, "
+        f"|w| spectral={ws:.3g} vs activation={wa:.3g}, "
+        f"alpha={'PINNED AT MAX' if out['alpha_pinned_at_max'] else 'varies'}"
+        + ("  <-- SHRUNK: a zero delta here is the estimator, not the answer"
+           if out["shrunk_to_zero"] else ""))
+    return out
+
+
 def spectral_block_diagnostic(y: np.ndarray,
                               groups: np.ndarray, sets: dict, n_splits: int,
                               activation_probe: str, pca_dims: int,
@@ -822,8 +894,13 @@ def compare(rows: list[dict], n_splits: int = 5, n_boot: int = 2000,
     # ── Diagnostics for the M4-M3 equivalence ────────────────────────────
     # Neither enters the contrast family: they explain a null, they do not
     # test one, so they cost no multiplicity budget.
-    diag = spectral_block_diagnostic(y_v, g_v, sets, n_splits,
-                                     activation_probe, pca_dims, log)
+    # Runs against the estimator the claims depend on (C-ABSENCE). The concat
+    # version is retained only for the ladder_mode="concat" audit path.
+    if ladder_mode == "offset":
+        diag = offset_block_diagnostic(y, groups, ladder, n_splits, log)
+    else:
+        diag = spectral_block_diagnostic(y_v, g_v, sets, n_splits,
+                                         activation_probe, pca_dims, log)
     if diag:
         report["controls"]["spectral_block"] = diag
 

@@ -1,8 +1,8 @@
 {
   "llmbar": {
-    "family_size": 30,
+    "family_size": 66,
     "alpha_raw": 0.05,
-    "alpha_effective": 0.0016666666666666668,
+    "alpha_effective": 0.0007575757575757576,
     "target_effect": 0.04,
     "power": 0.8,
     "slices": {
@@ -12,48 +12,48 @@
         "contrasts": {
           "M1n - M1": {
             "n_items": 200,
-            "observed_delta": -0.008429276315789491,
-            "se": 0.01893385624639363,
-            "mde_at_pilot_n_uncorrected": 0.04707855756944036,
-            "mde_at_pilot_n_fdr": 0.07150978024839474,
-            "n_needed_uncorrected": 278,
-            "n_needed_fdr": 640
+            "observed_delta": -0.020437956204379548,
+            "se": 0.015452066493860243,
+            "mde_at_pilot_n_uncorrected": 0.038421174880134676,
+            "mde_at_pilot_n_fdr": 0.06201512305111284,
+            "n_needed_uncorrected": 185,
+            "n_needed_fdr": 481
           },
           "M1nd - M1n": {
             "n_items": 200,
-            "observed_delta": 0.005756578947368418,
-            "se": 0.03138046620690498,
-            "mde_at_pilot_n_uncorrected": 0.07802674033500426,
-            "mde_at_pilot_n_fdr": 0.11851839442244491,
-            "n_needed_uncorrected": 762,
-            "n_needed_fdr": 1756
+            "observed_delta": -0.002085505735140769,
+            "se": 0.0424151209756816,
+            "mde_at_pilot_n_uncorrected": 0.10546413201213284,
+            "mde_at_pilot_n_fdr": 0.17022829584508273,
+            "n_needed_uncorrected": 1391,
+            "n_needed_fdr": 3623
           },
           "M2 - M1nd": {
             "n_items": 200,
-            "observed_delta": 0.08449835526315791,
-            "se": 0.03519385484620353,
-            "mde_at_pilot_n_uncorrected": 0.08750863532002938,
-            "mde_at_pilot_n_fdr": 0.13292087958179563,
-            "n_needed_uncorrected": 958,
-            "n_needed_fdr": 2209
+            "observed_delta": 0.02294056308654846,
+            "se": 0.01893260217843949,
+            "mde_at_pilot_n_uncorrected": 0.047075439360999005,
+            "mde_at_pilot_n_fdr": 0.07598385977954564,
+            "n_needed_uncorrected": 278,
+            "n_needed_fdr": 722
           },
           "M3 - M1nd": {
             "n_items": 200,
-            "observed_delta": 0.06763980263157893,
-            "se": 0.04022263633114906,
-            "mde_at_pilot_n_uncorrected": 0.10001257406141693,
-            "mde_at_pilot_n_fdr": 0.15191368560218285,
-            "n_needed_uncorrected": 1251,
-            "n_needed_fdr": 2885
+            "observed_delta": -0.011678832116788329,
+            "se": 0.032036670979456616,
+            "mde_at_pilot_n_uncorrected": 0.07965837700531002,
+            "mde_at_pilot_n_fdr": 0.1285755593744332,
+            "n_needed_uncorrected": 794,
+            "n_needed_fdr": 2067
           },
           "M4 - M3": {
             "n_items": 200,
-            "observed_delta": 0.00945723684210531,
-            "se": 0.007041362054858447,
-            "mde_at_pilot_n_uncorrected": 0.017508169733255856,
-            "mde_at_pilot_n_fdr": 0.026593961982162004,
-            "n_needed_uncorrected": 39,
-            "n_needed_fdr": 89
+            "observed_delta": -0.003962460896767495,
+            "se": 0.005941603707251592,
+            "mde_at_pilot_n_uncorrected": 0.014773648249279573,
+            "mde_at_pilot_n_fdr": 0.02384595517839404,
+            "n_needed_uncorrected": 28,
+            "n_needed_fdr": 72
           }
         }
       },
@@ -67,48 +67,48 @@
         "contrasts": {
           "M1n - M1": {
             "n_items": 200,
-            "observed_delta": 0.00453129425092047,
-            "se": 0.027165236811647724,
-            "mde_at_pilot_n_uncorrected": 0.06754567841235368,
-            "mde_at_pilot_n_fdr": 0.10259822877690536,
-            "n_needed_uncorrected": 571,
-            "n_needed_fdr": 1316
+            "observed_delta": -0.013086150490730697,
+            "se": 0.0162215179044833,
+            "mde_at_pilot_n_uncorrected": 0.04033439646904393,
+            "mde_at_pilot_n_fdr": 0.06510322935266166,
+            "n_needed_uncorrected": 204,
+            "n_needed_fdr": 530
           },
           "M1nd - M1n": {
             "n_items": 200,
-            "observed_delta": 0.051543472104219834,
-            "se": 0.05774683174477115,
-            "mde_at_pilot_n_uncorrected": 0.143586045408305,
-            "mde_at_pilot_n_fdr": 0.2180994296339478,
-            "n_needed_uncorrected": 2578,
-            "n_needed_fdr": 5946
+            "observed_delta": 0.01717557251908397,
+            "se": 0.031954479781297555,
+            "mde_at_pilot_n_uncorrected": 0.07945401065733113,
+            "mde_at_pilot_n_fdr": 0.1282456942868362,
+            "n_needed_uncorrected": 790,
+            "n_needed_fdr": 2056
           },
           "M2 - M1nd": {
             "n_items": 200,
-            "observed_delta": -0.053809119229680014,
-            "se": 0.03237355623377712,
-            "mde_at_pilot_n_uncorrected": 0.08049603372105932,
-            "mde_at_pilot_n_fdr": 0.1222691173953219,
-            "n_needed_uncorrected": 810,
-            "n_needed_fdr": 1869
+            "observed_delta": -0.001908396946564861,
+            "se": 0.0024017392256427345,
+            "mde_at_pilot_n_uncorrected": 0.0059718642060959636,
+            "mde_at_pilot_n_fdr": 0.009639109026232863,
+            "n_needed_uncorrected": 5,
+            "n_needed_fdr": 12
           },
           "M3 - M1nd": {
             "n_items": 200,
-            "observed_delta": 0.0240725007080147,
-            "se": 0.057293586657085005,
-            "mde_at_pilot_n_uncorrected": 0.14245906289211724,
-            "mde_at_pilot_n_fdr": 0.2163876042034957,
-            "n_needed_uncorrected": 2537,
-            "n_needed_fdr": 5853
+            "observed_delta": 0.0008178844056706547,
+            "se": 0.0024025804612857328,
+            "mde_at_pilot_n_uncorrected": 0.005973955917374056,
+            "mde_at_pilot_n_fdr": 0.009642485230440647,
+            "n_needed_uncorrected": 5,
+            "n_needed_fdr": 12
           },
           "M4 - M3": {
             "n_items": 200,
-            "observed_delta": -0.010478617955253289,
-            "se": 0.00729852580095174,
-            "mde_at_pilot_n_uncorrected": 0.018147600922955105,
-            "mde_at_pilot_n_fdr": 0.02756522334232407,
-            "n_needed_uncorrected": 42,
-            "n_needed_fdr": 95
+            "observed_delta": 0.00027262813522355156,
+            "se": 0.0004054784000499523,
+            "mde_at_pilot_n_uncorrected": 0.001008211848209856,
+            "mde_at_pilot_n_fdr": 0.0016273417464037988,
+            "n_needed_uncorrected": 1,
+            "n_needed_fdr": 1
           }
         }
       },
@@ -118,48 +118,48 @@
         "contrasts": {
           "M1n - M1": {
             "n_items": 200,
-            "observed_delta": -0.008333333333333304,
-            "se": 0.03523696507266342,
-            "mde_at_pilot_n_uncorrected": 0.08761582781435341,
-            "mde_at_pilot_n_fdr": 0.1330836991775762,
-            "n_needed_uncorrected": 960,
-            "n_needed_fdr": 2214
+            "observed_delta": -0.0038022813688211032,
+            "se": 0.005392211323348054,
+            "mde_at_pilot_n_uncorrected": 0.013407597898139865,
+            "mde_at_pilot_n_fdr": 0.02164103091763838,
+            "n_needed_uncorrected": 23,
+            "n_needed_fdr": 59
           },
           "M1nd - M1n": {
             "n_items": 200,
-            "observed_delta": 0.09210526315789469,
-            "se": 0.06329493210848422,
-            "mde_at_pilot_n_uncorrected": 0.15738125748634374,
-            "mde_at_pilot_n_fdr": 0.23905360994683197,
-            "n_needed_uncorrected": 3097,
-            "n_needed_fdr": 7144
+            "observed_delta": 0.09040980143641741,
+            "se": 0.06400608589212141,
+            "mde_at_pilot_n_uncorrected": 0.1591495234913244,
+            "mde_at_pilot_n_fdr": 0.2568811941235947,
+            "n_needed_uncorrected": 3167,
+            "n_needed_fdr": 8249
           },
           "M2 - M1nd": {
             "n_items": 200,
-            "observed_delta": -0.011842105263157876,
-            "se": 0.03199682893243425,
-            "mde_at_pilot_n_uncorrected": 0.07955931075699708,
-            "mde_at_pilot_n_fdr": 0.12084628592443596,
-            "n_needed_uncorrected": 792,
-            "n_needed_fdr": 1826
+            "observed_delta": -0.0021123785382340943,
+            "se": 0.0022474824559924893,
+            "mde_at_pilot_n_uncorrected": 0.0055883086262949275,
+            "mde_at_pilot_n_fdr": 0.009020016909645856,
+            "n_needed_uncorrected": 4,
+            "n_needed_fdr": 11
           },
           "M3 - M1nd": {
             "n_items": 200,
-            "observed_delta": -0.1640350877192982,
-            "se": 0.055219403535643724,
-            "mde_at_pilot_n_uncorrected": 0.13730165870452948,
-            "mde_at_pilot_n_fdr": 0.2085537864497855,
-            "n_needed_uncorrected": 2357,
-            "n_needed_fdr": 5437
+            "observed_delta": -0.0029573299535277098,
+            "se": 0.013867707252508849,
+            "mde_at_pilot_n_uncorrected": 0.03448170545647495,
+            "mde_at_pilot_n_fdr": 0.0556564762417288,
+            "n_needed_uncorrected": 149,
+            "n_needed_fdr": 388
           },
           "M4 - M3": {
             "n_items": 200,
-            "observed_delta": 0.00877192982456143,
-            "se": 0.009288828094158983,
-            "mde_at_pilot_n_uncorrected": 0.02309643753985895,
-            "mde_at_pilot_n_fdr": 0.035082238247422196,
-            "n_needed_uncorrected": 67,
-            "n_needed_fdr": 154
+            "observed_delta": -0.00042247570764686326,
+            "se": 0.0014613956994968735,
+            "mde_at_pilot_n_uncorrected": 0.003633723668077425,
+            "mde_at_pilot_n_fdr": 0.005865146526950056,
+            "n_needed_uncorrected": 2,
+            "n_needed_fdr": 5
           }
         }
       },
@@ -169,48 +169,48 @@
         "contrasts": {
           "M1n - M1": {
             "n_items": 200,
-            "observed_delta": -0.010936930368209974,
-            "se": 0.012903243007469338,
-            "mde_at_pilot_n_uncorrected": 0.03208358935730957,
-            "mde_at_pilot_n_fdr": 0.048733235319219165,
-            "n_needed_uncorrected": 129,
-            "n_needed_fdr": 297
+            "observed_delta": -0.04960937500000007,
+            "se": 0.02573025606206006,
+            "mde_at_pilot_n_uncorrected": 0.0639776348531675,
+            "mde_at_pilot_n_fdr": 0.10326547562161487,
+            "n_needed_uncorrected": 512,
+            "n_needed_fdr": 1333
           },
           "M1nd - M1n": {
             "n_items": 200,
-            "observed_delta": 0.006926722566533039,
-            "se": 0.03633608566512207,
-            "mde_at_pilot_n_uncorrected": 0.09034876353618652,
-            "mde_at_pilot_n_fdr": 0.13723488058565173,
-            "n_needed_uncorrected": 1021,
-            "n_needed_fdr": 2355
+            "observed_delta": 0.05546875000000007,
+            "se": 0.03953091764919882,
+            "mde_at_pilot_n_uncorrected": 0.0982926329481926,
+            "mde_at_pilot_n_fdr": 0.15865287166040629,
+            "n_needed_uncorrected": 1208,
+            "n_needed_fdr": 3147
           },
           "M2 - M1nd": {
             "n_items": 200,
-            "observed_delta": -0.09952606635071093,
-            "se": 0.05353752481520471,
-            "mde_at_pilot_n_uncorrected": 0.13311970954770697,
-            "mde_at_pilot_n_fdr": 0.2022016320794388,
-            "n_needed_uncorrected": 2216,
-            "n_needed_fdr": 5111
+            "observed_delta": -0.001953125,
+            "se": 0.0016424914419910512,
+            "mde_at_pilot_n_uncorrected": 0.004084013679137195,
+            "mde_at_pilot_n_fdr": 0.006591953828696493,
+            "n_needed_uncorrected": 3,
+            "n_needed_fdr": 6
           },
           "M3 - M1nd": {
             "n_items": 200,
-            "observed_delta": -0.03098796937659487,
-            "se": 0.06176747384869124,
-            "mde_at_pilot_n_uncorrected": 0.15358327092286816,
-            "mde_at_pilot_n_fdr": 0.2332846739691335,
-            "n_needed_uncorrected": 2949,
-            "n_needed_fdr": 6803
+            "observed_delta": -0.004296874999999978,
+            "se": 0.00885307141168957,
+            "mde_at_pilot_n_uncorrected": 0.02201293950359325,
+            "mde_at_pilot_n_fdr": 0.035530801863580416,
+            "n_needed_uncorrected": 61,
+            "n_needed_fdr": 158
           },
           "M4 - M3": {
             "n_items": 200,
-            "observed_delta": -0.007655851257747148,
-            "se": 0.0067097056510936745,
-            "mde_at_pilot_n_uncorrected": 0.016683514422962824,
-            "mde_at_pilot_n_fdr": 0.025341355210326544,
-            "n_needed_uncorrected": 35,
-            "n_needed_fdr": 81
+            "observed_delta": -0.0007812499999999556,
+            "se": 0.0017695316766583268,
+            "mde_at_pilot_n_uncorrected": 0.004399896028912495,
+            "mde_at_pilot_n_fdr": 0.007101815457137179,
+            "n_needed_uncorrected": 3,
+            "n_needed_fdr": 7
           }
         }
       },
@@ -220,48 +220,48 @@
         "contrasts": {
           "M1n - M1": {
             "n_items": 200,
-            "observed_delta": -0.0007115749525616888,
-            "se": 0.010964077387085618,
-            "mde_at_pilot_n_uncorrected": 0.027261902791832278,
-            "mde_at_pilot_n_fdr": 0.04140935445869481,
-            "n_needed_uncorrected": 93,
-            "n_needed_fdr": 215
+            "observed_delta": -0.007453714835296887,
+            "se": 0.010129062653544104,
+            "mde_at_pilot_n_uncorrected": 0.025185659648713835,
+            "mde_at_pilot_n_fdr": 0.040651848547348775,
+            "n_needed_uncorrected": 80,
+            "n_needed_fdr": 207
           },
           "M1nd - M1n": {
             "n_items": 200,
-            "observed_delta": -0.05882352941176472,
-            "se": 0.019884245100073313,
-            "mde_at_pilot_n_uncorrected": 0.049441675561837484,
-            "mde_at_pilot_n_fdr": 0.07509922854634,
-            "n_needed_uncorrected": 306,
-            "n_needed_fdr": 705
+            "observed_delta": -0.08199086318826643,
+            "se": 0.020125795846067177,
+            "mde_at_pilot_n_uncorrected": 0.050042285419292135,
+            "mde_at_pilot_n_fdr": 0.08077260775387912,
+            "n_needed_uncorrected": 314,
+            "n_needed_fdr": 816
           },
           "M2 - M1nd": {
             "n_items": 200,
-            "observed_delta": -0.014705882352941235,
-            "se": 0.028493172020327594,
-            "mde_at_pilot_n_uncorrected": 0.07084755592514137,
-            "mde_at_pilot_n_fdr": 0.10761360196454593,
-            "n_needed_uncorrected": 628,
-            "n_needed_fdr": 1448
+            "observed_delta": 0.0,
+            "se": 0.00087443689240543,
+            "mde_at_pilot_n_uncorrected": 0.0021742653500811684,
+            "mde_at_pilot_n_fdr": 0.003509453671099762,
+            "n_needed_uncorrected": 1,
+            "n_needed_fdr": 2
           },
           "M3 - M1nd": {
             "n_items": 200,
-            "observed_delta": 0.03984819734345335,
-            "se": 0.04307080884049352,
-            "mde_at_pilot_n_uncorrected": 0.10709448340433858,
-            "mde_at_pilot_n_fdr": 0.16267072249959433,
-            "n_needed_uncorrected": 1434,
-            "n_needed_fdr": 3308
+            "observed_delta": 0.0064919451791296545,
+            "se": 0.03693593823582092,
+            "mde_at_pilot_n_uncorrected": 0.09184028187325013,
+            "mde_at_pilot_n_fdr": 0.14823821497356907,
+            "n_needed_uncorrected": 1055,
+            "n_needed_fdr": 2747
           },
           "M4 - M3": {
             "n_items": 200,
-            "observed_delta": -0.006404174573054866,
-            "se": 0.006171975026632073,
-            "mde_at_pilot_n_uncorrected": 0.015346460743504974,
-            "mde_at_pilot_n_fdr": 0.023310443055524196,
-            "n_needed_uncorrected": 30,
-            "n_needed_fdr": 68
+            "observed_delta": -0.011541235874008238,
+            "se": 0.010628541511028865,
+            "mde_at_pilot_n_uncorrected": 0.026427601271213137,
+            "mde_at_pilot_n_fdr": 0.0426564505092064,
+            "n_needed_uncorrected": 88,
+            "n_needed_fdr": 228
           }
         }
       },
@@ -275,60 +275,60 @@
         "contrasts": {
           "M1n - M1": {
             "n_items": 200,
-            "observed_delta": -0.00668557536466774,
-            "se": 0.009222269071919656,
-            "mde_at_pilot_n_uncorrected": 0.02293094020431978,
-            "mde_at_pilot_n_fdr": 0.034830856754294565,
-            "n_needed_uncorrected": 66,
-            "n_needed_fdr": 152
+            "observed_delta": -0.03592449766592254,
+            "se": 0.0158506039085019,
+            "mde_at_pilot_n_uncorrected": 0.03941212814261954,
+            "mde_at_pilot_n_fdr": 0.06361460793679433,
+            "n_needed_uncorrected": 195,
+            "n_needed_fdr": 506
           },
           "M1nd - M1n": {
             "n_items": 200,
-            "observed_delta": 0.024108589951377657,
-            "se": 0.04151987382653389,
-            "mde_at_pilot_n_uncorrected": 0.10323812248182093,
-            "mde_at_pilot_n_fdr": 0.15681311903073317,
-            "n_needed_uncorrected": 1333,
-            "n_needed_fdr": 3074
+            "observed_delta": 0.04647858737568511,
+            "se": 0.040961784090720904,
+            "mde_at_pilot_n_uncorrected": 0.10185044638380525,
+            "mde_at_pilot_n_fdr": 0.16439549245976398,
+            "n_needed_uncorrected": 1297,
+            "n_needed_fdr": 3379
           },
           "M2 - M1nd": {
             "n_items": 200,
-            "observed_delta": -0.06482982171799023,
-            "se": 0.03354174878701251,
-            "mde_at_pilot_n_uncorrected": 0.0834007151369309,
-            "mde_at_pilot_n_fdr": 0.1266811712148171,
-            "n_needed_uncorrected": 870,
-            "n_needed_fdr": 2007
+            "observed_delta": -0.006494824436776958,
+            "se": 0.015695966478906847,
+            "mde_at_pilot_n_uncorrected": 0.03902762606143533,
+            "mde_at_pilot_n_fdr": 0.06299398808452697,
+            "n_needed_uncorrected": 191,
+            "n_needed_fdr": 497
           },
           "M3 - M1nd": {
             "n_items": 200,
-            "observed_delta": -0.00648298217179899,
-            "se": 0.047048499819549415,
-            "mde_at_pilot_n_uncorrected": 0.1169849120266957,
-            "mde_at_pilot_n_fdr": 0.17769374813719988,
-            "n_needed_uncorrected": 1711,
-            "n_needed_fdr": 3947
+            "observed_delta": 0.011162979500710324,
+            "se": 0.007335751697716238,
+            "mde_at_pilot_n_uncorrected": 0.018240162179420507,
+            "mde_at_pilot_n_fdr": 0.02944121062299624,
+            "n_needed_uncorrected": 42,
+            "n_needed_fdr": 109
           },
           "M4 - M3": {
             "n_items": 200,
-            "observed_delta": -0.007495948136142627,
-            "se": 0.005323720015425389,
-            "mde_at_pilot_n_uncorrected": 0.013237295982825723,
-            "mde_at_pilot_n_fdr": 0.02010673596825066,
-            "n_needed_uncorrected": 22,
-            "n_needed_fdr": 51
+            "observed_delta": -0.00020296326364932504,
+            "se": 0.0003114301806383842,
+            "mde_at_pilot_n_uncorrected": 0.0007743633149659105,
+            "mde_at_pilot_n_fdr": 0.0012498898436525442,
+            "n_needed_uncorrected": 1,
+            "n_needed_fdr": 1
           }
         }
       }
     },
     "summary": {
       "n_primary_contrasts_measured": 18,
-      "median_se": 0.03354174878701251,
+      "median_se": 0.005941603707251592,
       "median_slice_n": 200,
-      "mde_uncorrected": 0.0834007151369309,
-      "mde_fdr": 0.1266811712148171,
-      "n_needed_for_target_uncorrected": 870,
-      "n_needed_for_target_fdr": 2007
+      "mde_uncorrected": 0.014773648249279573,
+      "mde_fdr": 0.02384595517839404,
+      "n_needed_for_target_uncorrected": 28,
+      "n_needed_for_target_fdr": 72
     }
   }
 }

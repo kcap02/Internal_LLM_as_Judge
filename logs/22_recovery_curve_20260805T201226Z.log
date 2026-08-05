@@ -1,0 +1,37 @@
+22:12:26 INFO stage=22_recovery_curve | commit=9d431d3 | logfile=22_recovery_curve_20260805T201226Z.log
+22:12:26 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.8.0", "datasets": "4.8.5", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.3@2149f55"}
+22:12:26 INFO block width 1536, target block-only AUROC 0.633, detection at |delta| >= 0.02
+22:12:26 INFO 
+=== n = 200 ===
+22:12:26 INFO   plant  baseline     delta  block-only  detected
+22:12:27 INFO    0.00     0.819   -0.0095       0.457        no
+22:12:28 INFO    0.25     0.819   -0.0091       0.460        no
+22:12:28 INFO    0.50     0.819   -0.0093       0.466        no
+22:12:29 INFO    0.75     0.819   -0.0085       0.473        no
+22:12:29 INFO    1.00     0.819   -0.0071       0.486        no
+22:12:30 INFO    1.50     0.819   -0.0089       0.518        no
+22:12:30 INFO   no detection at any planted strength -> threshold above 0.518
+22:12:30 INFO 
+=== n = 400 ===
+22:12:30 INFO   plant  baseline     delta  block-only  detected
+22:12:31 INFO    0.00     0.801   -0.0027       0.479        no
+22:12:32 INFO    0.25     0.801   -0.0027       0.485        no
+22:12:33 INFO    0.50     0.801   -0.0031       0.499        no
+22:12:34 INFO    0.75     0.801   -0.0109       0.517        no
+22:12:35 INFO    1.00     0.801   -0.0103       0.542        no
+22:12:36 INFO    1.50     0.801   +0.0069       0.589        no
+22:12:36 INFO   no detection at any planted strength -> threshold above 0.589
+22:12:36 INFO 
+=== n = 800 ===
+22:12:36 INFO   plant  baseline     delta  block-only  detected
+22:12:38 INFO    0.00     0.764   -0.0004       0.479        no
+22:12:39 INFO    0.25     0.764   -0.0003       0.483        no
+22:12:41 INFO    0.50     0.764   -0.0016       0.498        no
+22:12:43 INFO    0.75     0.764   -0.0002       0.522        no
+22:12:45 INFO    1.00     0.764   +0.0014       0.549        no
+22:12:46 INFO    1.50     0.764   +0.0306       0.602       yes
+22:12:46 INFO   detection threshold: block-only AUROC ~0.602
+22:12:46 INFO 
+==============================================================
+22:12:46 INFO N_FREEZE candidate = 800 items per stratum — the smallest n whose detection threshold falls below the pilot's observed block-only AUROC of 0.633.
+22:12:46 INFO wrote recovery_curve.json

@@ -1,0 +1,149 @@
+{
+  "width": 1536,
+  "target_block_only": 0.633,
+  "detect_delta": 0.02,
+  "by_n": {
+    "200": {
+      "rows": [
+        {
+          "strength": 0.0,
+          "baseline": 0.8189935064935064,
+          "delta": -0.009537337662337664,
+          "block_only": 0.45738636363636365,
+          "detected": false
+        },
+        {
+          "strength": 0.25,
+          "baseline": 0.8189935064935064,
+          "delta": -0.009131493506493449,
+          "block_only": 0.46002435064935066,
+          "detected": false
+        },
+        {
+          "strength": 0.5,
+          "baseline": 0.8189935064935064,
+          "delta": -0.0093344155844155,
+          "block_only": 0.4659090909090909,
+          "detected": false
+        },
+        {
+          "strength": 0.75,
+          "baseline": 0.8189935064935064,
+          "delta": -0.008522727272727182,
+          "block_only": 0.4732142857142857,
+          "detected": false
+        },
+        {
+          "strength": 1.0,
+          "baseline": 0.8189935064935064,
+          "delta": -0.007102272727272707,
+          "block_only": 0.48599837662337664,
+          "detected": false
+        },
+        {
+          "strength": 1.5,
+          "baseline": 0.8189935064935064,
+          "delta": -0.008928571428571397,
+          "block_only": 0.5178571428571429,
+          "detected": false
+        }
+      ],
+      "detection_threshold": null
+    },
+    "400": {
+      "rows": [
+        {
+          "strength": 0.0,
+          "baseline": 0.8012888284750542,
+          "delta": -0.002718622564567341,
+          "block_only": 0.47923274429844437,
+          "detected": false
+        },
+        {
+          "strength": 0.25,
+          "baseline": 0.8012888284750542,
+          "delta": -0.002668277702260635,
+          "block_only": 0.48522378291295376,
+          "detected": false
+        },
+        {
+          "strength": 0.5,
+          "baseline": 0.8012888284750542,
+          "delta": -0.0031213814630217662,
+          "block_only": 0.49942103408347177,
+          "detected": false
+        },
+        {
+          "strength": 0.75,
+          "baseline": 0.8012888284750542,
+          "delta": -0.01092483512057607,
+          "block_only": 0.5170920807531592,
+          "detected": false
+        },
+        {
+          "strength": 1.0,
+          "baseline": 0.8012888284750542,
+          "delta": -0.010270351910587672,
+          "block_only": 0.5416100286965715,
+          "detected": false
+        },
+        {
+          "strength": 1.5,
+          "baseline": 0.8012888284750542,
+          "delta": 0.0069475909983385264,
+          "block_only": 0.5887328198157378,
+          "detected": false
+        }
+      ],
+      "detection_threshold": null
+    },
+    "800": {
+      "rows": [
+        {
+          "strength": 0.0,
+          "baseline": 0.763759313756183,
+          "delta": -0.00036315822428145683,
+          "block_only": 0.4785298353265293,
+          "detected": false
+        },
+        {
+          "strength": 0.25,
+          "baseline": 0.763759313756183,
+          "delta": -0.00028802203994737763,
+          "block_only": 0.48301296099179764,
+          "detected": false
+        },
+        {
+          "strength": 0.5,
+          "baseline": 0.763759313756183,
+          "delta": -0.0016404733579612474,
+          "block_only": 0.4982906518063991,
+          "detected": false
+        },
+        {
+          "strength": 0.75,
+          "baseline": 0.763759313756183,
+          "delta": -0.0002128858556131874,
+          "block_only": 0.5216580051343059,
+          "detected": false
+        },
+        {
+          "strength": 1.0,
+          "baseline": 0.763759313756183,
+          "delta": 0.001364974015403031,
+          "block_only": 0.5489825308371422,
+          "detected": false
+        },
+        {
+          "strength": 1.5,
+          "baseline": 0.763759313756183,
+          "delta": 0.030617995116148045,
+          "block_only": 0.6023667898065244,
+          "detected": true
+        }
+      ],
+      "detection_threshold": 0.6023667898065244
+    }
+  },
+  "n_freeze_candidate": 800
+}

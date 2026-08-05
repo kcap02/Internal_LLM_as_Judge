@@ -189,6 +189,20 @@ def main() -> None:
                 # A non-significant contrast means nothing on its own: report
                 # what size of effect the data actually rule out, so a tight
                 # null is distinguishable from an underpowered one.
+                # A delta is unreadable without the block-only AUROC beside
+                # it: zero with block-only at 0.63 (below the estimator's own
+                # detection threshold) means something entirely different from
+                # zero with block-only at 0.85.
+                only = {"M2": "M2only", "M3": "M3only",
+                        "M4": "M3only"}.get(cname.split(" - ")[0])
+                alone = (res["auroc_conditional"].get(only)
+                         if only else None)
+                if alone is not None:
+                    log.info("             block alone (%s) = %.3f  "
+                             "[a delta near zero is only informative if this "
+                             "clears the estimator's detection threshold]",
+                             only, alone)
+
                 eq = c.get("equivalence") or {}
                 if eq.get("equivalent") is not None:
                     log.info("             equivalence: %s |delta| < %.3f "
