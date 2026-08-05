@@ -98,3 +98,16 @@
 21:32:39 INFO   [180/400] median 2.2 s/item
 21:34:06 INFO   [200/400] median 2.3 s/item
 21:35:35 INFO   [220/400] median 2.4 s/item
+21:37:11 INFO   [240/400] median 2.4 s/item
+21:38:22 INFO   [260/400] median 2.4 s/item
+21:39:06 INFO   [280/400] median 2.3 s/item
+21:40:04 INFO   [300/400] median 2.3 s/item
+21:40:44 INFO   [320/400] median 2.3 s/item
+21:41:32 INFO   [340/400] median 2.3 s/item
+21:42:20 INFO   [360/400] median 2.3 s/item
+21:43:06 INFO   [380/400] median 2.3 s/item
+21:44:09 INFO   [400/400] median 2.3 s/item
+21:44:09 INFO   median 2.3 s/item -> ~63 min for 1676 items
+21:44:09 INFO   DRY RUN (400 items) — drop --dry-run for the full campaign.
+21:44:10 INFO Qwen2.5-3B-Instruct: unloaded, 13.7 GB VRAM free
+21:44:10 INFO done. Next: python scripts/20_analyse.py

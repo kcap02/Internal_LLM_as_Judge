@@ -73,6 +73,67 @@ def test_swamping_damage_grows_with_baseline_strength():
     assert losses[1.6] > losses[0.4]
 
 
+def test_offset_ladder_recovers_a_planted_effect_across_magnitudes():
+    """The acceptance criterion for ANY ladder estimator: a recovery curve.
+
+    A planted test at a single signal strength cannot distinguish an estimator
+    that works from one that has collapsed. Both of this project's ladder
+    failures passed such a test:
+
+      * concatenation (C-LADDER) passed at a 32-column block and destroys
+        0.315 AUROC of real signal at 4096 columns;
+      * offset-with-RidgeCV passed with a STRONG planted latent and, on real
+        data at n=200 with 1536 columns, selected maximum shrinkage on every
+        fold and returned a delta of 0.000 for every block on every slice --
+        a zero manufactured by the estimator.
+
+    So the criterion is recovery across a RANGE: as the planted signal grows,
+    the measured delta must grow with it. Zero signal must give ~zero delta
+    (that is `test_offset_ladder_is_monotone_under_a_wide_noise_block`), and a
+    weak-but-real signal must give a delta that is detectably positive.
+
+    The planted signal is spread over a DENSE random direction rather than a
+    single column, because that is how an activation encodes anything; a
+    one-column plant in a 512-column block is close to worst case for a
+    penalised probe and understates what the estimator can do.
+    """
+    rng = np.random.default_rng(1)
+    n_q, d_add = 250, 512
+    groups = np.repeat(np.arange(n_q), 2)
+    n = len(groups)
+    strata = np.tile(["A", "B"], n_q)
+
+    latent = rng.normal(size=n)
+    extra = rng.normal(size=n)
+    # A baseline that already explains a lot, which is the regime where the
+    # collapse happened: the residual left for the block is small.
+    y = ((latent + 0.9 * extra + rng.normal(0, 0.7, n)) > 0).astype(float)
+    X_base = np.c_[1.2 * latent + rng.normal(0, .6, n), rng.normal(size=(n, 5))]
+    base = stratified_auroc(y, oof_scores(X_base, y, groups, 5), strata)
+
+    direction = rng.normal(size=d_add)
+    direction /= np.linalg.norm(direction)
+
+    deltas = {}
+    for strength in (0.0, 0.5, 1.0):
+        X_add = rng.normal(size=(n, d_add)) + strength * np.outer(extra,
+                                                                  direction)
+        got = stratified_auroc(
+            y, oof_scores_offset(X_base, X_add, y, groups, 5), strata)
+        deltas[strength] = got - base
+
+    # Zero planted signal costs ~nothing.
+    assert abs(deltas[0.0]) < 0.03, (
+        f"noise block moved the score: {deltas[0.0]:+.3f}")
+    # A clearly-recoverable planted signal must show up. This is the assertion
+    # the RidgeCV form failed: it returned ~0.000 at every strength because it
+    # selected maximum shrinkage regardless.
+    assert deltas[1.0] > 0.03, (
+        f"no recovery: {[(s, round(d, 4)) for s, d in deltas.items()]} — the "
+        f"estimator is not expressing a planted effect it should detect")
+    assert deltas[1.0] > deltas[0.0], "recovery is not monotone in the plant"
+
+
 def test_pooled_fit_is_what_blocks_the_verdict_channel():
     """C-VERDICT: the ladder MUST be fitted pooled, never within stratum.
 

@@ -31,13 +31,14 @@ from __future__ import annotations
 import numpy as np
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
-from sklearn.linear_model import LogisticRegression, RidgeCV
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GroupKFold
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from . import features as F
-from .stats import paired_bootstrap, pooled_auroc, stratified_auroc
+from .stats import (_auc_or_none, paired_bootstrap, pooled_auroc,
+                    stratified_auroc)
 
 def contrasts_for(baseline: str) -> list[tuple[str, str]]:
     """Contrasts that carry the paper's claims, against the live baseline."""
@@ -97,6 +98,45 @@ def oof_scores(X: np.ndarray, y: np.ndarray, groups: np.ndarray,
 def _logit(p: np.ndarray, eps: float = 1e-6) -> np.ndarray:
     p = np.clip(p, eps, 1 - eps)
     return np.log(p / (1 - p))
+
+
+def _fit_offset_logistic(X: np.ndarray, y: np.ndarray, z: np.ndarray,
+                         alpha: float) -> np.ndarray:
+    """Penalised logistic regression with `z` as an UNPENALISED offset.
+
+    Minimises  sum log(1 + exp(-(2y-1)(z + Xw)))  +  alpha * ||w||^2  over w.
+
+    Why not RidgeCV on the working residual (the first attempt). That fits
+    squared error on `y - sigmoid(z)`, an objective on a different scale from
+    the logit and only loosely related to the AUROC we report. At n=160 per
+    training fold with 1536 columns its CV curve is nearly flat and its
+    minimum sits at maximum shrinkage: RidgeCV selected the top of the grid on
+    every fold and the correction it produced had 0.7% of the offset's scale,
+    so every internal rung came back numerically identical to the baseline.
+    That is a zero manufactured by the estimator, the mirror image of the
+    swamping C-LADDER describes. Capping the grid would only hide it — the
+    penalty would then be chosen by hand.
+
+    Here the second stage optimises the same likelihood the first stage did,
+    on the same scale, and `alpha` is selected by out-of-fold AUROC (the
+    reported metric) rather than by squared error.
+    """
+    from scipy.optimize import minimize
+
+    s = 2.0 * y - 1.0                      # +/-1 labels
+
+    def obj(w):
+        m = s * (z + X @ w)
+        # log(1+exp(-m)), computed stably
+        loss = np.logaddexp(0.0, -m).sum()
+        p = 1.0 / (1.0 + np.exp(np.clip(m, -30, 30)))   # sigmoid(-m)
+        grad = -(X.T @ (s * p))
+        return loss + alpha * w @ w, grad + 2.0 * alpha * w
+
+    w0 = np.zeros(X.shape[1])
+    res = minimize(obj, w0, jac=True, method="L-BFGS-B",
+                   options={"maxiter": 300})
+    return res.x
 
 
 def oof_scores_offset(X_base: np.ndarray, X_add: np.ndarray, y: np.ndarray,
@@ -161,15 +201,41 @@ def oof_scores_offset(X_base: np.ndarray, X_add: np.ndarray, y: np.ndarray,
             scores[te] = z_te
             continue
 
-        # (c) the added block fits the working residual of the offset model.
-        #     RidgeCV picks the shrinkage by efficient LOO-GCV, so a block of
-        #     4096 noise columns is shrunk hard and contributes ~nothing.
-        resid = y[tr][ok] - _sigmoid(z_tr[ok])
-        sc = StandardScaler().fit(X_add[tr][ok])
-        ridge = RidgeCV(alphas=np.logspace(0, 5, 11))
-        ridge.fit(sc.transform(X_add[tr][ok]), resid)
-        scores[te] = z_te + ridge.predict(sc.transform(X_add[te]))
+        # (c) the added block extends the offset model, with its penalty
+        #     selected by out-of-fold AUROC — the metric we report — rather
+        #     than by squared error on a working residual. See
+        #     `_fit_offset_logistic` for why the residual/RidgeCV form
+        #     manufactured a zero.
+        Xtr, ytr, ztr = X_add[tr][ok], y[tr][ok], z_tr[ok]
+        sc = StandardScaler().fit(Xtr)
+        Xtr_s, Xte_s = sc.transform(Xtr), sc.transform(X_add[te])
+        g_sel = g_tr[ok]
+
+        best_alpha, best_auc = ALPHA_GRID[-1], -np.inf
+        n_sel = max(2, min(3, len(np.unique(g_sel))))
+        for a in ALPHA_GRID:
+            oof = np.full(len(ytr), np.nan)
+            for str_, ste in GroupKFold(n_splits=n_sel).split(Xtr_s, ytr, g_sel):
+                if len(np.unique(ytr[str_])) < 2:
+                    continue
+                w = _fit_offset_logistic(Xtr_s[str_], ytr[str_], ztr[str_], a)
+                oof[ste] = ztr[ste] + Xtr_s[ste] @ w
+            m = ~np.isnan(oof)
+            auc = _auc_or_none(ytr[m], oof[m]) if m.any() else None
+            if auc is not None and auc > best_auc:
+                best_auc, best_alpha = auc, a
+
+        w = _fit_offset_logistic(Xtr_s, ytr, ztr, best_alpha)
+        scores[te] = z_te + Xte_s @ w
     return scores
+
+
+# Penalty grid for the second stage. Spans "essentially unpenalised" to
+# "essentially zero correction", so the selected value is informative: if the
+# top of the grid always wins, the block genuinely carries nothing at this n,
+# and `offset_shrinkage_report` says so rather than leaving it to be inferred
+# from a delta of 0.000.
+ALPHA_GRID = (0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0)
 
 
 def _sigmoid(z: np.ndarray) -> np.ndarray:

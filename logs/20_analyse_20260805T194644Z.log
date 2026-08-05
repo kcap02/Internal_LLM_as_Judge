@@ -1,0 +1,277 @@
+21:46:44 INFO stage=20_analyse | commit=3ccec61 | logfile=20_analyse_20260805T194644Z.log
+21:46:44 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.8.0", "datasets": "4.8.5", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.3@2149f55"}
+21:46:44 INFO config={"seed": 42, "judge_models_pilot": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen2.5-1.5B-Instruct", "meta-llama/Llama-3.2-1B-Instruct", "Qwen/Qwen2.5-3B-Instruct"], "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "distractor_panel": null, "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "model_dtype": "bfloat16", "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 4096, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_probe": "full", "activation_pca_dims": 24}
+21:46:44 INFO   stage11/stage12 overlap 1600 items, verdict disagreement 0 (0.00%)
+21:46:44 INFO   spectral coverage Qwen2.5-0.5B-Instruct        PASS  100% (400/400)
+21:46:44 INFO   spectral coverage Qwen2.5-1.5B-Instruct        PASS  100% (400/400)
+21:46:44 INFO   spectral coverage Qwen2.5-3B-Instruct          PASS  100% (400/400)
+21:46:44 INFO   spectral coverage Llama-3.2-1B-Instruct        PASS  100% (400/400)
+21:46:44 INFO llmbar: 1600 rows, peer-difficulty available for 1600
+21:46:44 INFO ### llmbar | Qwen2.5-0.5B-Instruct | format=pairwise
+21:46:44 INFO   n=200 items, 100 CV groups (100 question_ids)
+21:46:44 INFO   verdict behaviour: accuracy 53.5%, P(pred=A) 40.5%, acc|gt=A 44.0% (n=100), acc|gt=B 63.0% (n=100)
+21:46:44 INFO   families: Mn, M1, M1n, M1nd, M2, M2only, M3, M3only, M4 | nuisance cols: 3 | baseline to beat: M1nd
+21:46:45 INFO   conditional-AUROC support: A: 44+/56-, B: 63+/37-
+21:46:45 INFO   SDT null (first-order observer, d'=0.18, c=+0.24, parameter uncertainty propagated): conditional AUROC 0.508, 90% band [0.359, 0.604] — this, not 0.500, is the reference
+21:46:45 INFO     NOTE: null band is 0.24 wide at n=200; per-slice comparison can only detect very large metacognitive effects. The pooled hierarchical test is the primary one.
+21:46:46 INFO   verdict-leakage floor (pure pred decoder at this slice's imbalance): 0.475 (p95 0.566)  <-- NOT clean: cancellation is partial here; every rung must clear this too
+21:46:46 INFO   floor to clear = max(SDT p95 0.604, verdict-leak p95 0.566) = 0.604
+21:46:46 INFO   rungs clearing BOTH floors: NONE — no rung carries information beyond first-order performance and verdict leakage
+21:47:18 INFO   spectral-block coefficients: mean|w| spectral=0.04224 vs activation=0.04455 (ratio 0.95)
+21:47:19 INFO   POSITIVE CONTROL (recover prompt length, n=140): M2only=0.996, M3only=1.000, M2=1.000, M3=1.000, M4=1.000
+21:47:19 INFO   control verdict-decodability (M4): 0.967 (near 1.0 is EXPECTED and is why the ladder must be fitted pooled, never within stratum)
+21:47:19 INFO   control identity-decodability (M4): 0.899 (high is expected; it is why pooled AUROC is not the headline)
+21:47:19 INFO   control permutation-null: 0.500 +/- 0.021 over 5 permutations (must be ~0.500)
+21:47:19 INFO   rung  conditional  pooled      
+21:47:19 INFO   Mn    0.426        0.429       
+21:47:19 INFO   M1    0.491        0.480       
+21:47:19 INFO   M1n   0.470        0.461       
+21:47:19 INFO   M1nd  0.468        0.567       
+21:47:19 INFO   M2    0.467        0.566       
+21:47:19 INFO   M2only 0.522        0.513       
+21:47:19 INFO   M3    0.467        0.566       
+21:47:19 INFO   M3only 0.509        0.501       
+21:47:19 INFO   M4    0.467        0.566       
+21:47:19 INFO   M1n - M1   delta=-0.020  CI95=[-0.053, +0.008]  p=0.9115
+21:47:19 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.4970, CI90=[-0.046, +0.004])
+21:47:19 INFO   M1nd - M1n delta=-0.002  CI95=[-0.085, +0.082]  p=0.5225
+21:47:19 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.3460, CI90=[-0.072, +0.066])
+21:47:19 INFO   M2 - M1nd  delta=-0.001  CI95=[-0.004, +0.001]  p=0.9125
+21:47:19 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.003, +0.000])
+21:47:19 INFO   M3 - M1nd  delta=-0.001  CI95=[-0.004, +0.002]  p=0.7840
+21:47:19 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.004, +0.001])
+21:47:19 INFO   M4 - M3    delta=+0.000  CI95=[+0.000, +0.000]  p=0.9910
+21:47:19 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[+0.000, +0.000])
+21:47:19 INFO ### llmbar | Qwen2.5-0.5B-Instruct | format=single
+21:47:19 INFO   n=200 items, 100 CV groups (100 question_ids)
+21:47:19 INFO   verdict behaviour: accuracy 50.5%, P(pred=No) 0.5%, acc|gt=No 1.0% (n=100), acc|gt=Yes 100.0% (n=100)
+21:47:19 INFO   DEGENERATE: a gt_verdict stratum has zero outcome variance (the judge answers one way regardless) — conditional AUROC is undefined there; this model carries no measurable signal.
+21:47:19 INFO   families: Mn, M1, M1n, M1nd, M2, M2only, M3, M3only, M4 | nuisance cols: 3 | baseline to beat: M1nd
+21:47:20 INFO   conditional-AUROC support: No: 1+/99- (NOT estimable), Yes: 100+/0- (NOT estimable)
+21:47:20 INFO   THIN STRATUM: the conditional estimate rests on as few as 0 minority-class items — treat every conditional number in this slice as indicative only.
+21:47:21 INFO   contrasts SUPPRESSED: verdict behaviour is (near-)constant, so no conditional contrast here is estimable — report the verdict bias itself, not an AUROC.
+21:47:21 INFO   spectral-block coefficients: mean|w| spectral=0.06433 vs activation=0.0478 (ratio 1.35)
+21:47:21 INFO   POSITIVE CONTROL (recover prompt length, n=135): M2only=0.997, M3only=1.000, M2=1.000, M3=1.000, M4=1.000
+21:47:21 INFO   control verdict-decodability (M4): n/a (near 1.0 is EXPECTED and is why the ladder must be fitted pooled, never within stratum)
+21:47:22 INFO   control identity-decodability (M4): 0.602 (high is expected; it is why pooled AUROC is not the headline)
+21:47:22 INFO   control permutation-null: n/a +/- n/a over 0 permutations (must be ~0.500)
+21:47:22 INFO   rung  conditional  pooled      
+21:47:22 INFO   Mn    n/a          0.462       
+21:47:22 INFO   M1    n/a          0.530       
+21:47:22 INFO   M1n   n/a          0.521       
+21:47:22 INFO   M1nd  n/a          0.660       
+21:47:22 INFO   M2    n/a          0.660       
+21:47:22 INFO   M2only n/a          0.541       
+21:47:22 INFO   M3    n/a          0.660       
+21:47:22 INFO   M3only n/a          0.562       
+21:47:22 INFO   M4    n/a          0.660       
+21:47:22 INFO ### llmbar | Qwen2.5-1.5B-Instruct | format=pairwise
+21:47:22 INFO   n=200 items, 100 CV groups (100 question_ids)
+21:47:22 INFO   verdict behaviour: accuracy 71.0%, P(pred=A) 35.0%, acc|gt=A 56.0% (n=100), acc|gt=B 86.0% (n=100)
+21:47:22 INFO   families: Mn, M1, M1n, M1nd, M2, M2only, M3, M3only, M4 | nuisance cols: 3 | baseline to beat: M1nd
+21:47:23 INFO   conditional-AUROC support: A: 56+/44-, B: 86+/14-
+21:47:23 INFO   THIN STRATUM: the conditional estimate rests on as few as 14 minority-class items — treat every conditional number in this slice as indicative only.
+21:47:23 INFO   SDT null (first-order observer, d'=1.23, c=+0.46, parameter uncertainty propagated): conditional AUROC 0.759, 90% band [0.633, 0.843] — this, not 0.500, is the reference
+21:47:23 INFO     NOTE: null band is 0.21 wide at n=200; per-slice comparison can only detect very large metacognitive effects. The pooled hierarchical test is the primary one.
+21:47:24 INFO   verdict-leakage floor (pure pred decoder at this slice's imbalance): 0.610 (p95 0.642)  <-- NOT clean: cancellation is partial here; every rung must clear this too
+21:47:24 INFO   floor to clear = max(SDT p95 0.843, verdict-leak p95 0.642) = 0.843
+21:47:24 INFO   rungs clearing BOTH floors: NONE — no rung carries information beyond first-order performance and verdict leakage
+21:47:56 INFO   spectral-block coefficients: mean|w| spectral=0.01866 vs activation=0.02746 (ratio 0.68)
+21:47:56 INFO   POSITIVE CONTROL (recover prompt length, n=140): M2only=1.000, M3only=0.999, M2=1.000, M3=0.999, M4=0.999
+21:47:56 INFO   control verdict-decodability (M4): 0.981 (near 1.0 is EXPECTED and is why the ladder must be fitted pooled, never within stratum)
+21:47:57 INFO   control identity-decodability (M4): 0.886 (high is expected; it is why pooled AUROC is not the headline)
+21:47:57 INFO   control permutation-null: 0.502 +/- 0.049 over 5 permutations (must be ~0.500)
+21:47:57 INFO   rung  conditional  pooled      
+21:47:57 INFO   Mn    0.436        0.443       
+21:47:57 INFO   M1    0.746        0.716       
+21:47:57 INFO   M1n   0.733        0.711       
+21:47:57 INFO   M1nd  0.751        0.771       
+21:47:57 INFO   M2    0.751        0.770       
+21:47:57 INFO   M2only 0.463        0.480       
+21:47:57 INFO   M3    0.750        0.770       
+21:47:57 INFO   M3only 0.570        0.624       
+21:47:57 INFO   M4    0.750        0.770       
+21:47:57 INFO   M1n - M1   delta=-0.013  CI95=[-0.047, +0.017]  p=0.7970
+21:47:57 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.3180, CI90=[-0.040, +0.013])
+21:47:57 INFO   M1nd - M1n delta=+0.017  CI95=[-0.047, +0.078]  p=0.2890
+21:47:57 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.4580, CI90=[-0.037, +0.071])
+21:47:57 INFO   M2 - M1nd  delta=+0.000  CI95=[+0.000, +0.000]  p=0.9850
+21:47:57 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[+0.000, +0.000])
+21:47:57 INFO   M3 - M1nd  delta=-0.001  CI95=[-0.003, +0.001]  p=0.8220
+21:47:57 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.002, +0.001])
+21:47:57 INFO   M4 - M3    delta=+0.000  CI95=[+0.000, +0.000]  p=1.0000
+21:47:57 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[+0.000, +0.000])
+21:47:57 INFO ### llmbar | Qwen2.5-1.5B-Instruct | format=single
+21:47:57 INFO   n=200 items, 100 CV groups (100 question_ids)
+21:47:57 INFO   verdict behaviour: accuracy 57.5%, P(pred=No) 14.5%, acc|gt=No 22.0% (n=100), acc|gt=Yes 93.0% (n=100)
+21:47:57 INFO   families: Mn, M1, M1n, M1nd, M2, M2only, M3, M3only, M4 | nuisance cols: 3 | baseline to beat: M1nd
+21:47:58 INFO   conditional-AUROC support: No: 22+/78-, Yes: 93+/7-
+21:47:58 INFO   THIN STRATUM: the conditional estimate rests on as few as 7 minority-class items — treat every conditional number in this slice as indicative only.
+21:47:59 INFO   SDT null (first-order observer, d'=0.70, c=+1.12, parameter uncertainty propagated): conditional AUROC 0.735, 90% band [0.589, 0.992] — this, not 0.500, is the reference
+21:47:59 INFO     NOTE: null band is 0.40 wide at n=200; per-slice comparison can only detect very large metacognitive effects. The pooled hierarchical test is the primary one.
+21:47:59 INFO   verdict-leakage floor (pure pred decoder at this slice's imbalance): 0.694 (p95 0.722)  <-- NOT clean: cancellation is partial here; every rung must clear this too
+21:47:59 INFO   floor to clear = max(SDT p95 0.992, verdict-leak p95 0.722) = 0.992
+21:47:59 INFO   rungs clearing BOTH floors: NONE — no rung carries information beyond first-order performance and verdict leakage
+21:48:30 INFO   spectral-block coefficients: mean|w| spectral=0.0527 vs activation=0.03216 (ratio 1.64)
+21:48:30 INFO   POSITIVE CONTROL (recover prompt length, n=135): M2only=0.999, M3only=1.000, M2=1.000, M3=1.000, M4=1.000
+21:48:31 INFO   control verdict-decodability (M4): 0.998 (near 1.0 is EXPECTED and is why the ladder must be fitted pooled, never within stratum)
+21:48:31 INFO   control identity-decodability (M4): 0.708 (high is expected; it is why pooled AUROC is not the headline)
+21:48:31 INFO   control permutation-null: 0.464 +/- 0.084 over 5 permutations (must be ~0.500)
+21:48:31 INFO   rung  conditional  pooled      
+21:48:31 INFO   Mn    0.523        0.506       
+21:48:31 INFO   M1    0.693        0.631       
+21:48:31 INFO   M1n   0.689        0.625       
+21:48:31 INFO   M1nd  0.780        0.787       
+21:48:31 INFO   M2    0.780        0.787       
+21:48:31 INFO   M2only 0.451        0.526       
+21:48:31 INFO   M3    0.781        0.788       
+21:48:31 INFO   M3only 0.584        0.575       
+21:48:31 INFO   M4    0.781        0.788       
+21:48:31 INFO   M1n - M1   delta=-0.004  CI95=[-0.015, +0.007]  p=0.7840
+21:48:31 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0035, CI90=[-0.012, +0.004])
+21:48:31 INFO   M1nd - M1n delta=+0.090  CI95=[-0.074, +0.177]  p=0.1520
+21:48:31 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.8110, CI90=[-0.053, +0.163])
+21:48:31 INFO   M2 - M1nd  delta=+0.000  CI95=[-0.002, +0.003]  p=0.5015
+21:48:31 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.001, +0.002])
+21:48:31 INFO   M3 - M1nd  delta=+0.001  CI95=[-0.002, +0.006]  p=0.2840
+21:48:31 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.002, +0.005])
+21:48:31 INFO   M4 - M3    delta=+0.000  CI95=[+0.000, +0.000]  p=1.0000
+21:48:31 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[+0.000, +0.000])
+21:48:31 INFO ### llmbar | Qwen2.5-3B-Instruct | format=pairwise
+21:48:31 INFO   n=200 items, 100 CV groups (100 question_ids)
+21:48:31 INFO   verdict behaviour: accuracy 84.0%, P(pred=A) 42.0%, acc|gt=A 76.0% (n=100), acc|gt=B 92.0% (n=100)
+21:48:31 INFO   families: Mn, M1, M1n, M1nd, M2, M2only, M3, M3only, M4 | nuisance cols: 3 | baseline to beat: M1nd
+21:48:32 INFO   conditional-AUROC support: A: 76+/24-, B: 92+/8-
+21:48:32 INFO   THIN STRATUM: the conditional estimate rests on as few as 8 minority-class items — treat every conditional number in this slice as indicative only.
+21:48:33 INFO   SDT null (first-order observer, d'=2.11, c=+0.35, parameter uncertainty propagated): conditional AUROC 0.851, 90% band [0.753, 0.973] — this, not 0.500, is the reference
+21:48:33 INFO     NOTE: null band is 0.22 wide at n=200; per-slice comparison can only detect very large metacognitive effects. The pooled hierarchical test is the primary one.
+21:48:34 INFO   verdict-leakage floor (pure pred decoder at this slice's imbalance): 0.656 (p95 0.700)  <-- NOT clean: cancellation is partial here; every rung must clear this too
+21:48:34 INFO   floor to clear = max(SDT p95 0.973, verdict-leak p95 0.700) = 0.973
+21:48:34 INFO   rungs clearing BOTH floors: NONE — no rung carries information beyond first-order performance and verdict leakage
+21:49:11 INFO   spectral-block coefficients: mean|w| spectral=0.02365 vs activation=0.01911 (ratio 1.24)
+21:49:12 INFO   POSITIVE CONTROL (recover prompt length, n=140): M2only=0.996, M3only=1.000, M2=0.999, M3=1.000, M4=1.000
+21:49:12 INFO   control verdict-decodability (M4): 0.999 (near 1.0 is EXPECTED and is why the ladder must be fitted pooled, never within stratum)
+21:49:14 INFO   control identity-decodability (M4): 0.878 (high is expected; it is why pooled AUROC is not the headline)
+21:49:14 INFO   control permutation-null: 0.450 +/- 0.048 over 5 permutations (must be ~0.500)
+21:49:14 INFO   rung  conditional  pooled      
+21:49:14 INFO   Mn    0.330        0.338       
+21:49:14 INFO   M1    0.720        0.696       
+21:49:14 INFO   M1n   0.670        0.635       
+21:49:14 INFO   M1nd  0.725        0.746       
+21:49:14 INFO   M2    0.725        0.745       
+21:49:14 INFO   M2only 0.308        0.334       
+21:49:14 INFO   M3    0.725        0.746       
+21:49:14 INFO   M3only 0.633        0.616       
+21:49:14 INFO   M4    0.725        0.746       
+21:49:14 INFO   M1n - M1   delta=-0.050  CI95=[-0.103, -0.002]  p=0.9810
+21:49:14 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.8975, CI90=[-0.094, -0.011])
+21:49:14 INFO   M1nd - M1n delta=+0.055  CI95=[-0.020, +0.135]  p=0.0675
+21:49:14 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.8340, CI90=[-0.006, +0.120])
+21:49:14 INFO   M2 - M1nd  delta=-0.000  CI95=[-0.002, +0.000]  p=0.9805
+21:49:14 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.002, +0.000])
+21:49:14 INFO   M3 - M1nd  delta=+0.000  CI95=[-0.002, +0.002]  p=0.6645
+21:49:14 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.001, +0.002])
+21:49:14 INFO   M4 - M3    delta=+0.000  CI95=[+0.000, +0.000]  p=1.0000
+21:49:14 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[+0.000, +0.000])
+21:49:14 INFO ### llmbar | Qwen2.5-3B-Instruct | format=single
+21:49:14 INFO   n=200 items, 100 CV groups (100 question_ids)
+21:49:14 INFO   verdict behaviour: accuracy 64.5%, P(pred=No) 64.5%, acc|gt=No 79.0% (n=100), acc|gt=Yes 50.0% (n=100)
+21:49:14 INFO   families: Mn, M1, M1n, M1nd, M2, M2only, M3, M3only, M4 | nuisance cols: 3 | baseline to beat: M1nd
+21:49:15 INFO   conditional-AUROC support: No: 79+/21-, Yes: 50+/50-
+21:49:15 INFO   THIN STRATUM: the conditional estimate rests on as few as 21 minority-class items — treat every conditional number in this slice as indicative only.
+21:49:16 INFO   SDT null (first-order observer, d'=0.81, c=-0.40, parameter uncertainty propagated): conditional AUROC 0.658, 90% band [0.570, 0.728] — this, not 0.500, is the reference
+21:49:16 INFO     NOTE: null band is 0.16 wide at n=200; per-slice comparison can only detect very large metacognitive effects. The pooled hierarchical test is the primary one.
+21:49:17 INFO   verdict-leakage floor (pure pred decoder at this slice's imbalance): 0.554 (p95 0.616)  <-- NOT clean: cancellation is partial here; every rung must clear this too
+21:49:17 INFO   floor to clear = max(SDT p95 0.728, verdict-leak p95 0.616) = 0.728
+21:49:17 INFO   rungs clearing BOTH floors: NONE — no rung carries information beyond first-order performance and verdict leakage
+21:49:56 INFO   spectral-block coefficients: mean|w| spectral=0.04162 vs activation=0.02944 (ratio 1.41)
+21:49:56 INFO   POSITIVE CONTROL (recover prompt length, n=135): M2only=0.999, M3only=1.000, M2=1.000, M3=1.000, M4=1.000
+21:49:57 INFO   control verdict-decodability (M4): 0.996 (near 1.0 is EXPECTED and is why the ladder must be fitted pooled, never within stratum)
+21:49:58 INFO   control identity-decodability (M4): 0.885 (high is expected; it is why pooled AUROC is not the headline)
+21:49:58 INFO   control permutation-null: 0.503 +/- 0.090 over 5 permutations (must be ~0.500)
+21:49:58 INFO   rung  conditional  pooled      
+21:49:58 INFO   Mn    0.459        0.464       
+21:49:58 INFO   M1    0.631        0.633       
+21:49:58 INFO   M1n   0.624        0.628       
+21:49:58 INFO   M1nd  0.542        0.584       
+21:49:58 INFO   M2    0.542        0.584       
+21:49:58 INFO   M2only 0.477        0.480       
+21:49:58 INFO   M3    0.543        0.584       
+21:49:58 INFO   M3only 0.574        0.586       
+21:49:58 INFO   M4    0.543        0.584       
+21:49:58 INFO   M1n - M1   delta=-0.007  CI95=[-0.028, +0.012]  p=0.7725
+21:49:58 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.1085, CI90=[-0.024, +0.009])
+21:49:58 INFO   M1nd - M1n delta=-0.082  CI95=[-0.119, -0.040]  p=1.0000
+21:49:58 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.9990, CI90=[-0.114, -0.048])
+21:49:58 INFO   M2 - M1nd  delta=+0.000  CI95=[-0.001, +0.002]  p=0.4930
+21:49:58 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.001, +0.001])
+21:49:58 INFO   M3 - M1nd  delta=+0.001  CI95=[-0.004, +0.005]  p=0.3695
+21:49:58 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.003, +0.004])
+21:49:58 INFO   M4 - M3    delta=+0.000  CI95=[+0.000, +0.001]  p=0.5940
+21:49:58 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[+0.000, +0.001])
+21:49:58 INFO ### llmbar | Llama-3.2-1B-Instruct | format=pairwise
+21:49:58 INFO   n=200 items, 100 CV groups (100 question_ids)
+21:49:58 INFO   verdict behaviour: accuracy 48.5%, P(pred=A) 2.5%, acc|gt=A 1.0% (n=100), acc|gt=B 96.0% (n=100)
+21:49:58 INFO   EXTREME VERDICT BIAS: P(pred=A)=2.5%. Conditional AUROC rests on very few minority-class items; treat its CI as uninformative and report the bias itself instead.
+21:49:58 INFO   families: Mn, M1, M1n, M1nd, M2, M2only, M3, M3only, M4 | nuisance cols: 3 | baseline to beat: M1nd
+21:49:59 INFO   conditional-AUROC support: A: 1+/99- (NOT estimable), B: 96+/4- (NOT estimable)
+21:49:59 INFO   THIN STRATUM: the conditional estimate rests on as few as 1 minority-class items — treat every conditional number in this slice as indicative only.
+21:50:00 INFO   SDT null (first-order observer, d'=-0.58, c=+2.04, parameter uncertainty propagated): conditional AUROC 0.896, 90% band [0.358, 1.000] — this, not 0.500, is the reference
+21:50:00 INFO     NOTE: null band is 0.64 wide at n=200; per-slice comparison can only detect very large metacognitive effects. The pooled hierarchical test is the primary one.
+21:50:00 INFO   floor to clear = max(SDT p95 1.000, verdict-leak p95 0.500) = 1.000
+21:50:00 INFO   rungs clearing BOTH floors: NONE — no rung carries information beyond first-order performance and verdict leakage
+21:50:00 INFO   contrasts SUPPRESSED: verdict behaviour is (near-)constant, so no conditional contrast here is estimable — report the verdict bias itself, not an AUROC.
+21:50:01 INFO   spectral-block coefficients: mean|w| spectral=0.04558 vs activation=0.02915 (ratio 1.56)
+21:50:01 INFO   POSITIVE CONTROL (recover prompt length, n=136): M2only=1.000, M3only=1.000, M2=1.000, M3=1.000, M4=1.000
+21:50:01 INFO   control verdict-decodability (M4): 0.717 (near 1.0 is EXPECTED and is why the ladder must be fitted pooled, never within stratum)
+21:50:02 INFO   control identity-decodability (M4): 0.599 (high is expected; it is why pooled AUROC is not the headline)
+21:50:02 INFO   control permutation-null: n/a +/- n/a over 0 permutations (must be ~0.500)
+21:50:02 INFO   rung  conditional  pooled      
+21:50:02 INFO   Mn    n/a          0.496       
+21:50:02 INFO   M1    n/a          0.613       
+21:50:02 INFO   M1n   n/a          0.609       
+21:50:02 INFO   M1nd  n/a          0.711       
+21:50:02 INFO   M2    n/a          0.711       
+21:50:02 INFO   M2only n/a          0.505       
+21:50:02 INFO   M3    n/a          0.712       
+21:50:02 INFO   M3only n/a          0.549       
+21:50:02 INFO   M4    n/a          0.712       
+21:50:02 INFO ### llmbar | Llama-3.2-1B-Instruct | format=single
+21:50:02 INFO   n=200 items, 100 CV groups (100 question_ids)
+21:50:02 INFO   verdict behaviour: accuracy 52.5%, P(pred=No) 44.5%, acc|gt=No 47.0% (n=100), acc|gt=Yes 58.0% (n=100)
+21:50:02 INFO   families: Mn, M1, M1n, M1nd, M2, M2only, M3, M3only, M4 | nuisance cols: 3 | baseline to beat: M1nd
+21:50:03 INFO   conditional-AUROC support: No: 47+/53-, Yes: 58+/42-
+21:50:04 INFO   SDT null (first-order observer, d'=0.13, c=+0.14, parameter uncertainty propagated): conditional AUROC 0.491, 90% band [0.362, 0.579] — this, not 0.500, is the reference
+21:50:04 INFO     NOTE: null band is 0.22 wide at n=200; per-slice comparison can only detect very large metacognitive effects. The pooled hierarchical test is the primary one.
+21:50:04 INFO   verdict-leakage floor (pure pred decoder at this slice's imbalance): 0.489 (p95 0.567)  <-- NOT clean: cancellation is partial here; every rung must clear this too
+21:50:04 INFO   floor to clear = max(SDT p95 0.579, verdict-leak p95 0.567) = 0.579
+21:50:04 INFO   rungs clearing BOTH floors: M1nd, M2, M3, M4
+21:50:42 INFO   spectral-block coefficients: mean|w| spectral=0.04211 vs activation=0.02786 (ratio 1.51)
+21:50:43 INFO   POSITIVE CONTROL (recover prompt length, n=135): M2only=0.996, M3only=0.993, M2=0.999, M3=0.993, M4=0.994
+21:50:43 INFO   control verdict-decodability (M4): 0.976 (near 1.0 is EXPECTED and is why the ladder must be fitted pooled, never within stratum)
+21:50:44 INFO   control identity-decodability (M4): 0.793 (high is expected; it is why pooled AUROC is not the headline)
+21:50:44 INFO   control permutation-null: 0.485 +/- 0.014 over 5 permutations (must be ~0.500)
+21:50:44 INFO   rung  conditional  pooled      
+21:50:44 INFO   Mn    0.411        0.412       
+21:50:44 INFO   M1    0.577        0.574       
+21:50:44 INFO   M1n   0.541        0.539       
+21:50:44 INFO   M1nd  0.588        0.620       
+21:50:44 INFO   M2    0.589        0.621       
+21:50:44 INFO   M2only 0.499        0.497       
+21:50:44 INFO   M3    0.592        0.623       
+21:50:44 INFO   M3only 0.520        0.512       
+21:50:44 INFO   M4    0.592        0.623       
+21:50:44 INFO   M1n - M1   delta=-0.036  CI95=[-0.069, -0.007]  p=0.9920
+21:50:44 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.8430, CI90=[-0.064, -0.011])
+21:50:44 INFO   M1nd - M1n delta=+0.046  CI95=[-0.034, +0.127]  p=0.1170
+21:50:44 INFO              equivalence: CANNOT rule out effects >= |delta| < 0.020 (TOST p=0.7475, CI90=[-0.018, +0.113])
+21:50:44 INFO   M2 - M1nd  delta=+0.002  CI95=[-0.002, +0.006]  p=0.2220
+21:50:44 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.002, +0.005])
+21:50:44 INFO   M3 - M1nd  delta=+0.004  CI95=[+0.000, +0.009]  p=0.0275
+21:50:44 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[+0.001, +0.008])
+21:50:44 INFO   M4 - M3    delta=-0.000  CI95=[-0.002, +0.000]  p=0.9970
+21:50:44 INFO              equivalence: RULED OUT effects >= |delta| < 0.020 (TOST p=0.0005, CI90=[-0.001, +0.000])
+21:50:44 INFO llmbar: analysis written -> analysis_llmbar.json
+21:50:44 INFO ========================================================================
+21:50:44 INFO BH-FDR over 66 contrasts (alpha=0.05): 0 survive
+21:50:44 INFO Reading guide: the CONDITIONAL AUROC is the headline — it only compares items sharing a gt_verdict, so a feature cannot score by merely telling a pos item from a neg one. Pooled AUROC is reported for completeness and is inflated by exactly that. A family contributes only if its contrast over M1n is positive, its CI clears zero, and it survives BH-FDR.
