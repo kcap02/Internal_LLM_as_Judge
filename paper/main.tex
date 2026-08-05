@@ -394,21 +394,36 @@ is the primary criterion, and the minimum detectable effect is retained as a low
 \section{Results}
 \label{sec:results}
 
-\emph{[Pending the scaled run at $n = \NFreeze{}$ per stratum. \texttt{fill\_numbers.py --verify}
-exits non-zero on the macros this section requires. Written to be filled.]}
+Two panels are reported, and they are distinct experiments. The \emph{pilot panel} is four judges
+below 4B at \PilotSliceN{} items per slice on one bank, and it is complete; it establishes the
+estimator's behaviour and the size of both floors. The \emph{main panel} is
+\NJudgesMain{} judges spanning scale at \NItemsPerSliceMain{} items per stratum across all five
+banks, and it carries the preregistered primary tests. Results below are labelled by panel and no
+quantity is pooled across them.
 
-The panel is \NJudgesMain{} judges spanning scale at \NItemsPerSliceMain{} items per slice, with all
-five banks entering a hierarchical model as a random effect. Both floors are reported per slice
-alongside per-stratum support counts.
+\subsection{Pilot panel}
 
-\paragraph{Spectral features alone.} Fitted without baseline columns, the spectral family attains
-\MTwoOnlyLo{}--\MTwoOnlyHi{} conditional AUROC across \NSlicesEstimable{} estimable slices of the
-four-judge panel, at or below chance on every one. The activation family attains
-\MThreeOnlyLo{}--\MThreeOnlyHi{}. Since the corresponding rungs sit at or below the estimator's
-detection threshold at this $n$, the nested comparison between them is not informative here, and is
-reported as unresolved rather than as an equivalence.
+\paragraph{Spectral features alone.} Fitted without baseline columns, the spectral family attained
+\MTwoOnlyLo{}--\MTwoOnlyHi{} conditional AUROC across \NSlicesEstimable{} estimable slices, at or
+below chance on every one. The activation family attained \MThreeOnlyLo{}--\MThreeOnlyHi{}. Both sit
+at or below the estimator's detection threshold at this $n$ (\cref{sec:absence}), so the nested
+comparison between them is uninformative on this panel and is reported as unresolved rather than as
+an equivalence.
 
-\paragraph{Controls.} The positive control attains at least \PosControlLo{} on every slice.
+\paragraph{Floors and controls.} The floor $\phi$ of \cref{eq:floor} ranged over
+\FloorLo{}--\FloorHi{}, exceeding every rung on all but one slice. The positive control attained at
+least \PosControlLo{} on every slice, establishing that a null on this panel reflects the signal
+rather than the pipeline.
+
+\subsection{Main panel}
+
+\emph{[Pending the scaled run at $n = \NFreeze{}$ per stratum. \texttt{paper/check\_macros.py}
+exits non-zero on the two macros this subsection requires. Written to be filled; the pilot
+subsection above is final.]}
+
+All five banks enter a hierarchical model as a random effect. Both floors are reported per slice
+alongside per-stratum support counts, and the recovery curve is re-measured at the panel's block
+width before any delta is interpreted.
 
 \section{Numerical and provenance conditions}
 \label{sec:hygiene}
@@ -501,6 +516,11 @@ Trend read from overlapping intervals &
 Directional claim from a table whose IQRs overlap &
 Repeat measurement at fresh seeds &
 Script refuses a monotonicity claim unless consecutive IQRs are disjoint \\
+\addlinespace
+Verification run overwriting a reported artefact &
+A rigged failure sweep, used to test the pass condition, wrote the path the manuscript reads &
+An unrelated macro downstream, by chance &
+Canonical path written only under an explicit flag and only when every parameter matches the preregistered configuration \\
 \bottomrule
 \end{tabular}
 \end{table}

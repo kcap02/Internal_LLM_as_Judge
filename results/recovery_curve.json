@@ -185,5 +185,6 @@
     "detection": true,
     "block_only_trend_claimable": false,
     "calibration_self_check": true
-  }
+  },
+  "canonical": true
 }

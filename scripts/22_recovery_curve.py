@@ -52,11 +52,18 @@ Usage:
     python scripts/22_recovery_curve.py --n 200 400 800 1600 3200 --seeds 15
     python scripts/22_recovery_curve.py --target 0.633 --width 1536
 
-**Exploratory or rigged runs MUST pass `--tag`.** Without it this writes to
-`results/recovery_curve.json`, the file `paper/fill_numbers.py` resolves the
+**The canonical output path is protected structurally, not by convention.**
+`results/recovery_curve.json` is what `paper/fill_numbers.py` resolves the
 paper's detection-threshold macros from. A rigged failure run used to verify
-the PASS/FAIL logic (`--n 50 100 --target 0.999`) overwrote the production
-sweep, and the paper's macros silently became undefined.
+the PASS/FAIL logic (`--n 50 100 --target 0.999`) once overwrote it, and the
+only reason this was noticed is that an unrelated macro downstream happened to
+be flagged; had it not been, the paper would have printed thresholds from a run
+designed to detect nothing, with every check in the repo passing.
+
+The verification path and the thing verified must not share a write target. So
+this script writes to a **tagged** path by default, and will only write the
+canonical one when `--canonical` is given *and* every parameter matches
+`PREREG_CONFIG` below. Any exploratory sweep therefore cannot reach it.
 """
 
 import _bootstrap  # noqa: F401
@@ -74,6 +81,31 @@ from llm_judge.log_utils import setup_logging
 # Delta at or above this counts as a detection. Matches the preregistered
 # equivalence band, so "detected" and "not equivalent to zero" agree.
 DETECT_DELTA = 0.02
+
+# The preregistered sweep. `--canonical` writes results/recovery_curve.json,
+# which the paper reads, and is refused unless every value below matches. This
+# is the structural form of "exploratory runs must be tagged": a rigged or
+# reduced sweep cannot reach the canonical path even if the operator forgets.
+PREREG_CONFIG = {
+    "n": [200, 400, 800, 1600],
+    "width": 1536,
+    "strengths": [0.0, 0.5, 1.0, 1.5, 2.0, 3.0],
+    "target": 0.633,
+    "pilot_n": 200,
+    "detect_frac": 0.80,
+    "n_splits": 5,
+    "seeds": 12,
+}
+
+
+def canonical_mismatches(args) -> list[str]:
+    """Which arguments differ from the preregistered sweep."""
+    got = {"n": list(args.n), "width": args.width,
+           "strengths": list(args.strengths), "target": args.target,
+           "pilot_n": args.pilot_n, "detect_frac": args.detect_frac,
+           "n_splits": args.n_splits, "seeds": args.seeds}
+    return [f"{k}: {got[k]!r} != {v!r}"
+            for k, v in PREREG_CONFIG.items() if got[k] != v]
 
 
 def iqr_separations(by_n: dict, ns: list, key: str = "block_only_iqr"):
@@ -153,7 +185,27 @@ def main() -> None:
     ap.add_argument("--detect-frac", type=float, default=0.80)
     ap.add_argument("--n-splits", type=int, default=5)
     ap.add_argument("--tag", default=None)
+    ap.add_argument("--canonical", action="store_true",
+                    help="write results/recovery_curve.json, which the paper "
+                         "reads. Refused unless every parameter matches "
+                         "PREREG_CONFIG.")
     args = ap.parse_args()
+
+    # Resolve the write target BEFORE spending the compute, so a refusal is
+    # immediate rather than discovered after the sweep.
+    if args.canonical:
+        bad = canonical_mismatches(args)
+        if bad:
+            raise SystemExit(
+                "refusing --canonical: parameters differ from the "
+                "preregistered sweep:\n  " + "\n  ".join(bad)
+                + "\nRun without --canonical (results are written to a tagged "
+                  "path) or match PREREG_CONFIG.")
+        if args.tag:
+            raise SystemExit("--canonical and --tag are mutually exclusive")
+        write_tag = None
+    else:
+        write_tag = args.tag or "exploratory"
 
     log = setup_logging("22_recovery_curve").info
     log(f"width {args.width} | {args.seeds} seeds/cell | detection at "
@@ -306,9 +358,13 @@ def main() -> None:
     verdict["calibration_self_check"] = cal_ok
 
     out["verdict"] = verdict
-    p = RESULTS_DIR / f"{tagged('recovery_curve', args.tag)}.json"
+    out["canonical"] = bool(args.canonical)
+    p = RESULTS_DIR / f"{tagged('recovery_curve', write_tag)}.json"
     atomic_write_json(p, out)
-    log(f"wrote {p.name}")
+    log(f"wrote {p.name}"
+        + ("" if args.canonical else "  (NOT canonical: the paper reads "
+                                     "recovery_curve.json, written only "
+                                     "under --canonical)"))
 
     if not verdict["detection"] or cal_ok is False:
         log("\nOVERALL: FAIL — do not use this sweep to set N_FREEZE.")
