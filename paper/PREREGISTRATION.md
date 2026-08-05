@@ -409,17 +409,69 @@ says it does) may be fixed and the analysis re-run, with the bug and the
 before/after both reported; and a **run that fails to complete** may be
 resumed. Neither licenses a change to the specification.
 
+### 9.1 No pilot-and-scale
+
+**We do not run small experiments and scale the ones that look promising.**
+This is selection on the outcome and it is the same forking-paths failure §9
+exists to end, arriving under a different name.
+
+The measurement forbids it specifically. The detection threshold (§8.2) is a
+property of $n$: at $n = 200$ the estimator detects a calibrated true effect in
+only 58% of seeds. A small-scale run therefore does not produce weak evidence
+worth following up — it produces fluctuations at the scale of the effect being
+looked for, and scaling whatever looks largest is scaling the loudest noise.
+The pilot's 0/30 and 0/66 were uninformative rather than negative for exactly
+this reason.
+
+**Legitimate exploration is CPU-side and post hoc**: the transfer matrix,
+risk–coverage curves, the full-vector layer contrast and the floor
+decomposition all run against the stored features after the scaled run. They
+consume no GPU, they consume no $\alpha$ because they are labelled exploratory
+and unstarred, and none of them requires a new pass.
+
+**One small run is legitimate before the freeze, and it is not exploration.**
+Reproducing a published positive claim (§10) in this harness is a *feasibility*
+check: it establishes whether the setup runs here at all, which the budget
+depends on. The distinction is what is being tested — that the pipeline
+executes, not that a result is interesting — and it is recorded here so the
+distinction cannot be claimed retrospectively for something else.
+
 ## 10. Sequencing after the freeze
 
-The **cheap arm** (activations only — no retained attention, no
-eigendecomposition, no VRAM ceiling) starts the **same day** as the freeze. It
-is the only queue with a hardware constraint; the unification experiments, the
-published-baseline reimplementation, the transfer matrix and the risk-coverage
-curves are all CPU and run against its output.
+Six weeks to the abstract deadline. This is one scaled run plus writing, not an
+exploration budget.
 
-The expensive (spectral) arm does not need scale — it is already at SE
-0.005–0.009 for test 2 — and is budgeted at a few hundred items per bank across
-the three judges, for generality rather than power.
+| when | what |
+|---|---|
+| this week | freeze §3 and §7, record the hash |
+| immediately after | **cheap arm** at $n = $ `N_FREEZE` per stratum across the panel — hours of inference, no retained attention, no eigendecomposition, no VRAM ceiling |
+| behind it | CPU queue against the stored features: transfer matrix, risk–coverage, full-vector layer contrast, floor decomposition |
+| in parallel | **published-baseline reimplementation** (§10.1) |
+| final three weeks | writing |
+
+The expensive (spectral) arm does not need scale, and is budgeted at a few
+hundred items per bank across the named judges, for generality rather than
+power. Its detection threshold must be re-measured at its own block width
+before any of its deltas are interpreted.
+
+### 10.1 The published-baseline reimplementation is not optional
+
+With the `M4 − M3` claim retracted (§7), this paper's positive empirical
+content is one null on a four-judge pilot plus methodological findings
+demonstrated largely on planted data. A fair reviewer summary of that alone is
+*"the authors show a standard estimator has failure modes, and find nothing
+with their own method."*
+
+Applying the two floors and the corrected ladder to a **published positive
+claim about internals and metacognition** is the one item that changes this,
+and it is the only place where the interesting outcome exists in both
+directions: if the published result survives both floors, that is a result; if
+it moves, that is a larger one. Neither outcome depends on a number coming out
+a particular way, which is what distinguishes it from the pilot-and-scale
+strategy §9.1 forbids.
+
+It therefore ranks **above additional judges and above panel breadth**, and
+runs in parallel with the cheap arm rather than behind it.
 
 ## 11. Minimum viable submission
 
