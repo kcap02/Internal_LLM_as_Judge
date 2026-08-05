@@ -46,10 +46,32 @@ def _versions() -> dict:
     out = {"python": sys.version.split()[0], "platform": platform.platform()}
     for name, dist in _PKGS.items():
         try:
-            out[name] = version(dist)
+            out[name] = version(dist) + _vcs_suffix(dist)
         except PackageNotFoundError:
             out[name] = "not installed"
     return out
+
+
+def _vcs_suffix(dist: str) -> str:
+    """`@<sha>` for a package installed from a VCS URL, else "".
+
+    C-VER is about provenance that lives only in the log. A version *string*
+    is not provenance for a package installed from git: `spectral_trust` reads
+    0.2.3 whether it came from the release commit, a later fix, or a local
+    edit. pip records the resolved commit in the distribution's
+    `direct_url.json` (PEP 610), so read it and pin the record to the actual
+    code that ran.
+    """
+    try:
+        from importlib.metadata import distribution
+        raw = distribution(dist).read_text("direct_url.json")
+        if not raw:
+            return ""
+        info = json.loads(raw)
+        sha = (info.get("vcs_info") or {}).get("commit_id")
+        return f"@{sha[:7]}" if sha else ""
+    except Exception:
+        return ""
 
 
 def setup_logging(stage: str, config_dump: dict | None = None) -> logging.Logger:

@@ -1,0 +1,68 @@
+% ICLR 2027 requires a disclosure of LLM use as a section in the paper text (not counted toward the
+% page limit) plus a declaration in the submission form. \input this from main.tex before the
+% bibliography.
+%
+% !! ONE CLAUSE IS NOT YET TRUE. The bibliography paragraph asserts that every reference was
+% !! human-verified against the paper it cites. At the time of writing, the references had been
+% !! resolved by an LLM reading search results and annotated with what each paper establishes, but
+% !! the human confirmation pass had NOT been done. Do that pass, then this section is accurate.
+% !! Do not submit with the clause as written until it is. Under the ICLR 2027 AI policy a
+% !! misrepresentation of this kind is a Code of Ethics matter, and this paper's own thesis is that
+% !! plausible-looking output requires checking.
+
+\section*{Use of large language models}
+\label{sec:aiuse}
+
+We disclose LLM involvement in this work in the terms the ICLR 2027 policy requires, and in more
+detail than the minimum, because the paper's subject makes the question directly relevant.
+
+\paragraph{As a methodological adversary.} A substantial part of this paper originated in an
+extended adversarial exchange with a large language model (Anthropic Claude, Opus~5, accessed
+through Claude Code between July and September 2026). The model was given the repository and asked
+to attack the estimator rather than to defend it. Several of the findings reported here were first
+raised in that exchange and then verified by us in code:
+
+\begin{itemize}[nosep,leftmargin=*]
+\item the observation that the ladder's deltas correlated negatively with baseline strength, which
+      led to the concat-swamping result of \cref{sec:ladder};
+\item the request for a matched signal-detection null, which produced \cref{sec:estimand} and
+      retracted a behavioural trend we had been prepared to report as a finding;
+\item the identification of the self-verdict leakage channel and the observation that the pooled
+      fit, not the conditional metric, is what blocks it (\cref{sec:verdict});
+\item the demand for a minimum-detectable-effect calculation before further compute
+      (\cref{sec:inference}), which established that our pilot null was uninformative.
+\end{itemize}
+
+Every one of these was independently checked: each is reproduced by a planted-data test in the
+released test suite, and each is stated in the paper with the measurement rather than the argument.
+Where the model's premises were wrong we say so in \cref{sec:corrections}, and two of its
+recommendations were tested and rejected on evidence --- notably the proposal to replace the grouped
+bootstrap with paired DeLong, which we show would have understated our standard errors by
+$\DelongRatioClustered{}\times$.
+
+\paragraph{As an implementer.} The same model wrote or substantially edited code in the released
+repository, including the offset ladder estimator, the two null references, the leakage controls,
+the power stage and the regression tests. All of it is covered by the test suite and by the build
+checks described below; none of it was accepted without a test that fails when the behaviour
+regresses.
+
+\paragraph{As a search tool over the literature, with human verification.} Candidate references were
+located using LLM-assisted search. Every citation was then opened and checked by a human author
+against the claim the sentence makes, and the record of that check --- what each paper establishes,
+and which sentence leans on it --- is kept as structured comments in the released
+\texttt{refs.bib}. Two mismatches were caught this way and fixed in the \emph{sentence} rather than
+the citation: a pair of probing papers that reach opposite prescriptions had been cited as
+agreeing, and a reward-model benchmark had been cited behind a later, differently-named dataset it
+does not describe. A build check refuses to compile the paper if any cited key lacks a resolvable
+DOI or arXiv identifier.
+
+\paragraph{What was not delegated.} The research question, the experimental design, the choice of
+banks and panel, the preregistered primary tests, and the decision about what may be claimed are
+ours. So is responsibility for everything in this paper, including anything an LLM produced.
+
+\paragraph{Reproducibility of the disclosure itself.} Because a claim about how a paper was written
+is as checkable as any other, the repository carries the full provenance: every result file records
+the git commit, the package versions --- including the exact VCS commit of the spectral library, not
+merely its version string --- the configuration and a digest of the bank that was scored. Every
+number printed in this paper is a macro resolved from a results file, and the build fails on an
+unresolved one rather than printing a stale value.
