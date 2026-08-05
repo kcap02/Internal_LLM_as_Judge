@@ -35,10 +35,16 @@ raised in that exchange and then verified by us in code:
 
 Every one of these was independently checked: each is reproduced by a planted-data test in the
 released test suite, and each is stated in the paper with the measurement rather than the argument.
-Where the model's premises were wrong we say so in \cref{sec:corrections}, and two of its
-recommendations were tested and rejected on evidence --- notably the proposal to replace the grouped
-bootstrap with paired DeLong, which we show would have understated our standard errors by
-$\DelongRatioClustered{}\times$.
+
+The exchange ran in both directions, which is the more useful thing to report. Where the model's
+premises were wrong we say so in \cref{sec:corrections}, and three of its recommendations were
+rejected: replacing the grouped bootstrap with paired DeLong, which we show would have understated
+our standard errors by $\DelongRatioClustered{}\times$; a concern about the eigensolver
+normalisation that the call site already precluded; and a proposal to run small experiments and
+scale the ones that appeared promising, which is outcome-selection and is forbidden by our own
+analysis plan. Corrections also ran from the model to us, including the retraction of a headline
+equivalence claim we had been prepared to report. Neither party reliably caught the other, which is
+the argument for the build-time checks described below rather than for either party's vigilance.
 
 \paragraph{As an implementer.} The same model wrote or substantially edited code in the released
 repository, including the offset ladder estimator, the two null references, the leakage controls,

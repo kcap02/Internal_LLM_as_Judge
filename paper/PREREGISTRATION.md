@@ -415,6 +415,14 @@ resumed. Neither licenses a change to the specification.
 This is selection on the outcome and it is the same forking-paths failure §9
 exists to end, arriving under a different name.
 
+The provenance is part of the point: the strategy was **proposed by the
+methodological reviewer**, roughly two weeks into building an apparatus whose
+purpose is to prevent outcome-selection, and rejected on the grounds below. A
+prohibition with anonymous provenance reads as a rule someone thought up. One
+that records the auditing party proposing the failure mode is evidence that the
+discipline has to be structural rather than maintained as a habit by whoever is
+paying attention.
+
 The measurement forbids it specifically. The detection threshold (§8.2) is a
 property of $n$: at $n = 200$ the estimator detects a calibrated true effect in
 only 58% of seeds. A small-scale run therefore does not produce weak evidence
