@@ -89,6 +89,14 @@ exactly this case and was nearly written up as a negative result.
   Option 3 is the cheapest and is consistent with §10's split, but it changes
   what primary test 2 generalises over, so it must be a preregistered choice
   and not a retrospective description of what fitted.
+
+  **Where the per-layer attention reduction lives, if implemented.** It changes
+  what `spectral_trust` does on every forward pass, and `release/0.2.3` is the
+  artifact this paper cites. It goes in the **judge repository as a local
+  hook**, not into that release: 0.2.3 is currently a clean one-fix patch off
+  published 0.2.2, and keeping it minimal keeps the cited artifact reviewable.
+  The library absorbs the reduction in 0.3.0 alongside the gini metrics, which
+  §6 already excludes from this paper's feature set.
 - **Five banks** (MMLU, MMLU-Pro, JudgeBench, LLMBar, RewardBench 2), entering
   the hierarchical model as a **random effect** — pooled, not tested
   separately.
@@ -269,12 +277,28 @@ used elsewhere in this document.
 | 800 | +0.062 | [+0.059, +0.066] | 100% | 0.647 | [0.626, 0.661] |
 | 1600 | +0.082 | [+0.064, +0.084] | 100% | 0.631 | [0.625, 0.637] |
 
-Under pairing, block-only rises monotonically from n=200 to n=800 and the
-800→1600 dip has heavily overlapping IQRs, so it is a plateau with sampling
-noise rather than an inconsistent estimator. An earlier unpaired sweep showed
-a non-monotone block-only (0.615, 0.680, 0.652, 0.631); that was an artefact
-of regenerating each cell from a seed that consumed different draws at
-different n, which made the columns unrelated realisations.
+**Block-only is approximately flat in n, and that matters for how the redesign
+is described.** A direct check at s\* = 2.721 over 20 seeds gives block-only
+0.643 (phase-1 seeds) and 0.634 (phase-2 seeds) at n=200 — so the calibration
+is self-consistent with its 0.633 target. Re-running the paired sweep on 12
+fresh seeds gives block-only 0.649, 0.658, 0.657, 0.641 across n = 200 → 1600:
+**flat, not rising.**
+
+The consequence is that the downward bias in block-only at n=200 — the
+motivation originally given for indexing the curve on planted strength rather
+than on a recovered quantity — **is negligible at this width**. The
+plant-indexed design is still the right one, because indexing on an estimated
+quantity is ill-posed in principle, but the reason it improved this
+measurement was the **pairing and the seeding**, not a correction for
+regime-mixing.
+
+Two earlier readings of this table were noise. The unpaired sweep's
+non-monotone block-only (0.615, 0.680, 0.652, 0.631) and the first paired
+sweep's apparent monotone rise (0.574 → 0.626 → 0.647) were both 10-seed
+fluctuations around a flat ≈0.65; the 0.574 in particular was a low draw, and
+reading a trend into it was an error. **The `n` dependence lives in the
+detection fraction and the delta, not in block-only** — and those are what set
+`N_FREEZE`.
 
 > **`N_FREEZE` = 800 items per stratum.**
 >
