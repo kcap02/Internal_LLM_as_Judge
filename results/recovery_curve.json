@@ -172,6 +172,15 @@
     }
   },
   "n_freeze_candidate": 400,
+  "calibration_self_check": {
+    "seed_offset": 9000,
+    "median": 0.6355131169700705,
+    "iqr": [
+      0.5975696764090377,
+      0.6767184887955894
+    ],
+    "n_seeds": 12
+  },
   "verdict": {
     "detection": true,
     "block_only_trend_claimable": false,

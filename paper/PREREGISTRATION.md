@@ -294,12 +294,25 @@ used elsewhere in this document.
 | 800 | +0.062 | [+0.059, +0.066] | 100% | 0.647 | [0.626, 0.661] |
 | 1600 | +0.082 | [+0.064, +0.084] | 100% | 0.631 | [0.625, 0.637] |
 
-**Block-only is approximately flat in n, and that matters for how the redesign
-is described.** A direct check at s\* = 2.721 over 20 seeds gives block-only
-0.643 (phase-1 seeds) and 0.634 (phase-2 seeds) at n=200 — so the calibration
-is self-consistent with its 0.633 target. Re-running the paired sweep on 12
-fresh seeds gives block-only 0.649, 0.658, 0.657, 0.641 across n = 200 → 1600:
-**flat, not rising.**
+**Block-only is approximately flat in n**, and the script refuses any
+monotonicity claim from this table because no consecutive IQRs separate. The
+calibration self-check, run on 12 **independent** worlds at the pilot's n,
+gives block-only 0.636 IQR [0.598, 0.677] against the 0.633 target — so s\*
+delivers the intended plant.
+
+*A prefix is a valid subsample.* We checked, because the sweep's own n=200 cell
+reads 0.574 while a fresh measurement reads ≈0.63. Structurally the prefix is
+sound (200 items, 100 groups, stratum fraction 0.5), and distributionally the
+two agree: 12 fresh worlds give median 0.627 IQR [0.587, 0.711], 12 prefixes of
+n=1600 worlds give 0.648 IQR [0.625, 0.670], overlapping by 0.154. The 0.574 is
+a low draw of one seed set, not a property of prefixing, and the n-sweep is
+measuring what it claims to.
+
+*How we nearly concluded otherwise.* Two sweeps both reported 0.574 and that
+read as replication. Both used seed offset `2000+k` and shared ten seeds: it
+was the same computation twice. The calibration self-check now runs on an
+independent seed offset for exactly this reason — checking a calibration
+against a cell that shares its seeds is not a check.
 
 The consequence is that the downward bias in block-only at n=200 — the
 motivation originally given for indexing the curve on planted strength rather

@@ -259,15 +259,30 @@ def main() -> None:
             "NO MONOTONICITY CLAIM IS PERMITTED from this table. Any apparent "
             "rise or fall is within sampling noise.")
 
-    # The calibration must reproduce its own target when measured directly.
+    # The calibration must reproduce its target on INDEPENDENT draws. Checking
+    # it against the sweep's own n=200 cell is not a check: that cell shares
+    # its seeds with the sweep, so a low draw there produces a "confirmed" low
+    # reading. (This bit us: two sweeps both reported block-only 0.574 at
+    # n=200, which read as replication and was the same seed set twice.)
+    cal_seeds = 9000
+    fresh = [evaluate(make_world(args.pilot_n, args.width, s_star,
+                                 cal_seeds + k),
+                      args.pilot_n, args.n_splits, args.width,
+                      want_delta=False)[1]
+             for k in range(args.seeds)]
+    fresh = [v for v in fresh if v is not None]
     cal_ok = None
-    if by_n and str(args.pilot_n) in by_n:
-        got = by_n[str(args.pilot_n)]["median_block_only"]
-        lo, hi = by_n[str(args.pilot_n)]["block_only_iqr"]
+    if fresh:
+        med = float(np.median(fresh))
+        lo, hi = np.percentile(fresh, [25, 75])
         cal_ok = bool(lo <= args.target <= hi)
-        log(f"[{'PASS' if cal_ok else 'WARN'}] calibration self-check: "
-            f"block-only at the pilot's n={args.pilot_n} is {got:.3f} "
-            f"IQR [{lo:.3f}, {hi:.3f}] against target {args.target:.3f}"
+        out["calibration_self_check"] = {
+            "seed_offset": cal_seeds, "median": med,
+            "iqr": [float(lo), float(hi)], "n_seeds": len(fresh)}
+        log(f"[{'PASS' if cal_ok else 'WARN'}] calibration self-check on "
+            f"{len(fresh)} INDEPENDENT worlds at n={args.pilot_n}: "
+            f"block-only {med:.3f} IQR [{lo:.3f}, {hi:.3f}] against target "
+            f"{args.target:.3f}"
             + ("" if cal_ok else " — target OUTSIDE the IQR; s* is not "
                "delivering the intended plant"))
     verdict["calibration_self_check"] = cal_ok
