@@ -6,9 +6,14 @@ accelerate
 scikit-learn
 numpy
 psutil
-# PINNED. The pilot ran 0.2.1; 0.2.2 fixed the rw-normalization eigensolver
-# dispatch and 0.2.3 adds the hard non-finite-attention assertion (C-NUM).
-# Metrics on the sym path are unchanged across these (verified: <=0.02%), but
-# a campaign must not straddle library versions silently — the log header
-# records the version actually used.
-spectral-trust==0.2.3
+# PINNED BY COMMIT, not by version. The pilot ran 0.2.1; 0.2.2 fixed the
+# rw-normalization eigensolver dispatch; 0.2.3 adds the hard
+# non-finite-attention assertion (C-NUM) and is NOT ON PyPI. A SHA pin
+# resolves today, installs the assertion, and is exactly reproducible for a
+# reader of the paper — a version pin gives up one of those three until the
+# release is published. Switch to `spectral-trust==0.2.3` after upload.
+#
+# Metrics on the sym path are unchanged across 0.2.1->0.2.3 (verified: <=0.02%
+# on every metric at every length), but a campaign must not straddle library
+# versions silently — the log header records the version actually used.
+spectral-trust @ git+https://github.com/vcnoel/spectral-trust.git@2149f55

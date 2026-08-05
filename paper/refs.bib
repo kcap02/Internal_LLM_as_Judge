@@ -1,21 +1,24 @@
 % VERIFIED REFERENCES ONLY.
 %
-% An entry appears here only once someone has confirmed it resolves to a real
-% paper with a real DOI or arXiv ID. paper/check_refs.py fails the build on any
-% key cited in main.tex that is absent here or lacks a resolvable identifier.
+% An entry appears here only once someone has confirmed it resolves to a real paper with a real DOI
+% or arXiv ID. paper/check_refs.py fails the build on any key cited in main.tex that is absent here
+% or lacks a resolvable identifier.
 %
-% This file is deliberately almost empty. main.tex currently cites ~25 keys that
-% were written from the shape of the argument rather than from a bibliography
-% anyone read. They are NOT here, so the build is blocked until each is either
-% verified and added, or deleted along with the sentence citing it.
+% Existence is not the check that matters. The commoner failure is a real DOI attached to a claim the
+% paper does not make, because a search returns something adjacent and it gets accepted as the
+% intended reference. So every entry carries a CLAIM: line recording what the paper actually
+% establishes, and a USED-FOR: line recording the sentence in main.tex that leans on it. Where the
+% sentence is not supported by the CLAIM, the SENTENCE changes or goes -- not the citation.
 %
-% Treat this exactly like C-NUM: a silent correctness failure that produces
-% entirely plausible output. A paper arguing that plausible numbers require
-% verification cannot ship an unverified bibliography.
+% Verified 2026-08-05.
+
+% ---------------------------------------------------------------------------------------------
+% Metacognition / signal detection
+% ---------------------------------------------------------------------------------------------
 
 @article{maniscalco2012,
-  title   = {A signal detection theoretic approach for estimating
-             metacognitive sensitivity from confidence ratings},
+  title   = {A signal detection theoretic approach for estimating metacognitive sensitivity from
+             confidence ratings},
   author  = {Maniscalco, Brian and Lau, Hakwan},
   journal = {Consciousness and Cognition},
   volume  = {21},
@@ -24,3 +27,215 @@
   year    = {2012},
   doi     = {10.1016/j.concog.2011.09.021}
 }
+% CLAIM: introduces meta-d', a measure of metacognitive sensitivity expressed in the units of
+%   first-order d', estimated from type-2 (confidence) data via an SDT model.
+% USED-FOR: sec:estimand -- that meta-d' expresses metacognitive sensitivity in first-order units.
+%   SUPPORTED.
+
+@article{fleming2014,
+  title   = {How to measure metacognition},
+  author  = {Fleming, Stephen M. and Lau, Hakwan C.},
+  journal = {Frontiers in Human Neuroscience},
+  volume  = {8},
+  pages   = {443},
+  year    = {2014},
+  doi     = {10.3389/fnhum.2014.00443}
+}
+% CLAIM: review of metacognitive-sensitivity measures; treats the meta-d'/d' ratio (M-ratio) as the
+%   normalisation of metacognitive sensitivity for first-order performance.
+% USED-FOR: sec:estimand -- that M-ratio = 1.0 means no insight beyond first-order performance.
+%   SUPPORTED. NB the "= 1.0" reading is the standard interpretation of the ratio, not a numerical
+%   result of this paper; phrase it as the framework's convention, not as their finding.
+
+% ---------------------------------------------------------------------------------------------
+% Probing and its controls
+% ---------------------------------------------------------------------------------------------
+
+@inproceedings{hewitt2019control,
+  title     = {Designing and Interpreting Probes with Control Tasks},
+  author    = {Hewitt, John and Liang, Percy},
+  booktitle = {Proceedings of the 2019 Conference on Empirical Methods in Natural Language
+               Processing and the 9th International Joint Conference on Natural Language Processing
+               (EMNLP-IJCNLP)},
+  pages     = {2733--2743},
+  year      = {2019},
+  eprint    = {1909.03368},
+  archivePrefix = {arXiv}
+}
+% CLAIM: a probe's accuracy conflates what the representation encodes with what the probe can learn;
+%   proposes control tasks (randomised labels) and reports selectivity, the gap between the two.
+% USED-FOR: sec:related -- as the origin of the control-task discipline our positive control follows.
+%   SUPPORTED. Do NOT claim they address nested model comparison or block width; they do not.
+
+@article{belinkov2022,
+  title   = {Probing Classifiers: Promises, Shortcomings, and Advances},
+  author  = {Belinkov, Yonatan},
+  journal = {Computational Linguistics},
+  volume  = {48},
+  number  = {1},
+  pages   = {207--219},
+  year    = {2022},
+  doi     = {10.1162/coli_a_00422}
+}
+% CLAIM: a squib reviewing probing-classifier methodology and its documented limitations.
+% USED-FOR: sec:related -- cited as the synthesis of the probing-critique literature. SUPPORTED.
+
+@inproceedings{voita2020,
+  title     = {Information-Theoretic Probing with Minimum Description Length},
+  author    = {Voita, Elena and Titov, Ivan},
+  booktitle = {Proceedings of the 2020 Conference on Empirical Methods in Natural Language
+               Processing (EMNLP)},
+  pages     = {183--196},
+  year      = {2020},
+  eprint    = {2003.12298},
+  archivePrefix = {arXiv}
+}
+% CLAIM: recasts probing as compression; MDL of the labels given representations is more informative
+%   and more stable than probe accuracy, and sensitive to probe capacity.
+% USED-FOR: sec:related -- "sharpens the same worry through probe capacity and description length".
+%   SUPPORTED for the description-length half.
+
+@inproceedings{pimentel2020,
+  title     = {Information-Theoretic Probing for Linguistic Structure},
+  author    = {Pimentel, Tiago and Valvoda, Josef and Hall Maudslay, Rowan and Zmigrod, Ran and
+               Williams, Adina and Cotterell, Ryan},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational
+               Linguistics (ACL)},
+  pages     = {4609--4622},
+  year      = {2020},
+  eprint    = {2004.03061},
+  archivePrefix = {arXiv}
+}
+% CLAIM: operationalises probing as mutual-information estimation and argues AGAINST the simple-probe
+%   convention -- one should choose the highest-performing probe, since it tightens the estimate.
+% USED-FOR: sec:related -- currently grouped with voita2020 under "probe capacity". PARTIALLY
+%   SUPPORTED: the two reach opposite prescriptions on probe complexity, so the sentence must not
+%   imply they agree. Phrase as "the same worry pursued in opposite directions".
+
+@article{elazar2021,
+  title   = {Amnesic Probing: Behavioral Explanation with Amnesic Counterfactuals},
+  author  = {Elazar, Yanai and Ravfogel, Shauli and Jacovi, Alon and Goldberg, Yoav},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume  = {9},
+  pages   = {160--175},
+  year    = {2021},
+  doi     = {10.1162/tacl_a_00359}
+}
+% CLAIM: probing shows what is encoded, not what the model uses; removes a property by causal
+%   intervention and measures the behavioural effect instead.
+% USED-FOR: sec:related -- "whether probing accuracy implies the model uses the information".
+%   SUPPORTED, and this is the paper that makes the use/encode distinction causal.
+
+@inproceedings{ravichander2021,
+  title     = {Probing the Probing Paradigm: Does Probing Accuracy Entail Task Relevance?},
+  author    = {Ravichander, Abhilasha and Belinkov, Yonatan and Hovy, Eduard},
+  booktitle = {Proceedings of the 16th Conference of the European Chapter of the Association for
+               Computational Linguistics (EACL)},
+  pages     = {3363--3377},
+  year      = {2021},
+  eprint    = {2005.00719},
+  archivePrefix = {arXiv}
+}
+% CLAIM: models encode linguistic properties that are demonstrably NOT needed for the task they were
+%   trained on, so probing accuracy does not entail task relevance.
+% USED-FOR: sec:related -- same clause as elazar2021. SUPPORTED.
+
+% ---------------------------------------------------------------------------------------------
+% LLM judges and judge benchmarks
+% ---------------------------------------------------------------------------------------------
+
+@inproceedings{zheng2023,
+  title     = {Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena},
+  author    = {Zheng, Lianmin and Chiang, Wei-Lin and Sheng, Ying and Zhuang, Siyuan and Wu, Zhanghao
+               and Zhuang, Yonghao and Lin, Zi and Li, Zhuohan and Li, Dacheng and Xing, Eric P. and
+               Zhang, Hao and Gonzalez, Joseph E. and Stoica, Ion},
+  booktitle = {Advances in Neural Information Processing Systems 36 (NeurIPS) Datasets and
+               Benchmarks Track},
+  year      = {2023},
+  eprint    = {2306.05685},
+  archivePrefix = {arXiv}
+}
+% CLAIM: strong LLM judges agree with human preference at >80%; documents position, verbosity and
+%   self-enhancement biases as limitations of LLM-as-a-judge.
+% USED-FOR: sec:related -- "known pathologies: position bias, length bias, self-preference".
+%   SUPPORTED (verbosity is the length pathology; self-enhancement is self-preference).
+
+@inproceedings{zeng2024,
+  title     = {Evaluating Large Language Models at Evaluating Instruction Following},
+  author    = {Zeng, Zhiyuan and Yu, Jiatong and Gao, Tianyu and Meng, Yu and Goyal, Tanya and
+               Chen, Danqi},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  eprint    = {2310.07641},
+  archivePrefix = {arXiv}
+}
+% CLAIM: LLMBar, a meta-evaluation benchmark of 419 manually curated output pairs in which the
+%   instruction-violating response is superficially attractive; evaluators vary widely and the best
+%   remain far from ceiling.
+% USED-FOR: sec:setup, as our adversarial free-text bank. SUPPORTED -- and the 419 pairs match the
+%   418 CV groups our text-derived grouping yields, which is worth stating as a provenance check.
+
+@inproceedings{tan2024,
+  title     = {JudgeBench: A Benchmark for Evaluating LLM-based Judges},
+  author    = {Tan, Sijun and Zhuang, Siyuan and Montgomery, Kyle and Tang, William Y. and
+               Cuadron, Alejandro and Wang, Chenguang and Popa, Raluca Ada and Stoica, Ion},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2025},
+  eprint    = {2410.12784},
+  archivePrefix = {arXiv}
+}
+% CLAIM: evaluates judges against OBJECTIVE correctness on knowledge/reasoning/math/coding rather
+%   than against human preference, on the argument that crowdsourced preference is a poor indicator
+%   of factual correctness.
+% USED-FOR: sec:setup, as our objectively-labelled free-text bank. SUPPORTED, and the objective-label
+%   property is exactly why we use it. NB: arXiv 2024, PUBLISHED ICLR 2025 -- the key says 2024;
+%   either rename the key or cite the year as 2025 consistently.
+
+@article{lambert2024,
+  title   = {RewardBench: Evaluating Reward Models for Language Modeling},
+  author  = {Lambert, Nathan and Pyatkin, Valentina and Morrison, Jacob and Miranda, LJ and
+             Lin, Bill Yuchen and Chandu, Khyathi and Dziri, Nouha and Kumar, Sachin and
+             Zick, Tom and Choi, Yejin and Smith, Noah A. and Hajishirzi, Hannaneh},
+  journal = {arXiv preprint},
+  year    = {2024},
+  eprint  = {2403.13787},
+  archivePrefix = {arXiv}
+}
+% CLAIM: RewardBench, a benchmark and codebase for evaluating REWARD MODELS on prompt-chosen-rejected
+%   trios across chat, reasoning and safety.
+% !! MISMATCH: our bank is RewardBench **2**, a later and different dataset that this paper does NOT
+% !! describe. Citing this for our bank is the exact failure this file exists to catch. Either find
+% !! and verify the RewardBench 2 reference, or drop our RewardBench 2 bank's citation and describe
+% !! the dataset without one. DO NOT let this key stand behind a sentence about RewardBench 2.
+
+% ---------------------------------------------------------------------------------------------
+% Selective prediction
+% ---------------------------------------------------------------------------------------------
+
+@article{elyaniv2010,
+  title   = {On the Foundations of Noise-free Selective Classification},
+  author  = {El-Yaniv, Ran and Wiener, Yair},
+  journal = {Journal of Machine Learning Research},
+  volume  = {11},
+  pages   = {1605--1641},
+  year    = {2010},
+  doi     = {10.5555/1756006.1859904}
+}
+% CLAIM: formalises selective classification (classification with a reject option) and the
+%   risk-coverage trade-off, and characterises achievable trade-offs.
+% USED-FOR: sec:related -- that the practical form of the question is precision at fixed coverage.
+%   SUPPORTED; the risk-coverage curve is this paper's central object.
+
+@inproceedings{geifman2017,
+  title     = {Selective Classification for Deep Neural Networks},
+  author    = {Geifman, Yonatan and El-Yaniv, Ran},
+  booktitle = {Advances in Neural Information Processing Systems 30 (NIPS)},
+  pages     = {4878--4887},
+  year      = {2017},
+  eprint    = {1705.08500},
+  archivePrefix = {arXiv}
+}
+% CLAIM: constructs a selective classifier from a trained network with a guaranteed risk bound at a
+%   chosen coverage; reports 2% top-5 ImageNet error at ~60% coverage with probability 0.999.
+% USED-FOR: sec:related -- same clause as elyaniv2010. SUPPORTED, and it is the reason we report
+%   coverage at fixed risk rather than Delta-AUROC.

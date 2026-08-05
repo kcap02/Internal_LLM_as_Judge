@@ -133,16 +133,22 @@ metacognition at all. \Cref{sec:estimand} is a Monte-Carlo M-ratio for judges.
 
 \paragraph{Probing and its controls.} That a probe's score reflects the probe rather than the
 representation is the concern of \citet{hewitt2019control}, answered with control tasks; the
-follow-on literature sharpens it through probe capacity \citep{voita2020,pimentel2020}, through
-whether the model uses the information \citep{ravichander2021,elazar2021}, and in the synthesis of
+follow-on literature pursues it in opposite directions --- \citet{voita2020} recasting probing as
+compression, \citet{pimentel2020} arguing from mutual information that one should choose the
+\emph{highest}-performing probe rather than the simplest --- and through whether the model
+\emph{uses} what a probe can read \citep{ravichander2021,elazar2021}, synthesised by
 \citet{belinkov2022}. Our positive control (\cref{sec:absence}) is in that tradition. The failure in
 \cref{sec:ladder} is different in kind and, as far as we know, undocumented: it is not about probe
 capacity but about what happens to a \emph{nested} comparison when the two models being compared
 have very different column counts under one penalty.
 
 \paragraph{LLM judges.} Judge models are evaluated on benchmarks built for the purpose
-\citep{zheng2023,lambert2024,tan2024,zeng2024}, whose known pathologies --- position bias, length
-bias, self-preference --- motivate the confound register we carry alongside this work. Our judging
+\citep{zheng2023,tan2024,zeng2024}, whose known pathologies --- position bias, verbosity bias and
+self-enhancement \citep{zheng2023} --- motivate the confound register we carry alongside this work.
+The two free-text banks we treat as primary were chosen for complementary label semantics:
+\citet{tan2024} labels responses by \emph{objective} correctness rather than by human preference,
+and \citet{zeng2024} is adversarial by construction, its 419 curated pairs pitting an
+instruction-violating response that is superficially attractive against a compliant one. Our judging
 setup is logprob readout, which is what reward models and constrained-decoding judge pipelines
 actually do at scale.
 

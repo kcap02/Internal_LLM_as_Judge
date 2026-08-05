@@ -15,7 +15,8 @@ dependencies = [
     "scikit-learn",
     "numpy",
     "psutil",
-    "spectral-trust==0.2.3",
+    # Pinned by commit: 0.2.3 is not on PyPI. See requirements.txt.
+    "spectral-trust @ git+https://github.com/vcnoel/spectral-trust.git@2149f55",
 ]
 
 [tool.setuptools.packages.find]
