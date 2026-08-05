@@ -1,0 +1,27 @@
+22:32:14 INFO stage=22_recovery_curve | commit=e187adc | logfile=22_recovery_curve_20260805T203214Z.log
+22:32:14 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.8.0", "datasets": "4.8.5", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.3@2149f55"}
+22:32:14 INFO width 1536 | 10 seeds/cell | detection at delta >= 0.02 in >= 80% of seeds
+22:32:14 INFO 
+=== calibration: block-only AUROC at the pilot's n=200 ===
+22:32:14 INFO   plant   median block-only              IQR
+22:32:15 INFO    0.00               0.479   [0.443, 0.520]
+22:32:16 INFO    0.50               0.489   [0.452, 0.528]
+22:32:16 INFO    1.00               0.518   [0.474, 0.557]
+22:32:17 INFO    1.50               0.560   [0.503, 0.592]
+22:32:18 INFO    2.00               0.594   [0.533, 0.636]
+22:32:18 INFO    3.00               0.648   [0.590, 0.699]
+22:32:18 INFO 
+calibrated plant strength for a pilot reading of 0.633: s* = 2.721  (interpolated)
+22:32:18 INFO 
+=== sweep at s* = 2.721 ===
+22:32:18 INFO   cells are PAIRED: one realisation per seed, evaluated at every n as a nested prefix,
+  so the columns track one underlying signal rather than unrelated draws.
+22:32:18 INFO      n   median delta          delta IQR   detect   block-only          block IQR
+22:33:20 INFO    200        +0.0322   [+0.018, +0.042]      60%        0.574     [0.537, 0.636]
+22:33:20 INFO    400        +0.0533   [+0.046, +0.076]     100%        0.626     [0.608, 0.639]
+22:33:20 INFO    800        +0.0624   [+0.059, +0.066]     100%        0.647     [0.626, 0.661]
+22:33:20 INFO   1600        +0.0822   [+0.064, +0.084]     100%        0.631     [0.625, 0.637]
+22:33:20 INFO 
+==================================================================
+22:33:20 INFO N_FREEZE candidate = 400 items per stratum — the smallest n detecting a plant calibrated to the pilot's own block-only reading, in >= 80% of 10 seeds.
+22:33:20 INFO wrote recovery_curve.json

@@ -70,25 +70,39 @@ from llm_judge.log_utils import setup_logging
 DETECT_DELTA = 0.02
 
 
-def simulate(n_items: int, width: int, strength: float, seed: int,
-             n_splits: int, want_delta: bool = True):
-    """One draw. Returns (delta or None, block_only)."""
-    rng = np.random.default_rng(seed)
-    n_q = max(2, n_items // 2)
-    groups = np.repeat(np.arange(n_q), 2)
-    n = len(groups)
-    strata = np.tile(["A", "B"], n_q)
+def make_world(n_max: int, width: int, strength: float, seed: int) -> dict:
+    """One realisation of the whole problem, generated ONCE at the largest n.
 
+    Cells at different n are then **nested subsets of this same realisation**,
+    which is what makes the monotonicity check meaningful. Regenerating per n
+    from `seed` alone does not do that: the generator consumes a different
+    number of draws at each n, so the cells are unrelated realisations and
+    cannot be compared as though they tracked one signal.
+    """
+    rng = np.random.default_rng(seed)
+    n_q = max(2, n_max // 2)
+    n = 2 * n_q
     latent = rng.normal(size=n)
     extra = rng.normal(size=n)
     y = ((latent + 0.9 * extra + rng.normal(0, 0.7, n)) > 0).astype(float)
     # A baseline that already explains a lot — the regime where both ladder
     # failures happened, since it leaves the block only a small residual.
     X_base = np.c_[1.2 * latent + rng.normal(0, .6, n), rng.normal(size=(n, 5))]
-
     direction = rng.normal(size=width)
     direction /= np.linalg.norm(direction)
     X_add = rng.normal(size=(n, width)) + strength * np.outer(extra, direction)
+    return {"y": y, "X_base": X_base, "X_add": X_add,
+            "groups": np.repeat(np.arange(n_q), 2),
+            "strata": np.tile(["A", "B"], n_q)}
+
+
+def evaluate(world: dict, n_items: int, n_splits: int, width: int,
+             want_delta: bool = True):
+    """Score a nested prefix of `world`. Returns (delta or None, block_only)."""
+    n = min(2 * (n_items // 2), len(world["y"]))
+    y, groups = world["y"][:n], world["groups"][:n]
+    strata, X_add = world["strata"][:n], world["X_add"][:n]
+    X_base = world["X_base"][:n]
 
     alone = stratified_auroc(
         y, oof_scores(X_add, y, groups, n_splits, n_act=width), strata)
@@ -129,8 +143,9 @@ def main() -> None:
     log(f"{'plant':>7} {'median block-only':>19} {'IQR':>16}")
     cal = []
     for s in args.strengths:
-        vals = [simulate(args.pilot_n, args.width, s, 1000 + k,
-                         args.n_splits, want_delta=False)[1]
+        vals = [evaluate(make_world(args.pilot_n, args.width, s, 1000 + k),
+                         args.pilot_n, args.n_splits, args.width,
+                         want_delta=False)[1]
                 for k in range(args.seeds)]
         vals = [v for v in vals if v is not None]
         med = float(np.median(vals))
@@ -156,26 +171,43 @@ def main() -> None:
 
     # ── Phase 2: sweep n at the calibrated plant ──────────────────────────
     log(f"\n=== sweep at s* = {s_star:.3f} ===")
-    log(f"{'n':>6} {'median delta':>14} {'detect frac':>12} {'median block-only':>19}")
+    log("  cells are PAIRED: one realisation per seed, evaluated at every n as "
+        "a nested prefix,\n  so the columns track one underlying signal rather "
+        "than unrelated draws.")
+    log(f"{'n':>6} {'median delta':>14} {'delta IQR':>18} {'detect':>8}"
+        f" {'block-only':>12} {'block IQR':>18}")
+
+    n_max = max(args.n)
+    worlds = [make_world(n_max, args.width, s_star, 2000 + k)
+              for k in range(args.seeds)]
+    per_seed: dict[int, list] = {n: [] for n in args.n}
+    per_seed_alone: dict[int, list] = {n: [] for n in args.n}
+    for w in worlds:
+        for n_items in args.n:
+            d, a = evaluate(w, n_items, args.n_splits, args.width)
+            if d is not None:
+                per_seed[n_items].append(d)
+            if a is not None:
+                per_seed_alone[n_items].append(a)
+
     by_n, threshold = {}, None
     for n_items in args.n:
-        ds, alones = [], []
-        for k in range(args.seeds):
-            d, a = simulate(n_items, args.width, s_star, 2000 + k,
-                            args.n_splits)
-            if d is not None:
-                ds.append(d)
-            if a is not None:
-                alones.append(a)
+        ds, alones = per_seed[n_items], per_seed_alone[n_items]
         if not ds:
             continue
         med_d = float(np.median(ds))
+        d_lo, d_hi = np.percentile(ds, [25, 75])
+        a_lo, a_hi = (np.percentile(alones, [25, 75]) if alones else (0., 0.))
         frac = float(np.mean([d >= DETECT_DELTA for d in ds]))
         med_a = float(np.median(alones)) if alones else float("nan")
         by_n[str(n_items)] = {"median_delta": med_d, "detect_fraction": frac,
                               "median_block_only": med_a, "n_seeds": len(ds),
+                              "delta_iqr": [float(d_lo), float(d_hi)],
+                              "block_only_iqr": [float(a_lo), float(a_hi)],
                               "deltas": [float(d) for d in ds]}
-        log(f"{n_items:>6} {med_d:>+14.4f} {frac:>12.0%} {med_a:>19.3f}")
+        log(f"{n_items:>6} {med_d:>+14.4f} "
+            f"{f'[{d_lo:+.3f}, {d_hi:+.3f}]':>18} {frac:>8.0%}"
+            f" {med_a:>12.3f} {f'[{a_lo:.3f}, {a_hi:.3f}]':>18}")
         if threshold is None and frac >= args.detect_frac:
             threshold = n_items
 

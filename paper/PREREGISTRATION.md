@@ -256,30 +256,48 @@ like the real data *through the same biased lens*.
 
 Pilot `M3only` = 0.633 (Qwen2.5-3B pairwise) → calibrated **s\* = 2.721**.
 
-*Phase 2 — sweep n at s\*.* Every cell is 10 seeds; detection is a delta
-≥ 0.02 in ≥ 80% of them, matching the power convention used elsewhere in this
-document. A single draw per cell would make the threshold — by definition the
-most seed-sensitive quantity here — a coin flip.
+*Phase 2 — sweep n at s\*.* Every cell is 10 seeds, and the cells are
+**paired**: one realisation per seed, evaluated at every n as a nested prefix,
+so the columns track one underlying signal instead of unrelated draws.
+Detection is a delta ≥ 0.02 in ≥ 80% of seeds, matching the power convention
+used elsewhere in this document.
 
-| n per stratum | median delta | detect fraction |
-|---|---|---|
-| 200 | +0.034 | 70% |
-| **400** | **+0.070** | **100%** |
-| 800 | +0.070 | 100% |
-| 1600 | +0.082 | 100% |
+| n per stratum | median delta | delta IQR | detect | block-only | block IQR |
+|---|---|---|---|---|---|
+| 200 | +0.032 | [+0.018, +0.042] | 60% | 0.574 | [0.537, 0.636] |
+| 400 | +0.053 | [+0.046, +0.076] | 100% | 0.626 | [0.608, 0.639] |
+| 800 | +0.062 | [+0.059, +0.066] | 100% | 0.647 | [0.626, 0.661] |
+| 1600 | +0.082 | [+0.064, +0.084] | 100% | 0.631 | [0.625, 0.637] |
 
-> **`N_FREEZE` is the smallest n detecting a plant calibrated to the pilot's
-> own block-only reading, in ≥ 80% of seeds, and never less than the n the MDE
-> calculation requires. On current measurements that is
-> `N_FREEZE` ≥ 400 items per stratum.**
+Under pairing, block-only rises monotonically from n=200 to n=800 and the
+800→1600 dip has heavily overlapping IQRs, so it is a plateau with sampling
+noise rather than an inconsistent estimator. An earlier unpaired sweep showed
+a non-monotone block-only (0.615, 0.680, 0.652, 0.631); that was an artefact
+of regenerating each cell from a seed that consumed different draws at
+different n, which made the columns unrelated realisations.
 
-Two honest caveats on that number. The pilot's 0.633 is itself one draw at
-n=200, where the calibration IQR spans roughly ±0.05, so s\* carries real
-uncertainty and 400 sits one grid step above a cell that already detects at
-70%. And the median block-only in phase 2 does not rise with n (0.615, 0.680,
-0.652, 0.631), which is not what a consistent estimator should do and is worth
-understanding before the number is used to buy hardware; it does not affect the
-detection conclusion, which is clean from n=400 upward.
+> **`N_FREEZE` = 800 items per stratum.**
+>
+> The measured detection threshold is 400 — the smallest n detecting the
+> calibrated plant in ≥ 80% of seeds. We preregister **one grid step above
+> it**, because the calibration carries uncertainty the sweep does not
+> quantify and the caveats compound in one direction:
+>
+> * s\* is interpolated from the pilot's `M3only` = 0.633, itself a single
+>   draw at n=200 where the calibration IQR spans roughly ±0.05;
+> * 400 sits one step above a cell that detects in only 60% of seeds;
+> * at 400 the delta IQR is [+0.046, +0.076], whose lower edge is nearer the
+>   0.02 detection band than at 800, where it is [+0.059, +0.066].
+>
+> The cost of being wrong is asymmetric: the extra items are inference on the
+> cheap arm, which has no VRAM ceiling and no eigendecomposition — hours, not
+> days — whereas a run that lands at the edge of the detection cliff produces
+> an uninterpretable delta *after* the freeze, when §9's stopping rule forbids
+> adjusting. The reason is stated here so the choice cannot be read as a
+> number picked after the fact.
+
+The curve must be **re-measured at the scaled block width**; the threshold is
+a function of width as well as n and does not carry over from 1536.
 
 The recovery curve is primary because it is calibrated on the estimator
 actually in use; the MDE is retained as a floor, not as the criterion.
@@ -292,9 +310,6 @@ the two floors, the `M2only` absence, and the estimator failures, and the
 ladder becomes a section on why the question is harder than the literature
 assumes. That is still a paper — it is a different one, and which one we are
 writing must be settled before GPU time is bought.
-
-The curve must be **re-measured at the scaled n and the scaled block width**;
-the threshold is a function of both and does not carry over from the pilot.
 
 If `N_FREEZE` is unaffordable, the primary tests become **equivalence tests
 with a stated band** rather than superiority tests. Both are defensible.
