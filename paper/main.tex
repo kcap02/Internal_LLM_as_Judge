@@ -1,39 +1,37 @@
-% How Not to Measure Whether a Judge Knows It Is Wrong
+% Reference Distributions and Estimator Failures in Type-2 ROC for LLM Judges
 %
-% Written against paper/OUTLINE.md rather than accreted section by section. Every printed quantity
-% is a macro defined in generated_numbers.tex by paper/fill_numbers.py, which resolves it from a
-% file in results/ and fails the build on an undefined macro.
+% Written against paper/OUTLINE.md and restructured on the Context-Content-Conclusion scheme of
+% Mensh & Kording (2017). Every printed quantity is a macro defined in generated_numbers.tex by
+% paper/fill_numbers.py, which resolves it from a file in results/ and fails the build on an
+% undefined macro.
 %
 %   python paper/fill_numbers.py --verify
+%   python paper/check_macros.py && python paper/check_refs.py
 %   pdflatex main && bibtex main && pdflatex main && pdflatex main
 %
-% --verify currently EXITS NON-ZERO: 21 macros are downstream of the stream-regeneration pass and
-% print as ?? until it has run. That is deliberate. The paper must not build while it still contains
-% a number nobody has measured.
+% check_macros.py currently BLOCKS: macros downstream of the scaled run print as ??.
+%
+% !! Section 8 (Results) is a stub pending the scaled run. The Anchor* macros were DELETED from
+% !! fill_numbers.py: under the corrected estimator M4-M3 is a tightly-estimated zero that cannot
+% !! distinguish redundancy from an estimator expressing neither block, so it is no longer an
+% !! anchor result and no sentence may rest on it.
+%
+% !! ai_use.tex asserts a human-verified bibliography. That is FALSE until the verification pass is
+% !! done. Do not submit until it is.
 %
 % Needs iclr2027_conference.sty/.bst from the ICLR 2027 call-for-papers page.
-%
-% !! THE BIBLIOGRAPHY IS NOT VERIFIED. 13 of the 14 citation keys below were written from the shape
-% !! of the argument rather than from a bibliography anyone read, and must be treated as fabricated
-% !! until checked. refs.bib deliberately contains only the entries someone has confirmed resolve to
-% !! a real paper with a DOI, and paper/check_refs.py fails the build on every other key. Verify each
-% !! against the actual paper or delete it together with the sentence citing it.
-% !!
-% !! Section 2 (Related work) additionally OVERSTATES novelty and must be rewritten before the
-% !! abstract freezes: meta-d'/M-ratio has already been applied to language models, including to
-% !! logprob-readout settings close to ours. The defensible claim is a bridge -- the metacognition
-% !! literature has the tool and uses it, the probing literature reports type-2 AUROC against 0.5 and
-% !! does not -- not an introduction of the tool. See paper/OUTLINE.md for the leads to check.
 
 \documentclass{article}
 \usepackage{iclr2027_conference,times}
 
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
 \usepackage{enumitem}
 \usepackage{microtype}
 \usepackage{caption}
 \usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage[capitalise,noabbrev]{cleveref}
@@ -41,204 +39,218 @@
 \captionsetup{font=small,labelfont=bf,skip=4pt}
 \setlength{\abovedisplayskip}{5pt}
 \setlength{\belowdisplayskip}{5pt}
+\newtheorem{definition}{Definition}
 
 % ======================= GENERATED NUMBERS -- do not edit by hand =======================
 \input{generated_numbers}
 % =======================================================================================
 
-\title{How Not to Measure Whether a Judge Knows It Is Wrong}
+\title{Reference Distributions and Estimator Failures\\in Type-2 ROC for LLM Judges}
 \author{Anonymous authors\\Paper under double-blind review}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Asking whether an LLM judge's internal state predicts its own errors is a type-2 (correctness) ROC
-problem, and the standard way of computing it is wrong in five separable ways. We measure each.
-First, because a judge is correct exactly when its verdict matches the label, any feature that
-merely separates positive from negative items scores well while carrying no self-knowledge;
-identity decodability runs \IdentLo{}--\IdentHi{} on our benchmark irrespective of which model
-judges. Second, and not removed by conditioning on the label, within a label stratum \emph{correct}
-means \emph{the judge said this stratum}, so a representation decoding the judge's own verdict is a
-perfect within-stratum predictor --- and the last-token hidden state decodes it at
-\VerdictDecodPlanted{}. What blocks this is the pooled fit, not the metric, and only when the strata
-are balanced. Third, concatenating a hidden-state block onto a small baseline under a shared penalty
-does not measure increment: a block of \AddBlockWide{} \emph{pure-noise} columns costs a strong
-baseline \SwampLossWide{} AUROC, and the damage grows with baseline strength. Fourth, the
-field-default paired DeLong test understates the standard error by \DelongRatioClustered{}$\times$ on
-pairwise judge data, which is clustered by construction. Fifth, the reference point is not $0.5$: a
-first-order signal-detection observer with no metacognition whatever reaches \SdtAurocMid{} at
-accuracy \SdtAccMid{}, so type-2 AUROC scored against $0.5$ credits first-order accuracy as
-self-knowledge. We give a corrected estimator for each, with a regression test apiece, and report a
-demonstration panel of confidence-margin, activation-probe and attention-graph spectral features
-under it. The one result that survives every correction unchanged is an equivalence: spectral
-features add nothing beyond a linear activation probe, with deltas in
-\AnchorDeltaLo{}--\AnchorDeltaHi{} at standard errors of \AnchorSELo{}--\AnchorSEHi{}.
+Whether an LLM judge's internal state predicts its own verdict errors is a type-2 (correctness) ROC
+problem. We characterise the estimator used to answer it and identify five properties that make the
+standard construction report something other than metacognitive sensitivity. Two are leakage
+channels specific to judge evaluation: because a judge is correct exactly when its verdict matches
+the label, any feature separating positive from negative items scores without self-knowledge
+(identity decodability \IdentLo{}--\IdentHi{} on our benchmark, invariant across judges), and,
+within a label stratum, any feature decoding the judge's own verdict is a perfect predictor
+(verdict decodability \VerdictDecodLo{}--\VerdictDecodHi{}). The second channel is blocked by pooled
+estimation rather than by the conditional metric, and only at balanced strata. Two are estimator
+failures in the nested comparison: under a shared penalty a hidden-state block of
+\AddBlockWide{} columns removes \SwampLossWide{} AUROC of real signal from a baseline, while an
+offset formulation with a cross-validated ridge shrinks the same block to a correction of
+\OffsetShrinkRatio{} of the baseline's scale, producing a zero. The fifth is the reference point:
+a first-order signal-detection observer with no metacognition attains conditional AUROC
+\SdtAurocMid{} at accuracy \SdtAccMid{}, so scoring against $0.5$ credits first-order accuracy as
+self-knowledge. We give corrected estimators and two reference distributions, and establish a
+detection threshold below which the nested comparison is uninformative regardless of its standard
+error. On a four-judge panel, spectral attention-graph features fitted alone attain
+\MTwoOnlyLo{}--\MTwoOnlyHi{} conditional AUROC, at or below chance on every slice.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:intro}
 
-LLM judges are used to score model outputs at a scale that forbids human review, so knowing when a
-judge is wrong is worth something. A natural proposal is to read it off the judge itself: train a
-probe on the judge's internal state to predict whether its verdict was correct, and report the AUROC.
-The construction is standard, it is cheap, and it produces numbers between $0.6$ and $0.9$ with
-reassuring regularity.
+LLM judges score model outputs at a scale that precludes human review, so a signal that identifies
+unreliable verdicts has value. The standard proposal reads it from the judge: fit a probe on the
+judge's internal state to predict whether its verdict was correct, and report the AUROC. The
+construction is cheap and returns values between $0.6$ and $0.9$.
 
-Those numbers are hard to interpret, for a reason visible in the target variable. Correctness is
-defined as $\texttt{is\_correct} = (\texttt{pred} = \texttt{gt})$, a comparison of two things, and a
-probe can score well by knowing about either one without knowing anything about the judge's own
-reliability. This paper takes that observation seriously and follows it through the estimator.
+The quantity it returns is not metacognitive sensitivity. Correctness is defined as
+$\texttt{is\_correct} = (\texttt{pred} = \texttt{gt})$, a comparison of two variables, and a probe
+can score by recovering either one. This paper characterises the resulting estimator.
 
-We find five separable failures. Two are leakage channels: one through the label, one through the
-judge's own verdict, and they require different fixes (\cref{sec:leakage}). One is in the ladder
-that is supposed to measure what internals \emph{add} to behaviour, which under a shared penalty
-measures something else entirely and does so in a direction that makes internals look
-\emph{worse} than they are (\cref{sec:ladder}). One is in the inference, where the field-default
-paired test assumes an independence that pairwise judge benchmarks violate by construction
-(\cref{sec:inference}). And one is in the reference point, where $0.5$ implies a comparison to a
-judge that cannot decide anything, rather than to a judge that decides as well as this one but knows
-nothing about how it decided (\cref{sec:estimand}).
+Five properties separate the reported quantity from the intended one. Two are leakage channels, one
+through the ground-truth label and one through the judge's own verdict, requiring different
+corrections (\cref{sec:leakage}). Two are failures of the nested comparison that is supposed to
+measure what internals add to behaviour, and they act in opposite directions: concatenation under a
+shared penalty removes signal from the baseline, and an offset formulation with cross-validated
+ridge removes the added block (\cref{sec:ladder}). The fifth concerns the reference point, which is
+conventionally $0.5$ and should be the performance of an observer that decides as well as this judge
+but has no access to how it decided (\cref{sec:estimand}).
 
-Four of the five inflate the reported number and one deflates it, which is worth stating plainly:
-this is not an argument that internal signals are weaker than claimed, it is an argument that the
-published quantity is not the one anybody wants.
+Four of the five inflate the reported value and one deflates it. The conclusion is not that internal
+signals are weaker than claimed but that the published quantity differs from the intended one.
 
 \paragraph{Contributions.}
-(i) We identify the type-2 estimand for judge metacognition and give it two floors rather than one:
-a first-order signal-detection floor, which is the Monte-Carlo form of meta-$d'$/$d'$, and a
-verdict-leakage floor arising from incomplete sign cancellation at unbalanced strata.
-(ii) We give the two-dimensional leakage taxonomy --- item identity and self-verdict --- and show
-that the second is blocked by the pooled fit rather than by the conditional metric, making it
-fragile to a refactor that looks innocuous.
-(iii) We show that the usual nested-model ladder does not measure increment at realistic block
-width, quantify the damage with a pure-noise block, and give a monotone offset estimator.
-(iv) We quantify the clustering penalty for paired DeLong on pairwise judge data.
-(v) We report a demonstration panel under the corrected estimator, and one equivalence result that
-survives all five corrections.
-(vi) We report our own analytic errors grouped by cause (\cref{sec:corrections}), including two that
-were about to enter a write-up as findings.
+\begin{enumerate}[nosep,leftmargin=*]
+\item \textbf{Two reference distributions for type-2 AUROC in judge evaluation}, replacing $0.5$: a
+      first-order signal-detection floor, which is a Monte-Carlo form of meta-$d'$/$d'$, and a
+      verdict-leakage floor arising from incomplete sign cancellation at unbalanced strata
+      (\cref{sec:estimand}).
+\item \textbf{A two-dimensional leakage taxonomy} for the correctness target, distinguishing
+      item-identity leakage, removed by conditioning, from self-verdict leakage, removed only by
+      pooled estimation (\cref{sec:leakage}).
+\item \textbf{Two opposed failure modes of nested estimation from wide representations}, with a
+      corrected estimator and an acceptance criterion --- recovery of a planted effect across
+      magnitudes --- that both failures violate (\cref{sec:ladder}).
+\end{enumerate}
 
 \section{Related work}
 \label{sec:related}
 
-\paragraph{Metacognition and the type-2 ROC.} Distinguishing an observer's first-order sensitivity
-from its insight into its own performance is the subject of a long methodological literature.
-Meta-$d'$ \citep{maniscalco2012} expresses metacognitive sensitivity in the units of first-order
-$d'$, and the ratio meta-$d'$/$d'$ --- the M-ratio --- is $1.0$ when an observer has no insight
-beyond what its first-order performance already implies \citep{fleming2014}. The essential point,
-which the probing literature on LLMs has not imported, is that a type-2 ROC computed against $0.5$
-is uninterpretable: a more accurate first-order observer scores higher on it without any
-metacognition at all. \Cref{sec:estimand} is a Monte-Carlo M-ratio for judges.
+\paragraph{Metacognition and the type-2 ROC.} Separating an observer's first-order sensitivity from
+its insight into its own performance has an established methodology. Meta-$d'$ \citep{maniscalco2012}
+expresses metacognitive sensitivity in the units of first-order $d'$, and the ratio meta-$d'$/$d'$
+is the conventional normalisation for first-order performance \citep{fleming2014}. A type-2 ROC
+computed against $0.5$ conflates the two: a more sensitive first-order observer scores higher on it
+without metacognition. That tool has been applied to language models; the contribution here is to
+connect it to the interpretability literature, which reports type-2 AUROC against $0.5$, and to
+measure what the omission costs in a setting where two additional leakage channels are present.
 
-\paragraph{Probing and its controls.} That a probe's score reflects the probe rather than the
-representation is the concern of \citet{hewitt2019control}, answered with control tasks; the
-follow-on literature pursues it in opposite directions --- \citet{voita2020} recasting probing as
-compression, \citet{pimentel2020} arguing from mutual information that one should choose the
-\emph{highest}-performing probe rather than the simplest --- and through whether the model
-\emph{uses} what a probe can read \citep{ravichander2021,elazar2021}, synthesised by
-\citet{belinkov2022}. Our positive control (\cref{sec:absence}) is in that tradition. The failure in
-\cref{sec:ladder} is different in kind and, as far as we know, undocumented: it is not about probe
-capacity but about what happens to a \emph{nested} comparison when the two models being compared
-have very different column counts under one penalty.
+\paragraph{Probing and its controls.} That a probe's accuracy reflects the probe rather than the
+representation motivates the control tasks of \citet{hewitt2019control}. The subsequent literature
+pursues the concern in opposing directions, \citet{voita2020} recasting probing as compression and
+\citet{pimentel2020} arguing from mutual information for the highest-performing probe rather than
+the simplest, and separately through whether a model uses what a probe can read
+\citep{ravichander2021,elazar2021}, synthesised by \citet{belinkov2022}. The positive control of
+\cref{sec:absence} follows that tradition. The failures in \cref{sec:ladder} concern nested model
+comparison under disparate column counts rather than probe capacity; we are not aware of a prior
+report of either.
 
-\paragraph{LLM judges.} Judge models are evaluated on benchmarks built for the purpose
-\citep{zheng2023,tan2024,zeng2024}, whose known pathologies --- position bias, verbosity bias and
-self-enhancement \citep{zheng2023} --- motivate the confound register we carry alongside this work.
-The two free-text banks we treat as primary were chosen for complementary label semantics:
-\citet{tan2024} labels responses by \emph{objective} correctness rather than by human preference,
-and \citet{zeng2024} is adversarial by construction, its 419 curated pairs pitting an
-instruction-violating response that is superficially attractive against a compliant one. Our judging
-setup is logprob readout, which is what reward models and constrained-decoding judge pipelines
-actually do at scale.
+\paragraph{Judge evaluation.} Judges are evaluated on purpose-built benchmarks
+\citep{zheng2023,tan2024,zeng2024}, whose documented pathologies include position, verbosity and
+self-enhancement bias \citep{zheng2023}. The two free-text banks used here differ in label
+semantics: \citet{tan2024} labels responses by objective correctness rather than human preference,
+and \citet{zeng2024} is adversarial by construction, its 419 curated pairs pairing an
+instruction-violating response that is superficially attractive against a compliant one.
 
-\paragraph{Selective prediction.} The practical form of the question is abstention: given a signal,
-what precision is available at a fixed coverage \citep{elyaniv2010,geifman2017}. We report
-coverage-at-fixed-risk rather than $\Delta$AUROC for the applied claim, because a $0.02$ AUROC
-difference has no operational meaning and a coverage change does.
+\paragraph{Selective prediction.} The applied form of the question is abstention: the precision
+available at a fixed coverage \citep{elyaniv2010,geifman2017}. We report coverage at fixed risk
+rather than $\Delta$AUROC for the applied claim.
 
-\section{Setup}
+\section{Setup and notation}
 \label{sec:setup}
 
-\paragraph{Judging.} A judge scores an item in one forward pass; the verdict is read from the
-next-token logprobs of two verdict tokens at the position following \texttt{Answer:}. The
-\emph{margin} is the signed difference of those two logprobs, so the predicted verdict is a
-deterministic function of $\mathrm{sign}(\text{margin})$ by construction --- a fact that matters in
-\cref{sec:leakage,sec:estimand}. Three formats: \texttt{mcq} and \texttt{single} (Yes/No) and
-\texttt{pairwise} (A/B, presented in \emph{both} orders). Prompts are raw and identical across the
-panel; a chat-template ablation moves a competent judge by at most $1.5$ points.
+\paragraph{Judging.} A judge scores an item in one forward pass. The verdict is read from the
+next-token log-probabilities of two verdict tokens at the position following \texttt{Answer:}.
+Formats are \texttt{mcq} and \texttt{single} (Yes/No) and \texttt{pairwise} (A/B, presented in both
+orders). Prompts are raw and identical across the panel; a chat-template ablation moves a competent
+judge by at most $1.5$ points.
 
-\paragraph{Banks.} Five banks (MMLU, MMLU-Pro, JudgeBench, LLMBar, RewardBench~2), balanced 50/50 by
-construction, seeded, and byte-identical across judges. Cross-validation groups are derived from
-normalised question \emph{text}, not identifiers: JudgeBench reuses 92 questions across its two
-splits, and grouping on identifiers would place the same question in train and test.
+\paragraph{Notation.} For item $i \in \{1,\dots,n\}$ let $g_i \in \mathcal{V}$ be the ground-truth
+verdict, $\hat{v}_i \in \mathcal{V}$ the judge's verdict, and $|\mathcal{V}| = 2$. The target is
+\begin{equation}
+y_i \;=\; \mathbb{1}[\hat{v}_i = g_i],
+\label{eq:target}
+\end{equation}
+and the \emph{stratum} of item $i$ is $g_i$. The margin $m_i = \ell_i(v_1) - \ell_i(v_2)$ is the
+difference of the two verdict log-probabilities, so $\hat{v}_i = v_1 \iff m_i > 0$: the verdict is a
+deterministic function of $\operatorname{sign}(m_i)$. Feature blocks are $X^{\mathrm{b}}$ (baseline:
+margin, $|m|$, $\hat v$, prompt length, task-start index, subject, peer difficulty),
+$X^{\mathrm{s}}$ (spectral) and $X^{\mathrm{a}}$ (activations), with
+$d_{\mathrm{a}} = \dim X^{\mathrm{a}}$ the model's hidden size. Cross-validation groups $q_i$ are
+derived from normalised question text, so that the two orders of a pairwise item and the
+positive/negative partners of one question share a fold.
 
-\paragraph{Features.} Three families in increasing cost. \textbf{Margin}: the signed logprob margin
-and its absolute value. \textbf{Activation}: the last-token hidden state at half and full depth.
-\textbf{Spectral}: attention-graph diagnostics --- Fiedler value, high-frequency energy ratio,
-smoothness, spectral entropy, plus a Fiedler-velocity summary --- computed on the symmetric
-normalised Laplacian over a task-token subgraph, summarised as mean, slope and normalised argmax
-over the last third of layers. The summary is fixed \emph{a priori}: three numbers per metric, no
-post-hoc layer selection. Precision is \texttt{bfloat16} uniformly (\cref{sec:hygiene}).
+\paragraph{Banks.} Five banks (MMLU, MMLU-Pro, JudgeBench, LLMBar, RewardBench~2), balanced $50/50$
+by construction, seeded, byte-identical across judges. Grouping on text rather than identifier
+collapses 419 LLMBar pairs into 418 groups, one instruction appearing verbatim in two adversarial
+subsets, and 620 JudgeBench identifiers into 528 groups.
 
-\paragraph{The ladder.} Rungs are $M_n$ (nuisance only: length, task-start index, subject), $M_1$
-(margin and verdict), $M_{1n}$ ($+$ nuisance), $M_{1nd}$ ($+$ leave-one-model-out peer difficulty),
-$M_2$ ($+$ spectral), $M_3$ ($+$ activations), $M_4$ (everything). The baseline every internal claim
-must clear is $M_{1nd}$ where at least two judges scored the same items.
+\paragraph{Features.} Three families in increasing cost. Margin: $m$ and $|m|$. Activation: the
+last-token hidden state at half and full depth. Spectral: attention-graph diagnostics --- Fiedler
+value, high-frequency energy ratio, smoothness, spectral entropy, and a Fiedler-velocity summary ---
+on the symmetric normalised Laplacian over a task-token subgraph, summarised as mean, slope and
+normalised argmax over the last third of layers. The summary is fixed \emph{a priori} at three
+numbers per metric. Precision is \texttt{bfloat16} uniformly (\cref{sec:hygiene}).
 
-\section{The estimand and its two floors}
+\section{Reference distributions for type-2 AUROC}
 \label{sec:estimand}
 
-\subsection{Neither floor is 0.5}
+\subsection{The conditional estimand}
 
-Write $y = \texttt{is\_correct}$ and let the strata be the ground-truth verdict. The headline metric
-is the \emph{conditional} AUROC: the probability that a correct item outscores an incorrect one
-\emph{drawn from the same stratum}. Within a stratum the item's label is constant, which removes the
-first leakage channel (\cref{sec:identity}).
+The headline metric compares items only within a stratum:
+\begin{equation}
+\mathrm{AUROC}_{\mathrm{c}}(s) \;=\;
+\Pr\!\big[\, s_i > s_j \;\big|\; y_i = 1,\; y_j = 0,\; g_i = g_j \,\big],
+\label{eq:cond}
+\end{equation}
+estimated as a discordant-pair-weighted average over strata. Within a stratum the ground-truth label
+is constant, which removes the first leakage channel (\cref{sec:identity}). Strata contributing
+fewer than five items of either class are excluded from the estimate.
 
-It does not follow that $0.5$ is the reference. Consider a first-order signal-detection observer: one
-latent decision variable $s$, verdict $=\mathrm{sign}(s-c)$, margin $=s-c$, and nothing whatever that
-knows about its own errors. Its discriminability $d'$ drives its accuracy, and it drives the
-informativeness of its margin at the same time. Simulating this observer and pushing it through the
-identical features, estimator and metric:
+\subsection{The first-order floor}
+
+Let a first-order observer hold a latent decision variable $s_i \sim \mathcal{N}(\mu_{g_i}, 1)$ with
+$\mu_{v_1} - \mu_{v_2} = d'$, emit $\hat v_i = v_1 \iff s_i > c$, and report margin $m_i = s_i - c$.
+
+\begin{definition}[First-order floor]
+\label{def:sdt}
+$F_{\mathrm{SDT}}(d', c)$ is the distribution of $\mathrm{AUROC}_{\mathrm{c}}$ obtained by applying
+the estimator of \cref{eq:cond} to data generated by the observer above, with $d'$ and $c$ estimated
+from the judge's own hit and false-alarm rates and re-estimated on each bootstrap resample.
+\end{definition}
+
+This observer has no access to its own errors beyond $\operatorname{sign}(m_i)$, and
+\cref{tab:sdt} gives its conditional AUROC. \Cref{def:sdt} is the Monte-Carlo form of
+meta-$d'$/$d'$ \citep{maniscalco2012,fleming2014}. Each rung is reported as a percentile against
+$F_{\mathrm{SDT}}$, and those percentiles enter the same Benjamini--Hochberg family as every other
+contrast.
 
 \begin{table}[h]
 \centering\small
-\caption{A judge with \emph{no} metacognition, at three discriminabilities. Type-2 AUROC scored
-against $0.5$ would read the third row as strong self-knowledge.}
+\caption{An observer with no metacognition, at three discriminabilities. Scored against $0.5$, the
+third row reads as strong self-knowledge.}
 \label{tab:sdt}
 \begin{tabular}{lcc}
 \toprule
-& accuracy & $M_1$ conditional AUROC \\
+& accuracy & $\mathrm{AUROC}_{\mathrm{c}}$ \\
 \midrule
-$d' \approx 0$   & \SdtAccLow{}  & \SdtAurocLow{}  \\
-$d' = 0.9$       & \SdtAccMid{}  & \SdtAurocMid{}  \\
-$d' = 1.4$       & \SdtAccHigh{} & \SdtAurocHigh{} \\
+$d' \approx 0$ & \SdtAccLow{}  & \SdtAurocLow{}  \\
+$d' = 0.9$     & \SdtAccMid{}  & \SdtAurocMid{}  \\
+$d' = 1.4$     & \SdtAccHigh{} & \SdtAurocHigh{} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-This is the M-ratio of \citet{maniscalco2012} in Monte-Carlo form. We estimate each judge's own $d'$
-and criterion from its hit and false-alarm rates, simulate the first-order observer at those values,
-and report every rung against \emph{that} null rather than against $0.5$. Parameter uncertainty is
-propagated: $d'$ and $c$ are re-estimated on each bootstrap resample, because simulating at the point
-estimate gives a null that is too narrow and makes ``above null'' anticonservative. Each rung
-receives a percentile against the null distribution, and those percentiles enter the same
-Benjamini--Hochberg family as every other contrast.
-
 \subsection{The verdict-leakage floor}
 \label{sec:verdictfloor}
 
-The second floor is specific to this target. Within the stratum $\texttt{gt}=A$, an item is correct
-if and only if the judge said $A$. So a feature decoding only $\texttt{pred}$ is a perfect
-within-stratum predictor. What prevents a pooled model from selecting it is sign cancellation: such
-a feature must score $1.0$ in one stratum and $0.0$ in the other.
+Within the stratum $g = v_1$, item $i$ is correct iff $\hat v_i = v_1$. A feature measurable with
+respect to $\hat v$ alone is therefore a perfect within-stratum predictor.
 
-\textbf{Cancellation is exact only when the strata are balanced}, and judges are biased --- verdict
-bias runs from $0.14$ to $0.64$ across our pilot panel. We therefore measure the residual directly:
-a synthetic feature that decodes the judge's verdict and nothing else, pushed through the full
-pipeline at each slice's own observed imbalance. The conditional AUROC it reaches is that slice's
-leakage floor, and it differs from the SDT floor. A rung must clear both.
+\begin{definition}[Verdict-leakage floor]
+\label{def:leak}
+$F_{\mathrm{V}}$ is the distribution of $\mathrm{AUROC}_{\mathrm{c}}$ attained by a feature block
+$\sigma(\hat v)$ that is a deterministic function of the judge's verdict and independent of
+everything else, evaluated at the slice's observed stratum imbalance under the same pooled
+estimator.
+\end{definition}
+
+A pooled fit cannot select such a feature, because it scores $1$ in one stratum and $0$ in the
+other. That cancellation is exact only at balanced strata, and judges are biased: verdict bias
+spans $0.14$ to $0.64$ across our panel. $F_{\mathrm{V}}$ measures the residual. A rung must clear
+\begin{equation}
+\phi \;=\; \max\!\big(\, Q_{95}(F_{\mathrm{SDT}}),\; Q_{95}(F_{\mathrm{V}}) \,\big),
+\label{eq:floor}
+\end{equation}
+which on our panel ranges over \FloorLo{}--\FloorHi{}.
 
 \section{Two leakage channels}
 \label{sec:leakage}
@@ -246,216 +258,254 @@ leakage floor, and it differs from the SDT floor. A rung must clear both.
 \subsection{Item identity}
 \label{sec:identity}
 
-Because $y = (\texttt{pred}=\texttt{gt})$ and every judge has some verdict bias, $y$ is largely
-determined by $\texttt{gt}$ alone. Any feature separating a positive item from a negative one
-therefore scores without carrying a bit about self-knowledge, and spectral and activation features
-do so trivially: the two prompts contain different text. We report
-\texttt{identity\_decodability} --- how well the same features predict $\texttt{gt}$ --- as a
-standing control. It runs \IdentLo{}--\IdentHi{} across our slices and, importantly, is
-\emph{flat across judges of very different competence}: it is a property of the benchmark, not of the
-model being measured, so it contaminates every result reported on that benchmark and cannot be
-escaped by choosing a better judge. Conditioning on $\texttt{gt}$ removes it.
+Because $y_i$ is determined by $\hat v_i$ and $g_i$ jointly and every judge has verdict bias, $y$ is
+largely determined by $g$ alone. Any feature separating a positive from a negative item scores
+without carrying information about the judge's reliability, and text-derived features do so
+trivially. The \texttt{identity\_decodability} control reports how well the same features predict
+$g$; it runs \IdentLo{}--\IdentHi{} across slices and is invariant across judges of very different
+competence, making it a property of the benchmark rather than of the model under test.
+Conditioning on $g$ removes it.
 
 \subsection{Self-verdict}
 \label{sec:verdict}
 
-The twin channel is not removed by conditioning, because the quantity decoded is $\texttt{pred}$,
-not $\texttt{gt}$ (\cref{sec:verdictfloor}). The last-token hidden state decodes $\texttt{pred}$
-essentially perfectly --- it is the state the verdict logit is read from --- and we report
-\texttt{verdict\_decodability} beside the identity control for exactly that reason.
+The second channel survives conditioning, because the decoded quantity is $\hat v$ rather than $g$
+(\cref{def:leak}). The last-token hidden state decodes $\hat v$ at
+\VerdictDecodLo{}--\VerdictDecodHi{}, which is expected: it is the state from which the verdict
+logit is read.
 
-The protection is the \emph{pooled fit}, which is a property of how the model is estimated rather
-than of the metric. Fitting within stratum --- an innocuous-looking refactor --- removes it and
-yields a near-perfect, entirely meaningless result. On planted data where a feature decodes
-$\texttt{pred}$ and nothing else, the pooled fit lands near $0.5$ and a within-stratum fit exceeds
-\PooledFitGuardWithin{}. We encode this as a regression test rather than a comment.
+Protection comes from the pooled fit, a property of the estimation rather than of the metric.
+Fitting within stratum removes it. On planted data in which a feature decodes $\hat v$ and nothing
+else, a pooled fit attains approximately $0.5$ and a within-stratum fit exceeds
+\PooledFitGuardWithin{}. This is enforced by a regression test.
 
-Leakage into type-2 AUROC is therefore two-dimensional: item identity, removed by conditioning, and
-self-verdict, removed only by pooled estimation at balanced strata. Probes controlling for neither
-are exposed to both.
+Leakage into type-2 AUROC is thus two-dimensional: item identity, removed by conditioning, and
+self-verdict, removed only by pooled estimation at balanced strata.
 
-\section{The ladder does not measure addition}
+\section{Nested estimation from wide representations}
 \label{sec:ladder}
 
-A nested comparison is supposed to answer: what does this block add to what we already had? Fitting
-it by concatenating the block onto the baseline columns under one shared penalty does not answer
-that question when the two differ in width by three orders of magnitude. A \texttt{hidden\_size}-wide
-activation block against a six-column baseline yields approximately ``activations'', not
-``baseline $+$ activations'', and the block must reconstruct the margin from scratch. When it cannot,
-the rung scores \emph{below} the baseline it was meant to extend.
+A nested comparison estimates what a block adds to a baseline. We report two failures of that
+estimate, acting in opposite directions, for blocks whose column count exceeds the baseline's by
+three orders of magnitude.
+
+\subsection{Concatenation under a shared penalty}
+
+Fitting one penalised model on $[X^{\mathrm{b}}, X^{\mathrm{a}}]$ with $d_{\mathrm{a}} \gg
+\dim X^{\mathrm{b}}$ does not estimate an increment: the shared penalty admits a solution
+approximating $X^{\mathrm{a}}$ alone, requiring the block to reconstruct the margin. \Cref{tab:swamp}
+gives the effect with a \emph{pure-noise} block, for which the correct delta is zero at every width.
+The damage increases with baseline strength, and across the six estimable slices of our panel the
+delta correlates with baseline strength at $r = -0.85$.
 
 \begin{table}[h]
 \centering\small
-\caption{Planted validation. The added block is \textbf{pure noise}; the correct delta is zero at
-every width. Concatenation destroys real signal, and destroys more of it when there is more to
-destroy.}
+\caption{Planted validation. The added block is pure noise; the correct delta is zero.}
 \label{tab:swamp}
 \begin{tabular}{lccc}
 \toprule
-baseline & added block & concat & offset \\
+baseline & added block & concatenation & offset \\
 \midrule
-\SwampBaseStrong{} & \AddBlockNarrow{} noise cols & \multicolumn{1}{c}{$-$\SwampLossNarrow{}} & $\pm$\OffsetLossWide{} \\
-\SwampBaseStrong{} & \AddBlockWide{} noise cols   & \multicolumn{1}{c}{$\mathbf{-\SwampLossWide{}}$} & $\pm$\OffsetLossWide{} \\
-\SwampBaseWeak{}   & \AddBlockWide{} noise cols   & \multicolumn{1}{c}{$-$\SwampLossWeakWide{}} & $\pm$\OffsetLossWide{} \\
+\SwampBaseStrong{} & \AddBlockNarrow{} columns & $-$\SwampLossNarrow{} & $\pm$\OffsetLossWide{} \\
+\SwampBaseStrong{} & \AddBlockWide{} columns   & $\mathbf{-\SwampLossWide{}}$ & $\pm$\OffsetLossWide{} \\
+\SwampBaseWeak{}   & \AddBlockWide{} columns   & $-$\SwampLossWeakWide{} & $\pm$\OffsetLossWide{} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The signature is diagnostic: the delta correlates negatively with baseline strength, so the better
-the baseline, the more the rung appears to lose. We observed exactly that on real data before
-identifying the cause.
+\subsection{The offset estimator, and its own failure mode}
+\label{sec:offset}
 
-\paragraph{The offset estimator.} Fit the baseline first, carry its out-of-fold logit as a fixed
-offset, and let the internal block fit only the working residual under ridge shrinkage:
-$\text{score} = z_{\text{baseline}} + f(X_{\text{internal}})$. If the block is uninformative, $f$
-shrinks to zero and the score reduces to the baseline, so addition is monotone by construction and a
-negative delta means overfitting rather than destruction of information already in hand. The offset
-for training rows comes from an \emph{inner} cross-validation inside the training fold; using the
-outer out-of-fold logit would leak the test fold into the baseline the second stage sees.
+Let $z$ be the baseline's out-of-fold logit. The offset estimator scores
+\begin{equation}
+\hat s \;=\; z + f(X^{\mathrm{a}}), \qquad
+f = \arg\min_{w} \; \sum_i \log\!\big(1 + e^{-(2y_i-1)(z_i + X^{\mathrm{a}}_i w)}\big)
+      \;+\; \alpha \lVert w \rVert^2 ,
+\label{eq:offset}
+\end{equation}
+with $z$ entering unpenalised. Addition is then monotone up to noise: an uninformative block drives
+$f \to 0$ and $\hat s \to z$. Two conditions are load-bearing. The offset for training rows must
+come from an inner cross-validation within the training fold, or the outer test fold enters the
+baseline the second stage observes. And $\alpha$ must be selected by out-of-fold AUROC.
 
-\paragraph{Two estimands, reported side by side.} The offset rung answers ``what does this block add
-to what we already had''. A block-only rung answers ``what is achievable from this block alone''.
-The gap between them is redundancy. Both belong in the table: the offset alone reads as
-self-handicapping, and the block-only alone hides that the information was already present.
+Selecting $\alpha$ instead by squared error on the working residual $y - \sigma(z)$ --- the natural
+ridge formulation --- fails. That objective is on a different scale from the logit, its
+cross-validation curve is nearly flat at $n = \PilotSliceN{}$ with $d_{\mathrm{a}} = 1536$, and its
+minimum lies at maximum shrinkage: the selected penalty reached the top of the grid on every fold,
+the resulting correction had \OffsetShrinkRatio{} of the offset's scale, and every internal rung
+returned a value numerically equal to the baseline. Capping the grid does not address this; it
+selects the penalty by hand.
 
-\subsection{Absence versus redundancy}
+\subsection{Acceptance criterion}
 \label{sec:absence}
 
-A tight equivalence between $M_4$ and $M_3$ has three explanations the delta cannot separate:
-spectral carries nothing; spectral carries what activations already carry; or the penalty shrank the
-spectral block to zero. A fourth is not hypothetical (\cref{sec:hygiene}): the features never
-arrived. We separate them with a block-only rung, the fitted coefficient norm on the spectral block
-against the activation block, and a positive control that recovers a target known to be encoded at
-matched $n$. On planted data the two worlds give indistinguishable deltas
-(\AbsenceDeltaNoise{} and \AbsenceDeltaDup{}) and block-only rungs of \AbsenceNoiseOnly{} versus
-\AbsenceDupOnly{}.
+Both failures passed a planted test at a single signal magnitude. The criterion is therefore a
+\emph{recovery curve}: a planted signal along a dense random direction at several magnitudes, with
+the requirement that zero signal costs approximately nothing and a recoverable signal is expressed.
+A single-column plant understates the estimator and is not used.
+
+The curve yields a \emph{detection threshold}, below which the comparison is uninformative
+irrespective of its standard error. At width \RecoveryWidth{} with \RecoverySeeds{} paired seeds per
+cell, detection reaches \DetectFracFourHundred{} of seeds at $n = 400$ and \DetectFracTwoHundred{} at
+$n = \PilotSliceN{}$, giving a preregistered $n = \NFreeze{}$ per stratum. Two further diagnostics
+distinguish absence from redundancy and from shrinkage: block-only rungs, fitted without baseline
+columns; and a positive control recovering a target known to be encoded, which attains at least
+\PosControlLo{} on every slice, establishing that a null reflects the signal rather than the
+pipeline.
 
 \section{Inference}
 \label{sec:inference}
 
-\paragraph{Clustering.} The pos/neg partners of one question and the two orders of one pairwise item
-share nearly all their text and live in one cross-validation group. Paired DeLong assumes
-independent items. On planted data with one item per group its standard error matches the grouped
-bootstrap exactly (\DelongSEIndep{} both); with four clustered rows per question it understates the
-standard error by \DelongRatioClustered{}$\times$. Since pairwise judge benchmarks are clustered by
-construction, adopting DeLong as the primary test manufactures significance. We use a grouped paired
-bootstrap, which is already paired --- both metrics are recomputed on identical resamples --- and
-report DeLong only as a labelled cross-check whose ratio to the bootstrap measures how much width is
-clustering.
+\paragraph{Clustering.} Items are clustered by construction: the two orders of a pairwise item and
+the positive/negative partners of one question share a group. Paired DeLong assumes independence.
+On planted data with one item per group its standard error matches the grouped bootstrap
+(\DelongSEIndep{} for both); with four clustered rows per question it understates the standard
+error by \DelongRatioClustered{}$\times$. We use a grouped paired bootstrap, which is itself paired,
+and report DeLong as a labelled cross-check.
 
-\paragraph{Equivalence.} A non-significant contrast is not a finding unless it says what it rules
-out. Every contrast carries a two-one-sided-test verdict against a pre-specified band of
-\EqBand{} conditional AUROC, read off the same bootstrap so the grouping is respected.
+\paragraph{Equivalence.} Each contrast carries a two-one-sided-test verdict against a band of
+\EqBand{} conditional AUROC, read from the same bootstrap.
 
-\paragraph{Power.} The width of each bootstrap CI is the standard error at the pilot's $n$, so the
-pilot prices its own minimum detectable effect. At \PilotSliceN{} items per slice and a median
-standard error of \MedianSE{}, the detectable effect is \MdeUncorrected{} uncorrected and
-\MdeFDR{} under Benjamini--Hochberg over \FamilySize{} contrasts. Against a plausible target of
-\TargetEffect{}, a pilot null is uninformative, and detecting it requires roughly \NNeededFDR{} items
-per slice. Two consequences shape the design: buy items rather than judges, since each judge
-multiplies the contrast family without adding per-test power; and pre-specify \NPrimaryTests{}
-primary tests, with everything else exploratory and unstarred.
+\paragraph{Power, and its limits.} At \PilotSliceN{} items per slice and a median standard error of
+\MedianSE{}, the minimum detectable effect is \MdeUncorrected{} uncorrected and \MdeFDR{} under
+Benjamini--Hochberg over \FamilySize{} contrasts. This statistic is not sufficient on its own: it
+measures the precision of a difference between two score vectors, and a collapsed estimator returns
+a difference of zero with a standard error to match. The detection threshold of \cref{sec:absence}
+is the primary criterion, and the minimum detectable effect is retained as a lower bound.
+
+\begin{algorithm}[t]
+\caption{Per-slice estimation}
+\label{alg:pipeline}
+\begin{algorithmic}[1]
+\State restrict to rows carrying every feature family; report the count dropped
+\State $\phi \gets \max(Q_{95}(F_{\mathrm{SDT}}), Q_{95}(F_{\mathrm{V}}))$ \Comment{\cref{eq:floor}}
+\ForAll{outer folds, grouped on $q$}
+  \State fit baseline on $X^{\mathrm{b}}$; $z_{\text{test}} \gets$ its out-of-fold logit
+  \State $z_{\text{train}} \gets$ inner-CV logit within the training fold
+  \State select $\alpha$ by out-of-fold AUROC; fit $f$ by \cref{eq:offset}
+  \State $\hat s \gets z + f(X)$
+\EndFor
+\State report $\mathrm{AUROC}_{\mathrm{c}}$ (\cref{eq:cond}), its percentile against
+       $F_{\mathrm{SDT}}$, the block-only rung, and per-stratum support
+\State grouped paired bootstrap for each contrast; TOST against \EqBand{}; BH-FDR over the family
+\end{algorithmic}
+\end{algorithm}
 
 \section{Results}
 \label{sec:results}
 
-\emph{[Pending the regeneration pass. \texttt{fill\_numbers.py --verify} currently exits non-zero on
-21 macros, all of which are downstream of it. This section is written to be filled, not to be
-guessed.]}
+\emph{[Pending the scaled run at $n = \NFreeze{}$ per stratum. \texttt{fill\_numbers.py --verify}
+exits non-zero on the macros this section requires. Written to be filled.]}
 
-The panel: \NJudgesMain{} judges spanning scale, \NItemsPerSliceMain{} items per slice, all five
-banks entering a pooled hierarchical model as a random effect rather than being tested separately.
-Both floors are reported per slice, alongside the per-stratum support counts, since a conditional
-AUROC resting on a handful of minority-class items looks exactly like one resting on hundreds.
+The panel is \NJudgesMain{} judges spanning scale at \NItemsPerSliceMain{} items per slice, with all
+five banks entering a hierarchical model as a random effect. Both floors are reported per slice
+alongside per-stratum support counts.
 
-\paragraph{Anchor: spectral adds nothing beyond activations.} This is the one result unaffected by
-\cref{sec:leakage,sec:ladder,sec:estimand}: $M_4$ and $M_3$ carry the same baseline and the same
-verdict leakage, so their difference is clean under all of them. Across \AnchorNSlices{} estimable
-slices the delta lies in \AnchorDeltaLo{}--\AnchorDeltaHi{} at standard errors of
-\AnchorSELo{}--\AnchorSEHi{}, which is TOST-equivalent against the \EqBand{} band. The attention-graph
-family is measurably redundant with a linear probe on the last-token hidden state, reported as a
-powered equivalence rather than as a failure to reject.
+\paragraph{Spectral features alone.} Fitted without baseline columns, the spectral family attains
+\MTwoOnlyLo{}--\MTwoOnlyHi{} conditional AUROC across \NSlicesEstimable{} estimable slices of the
+four-judge panel, at or below chance on every one. The activation family attains
+\MThreeOnlyLo{}--\MThreeOnlyHi{}. Since the corresponding rungs sit at or below the estimator's
+detection threshold at this $n$, the nested comparison between them is not informative here, and is
+reported as unresolved rather than as an equivalence.
 
-\paragraph{Controls.} Permutation nulls, refitting the whole pipeline with labels shuffled within
-stratum, land in \PermLo{}--\PermHi{}, so there is no leakage in the cross-validation itself.
+\paragraph{Controls.} The positive control attains at least \PosControlLo{} on every slice.
 
-\section{Numerical and provenance hygiene}
+\section{Numerical and provenance conditions}
 \label{sec:hygiene}
 
-Two failures in this class nearly entered our own write-up as findings, and both are silent.
+\paragraph{Precision.} Under \texttt{float16} one judge produced non-finite attention weights. Its
+spectral analysis failed on every item, and its verdict logits were corrupted: it presented as
+degenerate (\NumFpAcc{} accuracy, \NumFpBias{} verdict bias) where under \texttt{bfloat16} it is
+competent (\NumBfAcc{}). The two precisions agree on \NumAgreeFpBf{} of its verdicts. Precision must
+be uniform across a panel, since neither spectral metrics nor logits are comparable across dtypes.
+The analysis library now raises on the first layer of non-finite attention.
 
-\paragraph{Precision.} Under \texttt{float16}, one judge overflowed to \texttt{inf} inside attention.
-Its spectral analysis failed on 100\% of items --- caught per item by design, so nothing crashed and
-no summary looked wrong --- \emph{and} its verdicts were corrupted, presenting it as a fully
-degenerate judge (\NumFpAcc{} accuracy, \NumFpBias{} verdict bias) where under \texttt{bfloat16} it
-is competent (\NumBfAcc{}). The two precisions agree on \NumAgreeFpBf{} of its verdicts. A numerical
-bug was on its way into a write-up as a finding about model scale. Precision must be uniform across a
-panel, since neither spectral metrics nor logits are comparable across dtypes. We have promoted the
-check into the analysis library itself, which now raises on the first layer of non-finite attention.
-
-\paragraph{Versions.} The pilot ran a different version of the spectral library than the environment
-later held, and nothing in the results files recorded it. Comparing rows computed by different
-library versions is the same class of error as mixing dtypes. We verified that the change on the
-code path in use shifts every metric by at most \VerDtypeShift{} and pinned the version.
+\paragraph{Versions.} Spectral rows computed under different library versions are not comparable,
+and the version appears only in the run log. We verified that the change on the code path in use
+shifts every metric by at most \VerDtypeShift{}, and pin the library by commit rather than by
+version string.
 
 \section{Limitations}
 \label{sec:limitations}
 
-Named hazards we did not measure, each with the measurement we would propose.
+\textbf{Chain-of-thought.} The judges here are single-token log-probability readouts, which is what
+production reward pipelines use but not the only deployment. \Cref{def:sdt} transfers unchanged,
+requiring only a two-way argmax over a scalar margin at the readout token, but generated chain
+length correlates with item difficulty and would enter the baseline as a nuisance covariate. We
+expect internals to add less under chain-of-thought, since the model can externalise uncertainty
+into tokens the readout state has already absorbed.
 
-\textbf{Chain-of-thought.} Our judges are single-token logprob readouts, which is what production
-reward pipelines do but is not how a judge is always deployed. The signal-detection null transfers
-unchanged --- it needs only a two-way argmax over a scalar margin at the readout token --- but
-generated chain length correlates with item difficulty and would need to enter the baseline as a
-nuisance covariate, exactly as prompt length does. We predict internals add \emph{less} under
-chain-of-thought, because the model can externalise uncertainty into tokens the readout state has
-already absorbed.
+\textbf{Panel.} Internal access requires open weights.
 
-\textbf{Open-weight panel.} Internal access requires open weights, so the judges most used in
-practice are absent.
+\textbf{Label semantics.} On preference datasets the \texttt{single} format treats a relative
+preference as absolute truth, capping achievable accuracy. Pairwise is primary, and is additionally
+immune to the length confound by counterbalancing.
 
-\textbf{\texttt{single}-format label noise.} On preference datasets the ``is this response correct''
-framing treats a relative preference as absolute truth, capping achievable accuracy. Pairwise is our
-primary format for this reason, and is additionally immune to the length confound by
-counterbalancing.
+\textbf{Spectral summarisation.} Three numbers per metric, fixed \emph{a priori}. If the signal is
+layer-local this design cannot observe it, and a null would concern the summarisation.
 
-\textbf{The plant-indexed recovery curve did not earn its keep on our own measurement.} We index the
-curve on planted strength rather than on a recovered block-only AUROC because indexing on an
-estimated quantity is ill-posed in principle: the recovered value is biased by the same shrinkage
-that suppresses the delta. At the width and sample size we measured (1536 columns, $n=200$) that
-bias turns out to be negligible --- block-only is flat in $n$ --- so on \emph{this} measurement the
-redesign's practical benefit came from pairing the cells and seeding them, not from the bias
-correction that motivated it. We report both, and continue to recommend the plant-indexed form,
-because the bias is a function of width and sample size and there is no reason to expect it to stay
-negligible elsewhere.
+\textbf{Recovery-curve indexing.} We index the recovery curve on planted strength rather than on a
+recovered block-only AUROC, because indexing on an estimated quantity is ill-posed: the recovered
+value carries the same shrinkage that suppresses the delta. At the width and sample size measured
+here that bias is negligible, so on this measurement the benefit came from pairing and seeding the
+cells. The bias is a function of width and sample size, and the plant-indexed form remains the
+recommendation.
 
-\textbf{Fixed spectral summarisation.} Three numbers per metric, chosen \emph{a priori} to avoid
-post-hoc layer selection. If the signal is layer-local, this design cannot see it, and a null would
-be about the summarisation rather than the representation. One pre-registered contrast on the full
-layerwise vector addresses this at the cost of a single test.
-
-\section{Corrections}
+\section{Errata}
 \label{sec:corrections}
 
-We report our own errors grouped by cause, because the discipline this paper argues for is
-worthless if applied only to others.
+\Cref{tab:errata} lists analytic failures identified in this work, including our own. Each is
+accompanied by a regression test that fails if the behaviour recurs. The common property is that
+each returned a plausible value: four were measurements of a degenerate object, and two were
+misreadings of a valid one.
 
-\textbf{Two artefacts that survived multiple-comparison correction.} A judge answering one way
-almost always has near-zero within-stratum outcome variance; its conditional AUROC was estimated from
-a stratum holding a single minority-class item, and a bootstrap resampling that same item returned a
-\emph{narrow} interval around an arbitrary value. Two such contrasts passed
-Benjamini--Hochberg and were briefly reported as discoveries. Fixed in three layers: a minimum class
-count per stratum, contrast suppression for degenerate slices, and exclusion of unreliable slices
-from the correction family.
+\begin{table}[h]
+\centering\scriptsize
+\caption{Analytic failures, causes, and the checks that now prevent them.}
+\label{tab:errata}
+\begin{tabular}{p{2.4cm}p{3.4cm}p{2.6cm}p{3.4cm}}
+\toprule
+\textbf{Failure} & \textbf{Cause} & \textbf{Detected by} & \textbf{Fix and check} \\
+\midrule
+Degenerate slices producing discoveries &
+Conditional AUROC estimated from a stratum holding one minority item; the bootstrap resampled it &
+Two contrasts surviving BH-FDR with implausible deltas &
+Minimum class count per stratum; contrast suppression; exclusion from the FDR family \\
+\addlinespace
+Precision corrupting verdicts &
+\texttt{float16} overflow to non-finite attention &
+Per-item error field only &
+\texttt{bfloat16} panel-wide; library raises on non-finite attention \\
+\addlinespace
+Baseline swamped by a wide block &
+Shared penalty over disparate column counts &
+Delta correlating $r=-0.85$ with baseline strength &
+Offset estimator (\cref{eq:offset}); noise-block test at realistic width \\
+\addlinespace
+Added block shrunk to zero &
+Penalty selected by squared error on a working residual &
+Rungs numerically equal to the baseline &
+Penalty selected by out-of-fold AUROC; recovery-curve test \\
+\addlinespace
+Diagnostic reporting on an unused path &
+Coefficient norms computed on the concatenation pipeline while claims used the offset one &
+Healthy ratios alongside a collapsed estimator &
+Diagnostic bound to the estimator in use \\
+\addlinespace
+Validator sharing its input's seeds &
+Calibration checked against the sweep cell it was calibrating &
+Target at the edge of its own interval &
+Check drawn from independent seeds \\
+\addlinespace
+Trend read from overlapping intervals &
+Directional claim from a table whose IQRs overlap &
+Repeat measurement at fresh seeds &
+Script refuses a monotonicity claim unless consecutive IQRs are disjoint \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\textbf{A validation that could not detect the failure it was for.} Our first planted test of the
-ladder used a 32-column block and reported it clean. At that width the pathology of
-\cref{sec:ladder} is \SwampLossNarrow{} and invisible; at realistic width it is \SwampLossWide{}.
-
-\textbf{A trend we nearly reported.} The margin's conditional AUROC rose with judge competence
-across our panel, which reads as self-knowledge emerging with capability. Simulating the
-first-order observer of \cref{sec:estimand} reproduces the entire trend, and our judges sit at or
-below it. The finding was arithmetic.
+\input{ai_use}
 
 \bibliographystyle{iclr2027_conference}
 \bibliography{refs}

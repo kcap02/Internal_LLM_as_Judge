@@ -33,6 +33,14 @@ def main() -> int:
     undefined = sorted(used - set(defs))
     pending = sorted(m for m in used if "??" in defs.get(m, ""))
 
+    # A LaTeX control sequence cannot contain digits: \DetectFrac400 parses as
+    # \DetectFrac followed by the characters "400". The macro appears defined,
+    # the text appears to reference it, and the PDF silently prints something
+    # else. Neither the undefined nor the pending check above can see this.
+    digity = sorted(set(re.findall(r"\\([A-Z][A-Za-z]*[0-9][A-Za-z0-9]*)", tex))
+                    | set(re.findall(r"newcommand\{\\([A-Za-z]*[0-9]+[A-Za-z0-9]*)\}",
+                                     gen)))
+
     print(f"{len(defs)} macros defined, {len(used)} used in main.tex")
     if undefined:
         print(f"\nUNDEFINED ({len(undefined)}) — used in the text, never defined:")
@@ -48,7 +56,13 @@ def main() -> int:
     if unused:
         print(f"\n(unused definitions: {len(unused)} — harmless)")
 
-    if undefined or pending:
+    if digity:
+        print(f"\nDIGITS IN MACRO NAMES ({len(digity)}) — invalid LaTeX; these "
+              f"parse as a shorter command followed by literal digits:")
+        for m in digity:
+            print(f"  \\{m}")
+
+    if undefined or pending or digity:
         print("\nBUILD BLOCKED.")
         return 1
     print("\nAll macros defined and measured.")

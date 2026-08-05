@@ -51,6 +51,12 @@ Usage:
     python scripts/22_recovery_curve.py
     python scripts/22_recovery_curve.py --n 200 400 800 1600 3200 --seeds 15
     python scripts/22_recovery_curve.py --target 0.633 --width 1536
+
+**Exploratory or rigged runs MUST pass `--tag`.** Without it this writes to
+`results/recovery_curve.json`, the file `paper/fill_numbers.py` resolves the
+paper's detection-threshold macros from. A rigged failure run used to verify
+the PASS/FAIL logic (`--n 50 100 --target 0.999`) overwrote the production
+sweep, and the paper's macros silently became undefined.
 """
 
 import _bootstrap  # noqa: F401

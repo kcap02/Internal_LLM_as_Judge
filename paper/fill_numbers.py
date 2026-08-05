@@ -69,6 +69,9 @@ def collect() -> dict[str, str | None]:
     m["AddBlockWide"] = "4096"
     m["AddBlockNarrow"] = "32"
     m["DelongRatioClustered"] = "2.17"
+    # Correction SD as a fraction of the baseline logit's SD under the
+    # residual/RidgeCV second stage: the number that identified the collapse.
+    m["OffsetShrinkRatio"] = "0.7\\%"
     m["DelongSEIndep"] = "0.0020"
     m["AbsenceNoiseOnly"] = "0.504"
     m["AbsenceDupOnly"] = "0.876"
@@ -129,18 +132,63 @@ def collect() -> dict[str, str | None]:
         if perm:
             m["PermLo"] = _fmt(min(perm))
             m["PermHi"] = _fmt(max(perm))
-        # The anchor: M4 - M3 across estimable slices.
-        d4 = [(v.get("contrasts") or {}).get("M4 - M3", {})
-              for v in an.values() if isinstance(v, dict)]
-        d4 = [c for c in d4 if c.get("delta") is not None]
-        if d4:
-            deltas = [c["delta"] for c in d4]
-            ses = [(c["ci95"][1] - c["ci95"][0]) / 3.92 for c in d4]
-            m["AnchorNSlices"] = str(len(d4))
-            m["AnchorDeltaLo"] = _fmt(min(deltas), signed=True)
-            m["AnchorDeltaHi"] = _fmt(max(deltas), signed=True)
-            m["AnchorSELo"] = _fmt(min(ses))
-            m["AnchorSEHi"] = _fmt(max(ses))
+        # ── Corrected (offset-fitted) run ────────────────────────────────
+        # NB: `M4 - M3` is NO LONGER an anchor result. Under the offset
+        # estimator both rungs sit on the baseline, so their difference is a
+        # tightly-estimated zero that cannot distinguish redundancy from an
+        # estimator that expressed neither block. The Anchor* macros are
+        # deliberately NOT defined; any sentence needing them must be rewritten.
+        slices = [v for v in an.values()
+                  if isinstance(v, dict) and "auroc_conditional" in v]
+        m2o = [v["auroc_conditional"].get("M2only") for v in slices]
+        m2o = [x for x in m2o if x is not None]
+        if m2o:
+            m["MTwoOnlyLo"] = _fmt(min(m2o))
+            m["MTwoOnlyHi"] = _fmt(max(m2o))
+        m3o = [v["auroc_conditional"].get("M3only") for v in slices]
+        m3o = [x for x in m3o if x is not None]
+        if m3o:
+            m["MThreeOnlyLo"] = _fmt(min(m3o))
+            m["MThreeOnlyHi"] = _fmt(max(m3o))
+        vd = [(v["controls"].get("verdict_decodability") or {}).get("auroc")
+              for v in slices]
+        vd = [x for x in vd if x is not None]
+        if vd:
+            m["VerdictDecodLo"] = _fmt(min(vd))
+            m["VerdictDecodHi"] = _fmt(max(vd))
+        pc = [((v["controls"].get("positive_control") or {}).get("auroc")
+               or {}).get("M3only") for v in slices]
+        pc = [x for x in pc if x is not None]
+        if pc:
+            m["PosControlLo"] = _fmt(min(pc))
+        fl = [v.get("floor_to_clear") for v in slices]
+        fl = [x for x in fl if x is not None]
+        if fl:
+            m["FloorLo"] = _fmt(min(fl))
+            m["FloorHi"] = _fmt(max(fl))
+        m["NSlicesEstimable"] = str(len(m2o))
+    # ── Recovery curve / detection threshold (results/recovery_curve.json) ──
+    rc = _load("recovery_curve.json")
+    if rc:
+        m["RecoveryThresholdN"] = (str(rc["n_freeze_candidate"])
+                                   if rc.get("n_freeze_candidate") else None)
+        m["RecoveryWidth"] = str(rc.get("width"))
+        m["RecoverySeeds"] = str(rc.get("seeds_per_cell"))
+        m["CalibratedStrength"] = _fmt(rc.get("calibrated_strength"), nd=2)
+        csc = rc.get("calibration_self_check") or {}
+        m["CalibCheckMedian"] = _fmt(csc.get("median"))
+        # LaTeX control sequences cannot contain digits, so these are named in
+        # words: \DetectFracTwoHundred, not \DetectFrac200.
+        by = rc.get("by_n") or {}
+        words = {"200": "TwoHundred", "400": "FourHundred",
+                 "800": "EightHundred", "1600": "SixteenHundred"}
+        for n, w in words.items():
+            if n in by:
+                m[f"DetectFrac{w}"] = f"{100 * by[n]['detect_fraction']:.0f}\\%"
+                m[f"MedDelta{w}"] = _fmt(by[n]["median_delta"], signed=True)
+    # Preregistered, one grid step above the measured threshold (prereg §8.2).
+    m["NFreeze"] = "800"
+
     fdr = _load("analysis_fdr.json")
     if fdr:
         m["FdrNContrasts"] = str(fdr.get("n_contrasts"))
@@ -152,7 +200,7 @@ def collect() -> dict[str, str | None]:
               "OffsetBestMFour", "MTwoOnlyBest", "MThreeOnlyBest",
               "CoefRatioBest", "PosControlMThreeOnly", "PosControlMTwoOnly",
               "SdtNullBest", "SdtNullBandLo", "SdtNullBandHi",
-              "VerdictLeakBest", "VerdictLeakP95", "FloorToClear",
+              "VerdictLeakBest", "VerdictLeakPNinetyFive", "FloorToClear",
               "VerdictDecodBest", "StratumMinN", "NJudgesMain",
               "NItemsPerSliceMain", "MdeFDROffset", "CoverageAtRiskGain"):
         m.setdefault(k, None)
