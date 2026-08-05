@@ -30,3 +30,11 @@ Thumbs.db
 # Reference paper kept locally for formatting conventions; not part of this work.
 paper/example.tex
 paper/example.pdf
+
+# LaTeX build artefacts (paper/main_build.* is a generated fallback variant)
+paper/main_build.*
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
