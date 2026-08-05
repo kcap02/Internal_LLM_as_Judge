@@ -419,6 +419,16 @@ framing treats a relative preference as absolute truth, capping achievable accur
 primary format for this reason, and is additionally immune to the length confound by
 counterbalancing.
 
+\textbf{The plant-indexed recovery curve did not earn its keep on our own measurement.} We index the
+curve on planted strength rather than on a recovered block-only AUROC because indexing on an
+estimated quantity is ill-posed in principle: the recovered value is biased by the same shrinkage
+that suppresses the delta. At the width and sample size we measured (1536 columns, $n=200$) that
+bias turns out to be negligible --- block-only is flat in $n$ --- so on \emph{this} measurement the
+redesign's practical benefit came from pairing the cells and seeding them, not from the bias
+correction that motivated it. We report both, and continue to recommend the plant-indexed form,
+because the bias is a function of width and sample size and there is no reason to expect it to stay
+negligible elsewhere.
+
 \textbf{Fixed spectral summarisation.} Three numbers per metric, chosen \emph{a priori} to avoid
 post-hoc layer selection. If the signal is layer-local, this design cannot see it, and a null would
 be about the summarisation rather than the representation. One pre-registered contrast on the full

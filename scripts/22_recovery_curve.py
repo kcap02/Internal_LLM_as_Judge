@@ -219,19 +219,68 @@ def main() -> None:
            "calibration_note": note, "by_n": by_n,
            "n_freeze_candidate": threshold}
 
+    # ── Pass condition, evaluated by the script, not by the reader ────────
+    # The third half of prereg §4.1. Every estimator in this pipeline has a
+    # pre-stated acceptance criterion; the tool that validates them did not,
+    # and a table read afterwards for "did the fix work" is the same act as
+    # reading one for "did the hypothesis hold". Both of this project's
+    # misreadings of THIS table — a non-monotone block-only treated as a
+    # defect, then a monotone rise treated as its resolution — appeared
+    # immediately after an argument that predicted them.
     log("\n" + "=" * 66)
-    if threshold is not None:
-        log(f"N_FREEZE candidate = {threshold} items per stratum — the smallest "
-            f"n detecting a plant calibrated to the pilot's own block-only "
-            f"reading, in >= {args.detect_frac:.0%} of {args.seeds} seeds.")
-    else:
-        log(f"NO tested n detects at >= {args.detect_frac:.0%} of seeds. If no "
-            f"affordable n does, primary test 1 is preregistered as "
-            f"UNRESOLVABLE and the abstract says so (prereg §8.2).")
+    verdict = {}
 
+    verdict["detection"] = threshold is not None
+    if threshold is not None:
+        log(f"[PASS] detection: n={threshold} reaches "
+            f">= {args.detect_frac:.0%} of {args.seeds} seeds. "
+            f"N_FREEZE candidate = {threshold} items per stratum.")
+    else:
+        log(f"[FAIL] detection: NO tested n reaches "
+            f">= {args.detect_frac:.0%} of seeds. If no affordable n does, "
+            f"primary test 1 is preregistered as UNRESOLVABLE and the abstract "
+            f"says so (prereg §8.2).")
+
+    # Monotonicity in block-only may be CLAIMED only where consecutive IQRs
+    # are disjoint. Otherwise the script says so and no trend is reported.
+    ns = [n for n in args.n if str(n) in by_n]
+    sep = []
+    for a, b in zip(ns, ns[1:]):
+        la, ha = by_n[str(a)]["block_only_iqr"]
+        lb, hb = by_n[str(b)]["block_only_iqr"]
+        sep.append((a, b, bool(lb > ha or la > hb)))
+    verdict["block_only_trend_claimable"] = any(s for *_, s in sep)
+    if verdict["block_only_trend_claimable"]:
+        pairs = ", ".join(f"{a}->{b}" for a, b, s in sep if s)
+        log(f"[NOTE] block-only: IQRs separate at {pairs}; a trend may be "
+            f"claimed there and only there.")
+    else:
+        log("[NOTE] block-only: NO consecutive IQRs separate — "
+            "NO MONOTONICITY CLAIM IS PERMITTED from this table. Any apparent "
+            "rise or fall is within sampling noise.")
+
+    # The calibration must reproduce its own target when measured directly.
+    cal_ok = None
+    if by_n and str(args.pilot_n) in by_n:
+        got = by_n[str(args.pilot_n)]["median_block_only"]
+        lo, hi = by_n[str(args.pilot_n)]["block_only_iqr"]
+        cal_ok = bool(lo <= args.target <= hi)
+        log(f"[{'PASS' if cal_ok else 'WARN'}] calibration self-check: "
+            f"block-only at the pilot's n={args.pilot_n} is {got:.3f} "
+            f"IQR [{lo:.3f}, {hi:.3f}] against target {args.target:.3f}"
+            + ("" if cal_ok else " — target OUTSIDE the IQR; s* is not "
+               "delivering the intended plant"))
+    verdict["calibration_self_check"] = cal_ok
+
+    out["verdict"] = verdict
     p = RESULTS_DIR / f"{tagged('recovery_curve', args.tag)}.json"
     atomic_write_json(p, out)
     log(f"wrote {p.name}")
+
+    if not verdict["detection"] or cal_ok is False:
+        log("\nOVERALL: FAIL — do not use this sweep to set N_FREEZE.")
+        raise SystemExit(1)
+    log("\nOVERALL: PASS")
 
 
 if __name__ == "__main__":

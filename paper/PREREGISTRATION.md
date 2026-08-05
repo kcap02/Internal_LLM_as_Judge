@@ -147,6 +147,23 @@ The generalisation has two halves, and both are transferable claims:
    items per slice" precisely *because* the rungs sat on top of the baseline.
    A tight interval around a collapsed estimator is still tight. Precision and
    recovery must be reported as a pair.
+3. **The acceptance criterion must be fixed before the measurement, and
+   enforced by the script rather than by the reader.** Reading a table
+   afterwards to decide whether a fix worked is the same act as reading one to
+   decide whether a hypothesis held, and it fails the same way. Every one of
+   the five misreadings in this project was a number that looked like evidence
+   *for the thing the reader was already committed to* — and the sharpest was
+   the fifth, where an apparent monotone trend appeared in the sweep
+   immediately after we argued that pairing would produce it. That one was an
+   error in reading, not in an estimator, which is why the rule has to bind
+   the reader.
+
+   `scripts/22_recovery_curve.py` therefore prints **PASS/FAIL itself** and
+   exits non-zero on failure. It asserts: detection at ≥ 80% of seeds at some
+   tested n; a calibration self-check that the target lies inside the IQR at
+   the pilot's n; and — the guard against the fifth failure — **no
+   monotonicity claim about block-only is permitted unless consecutive IQRs
+   are disjoint**, which the script decides and states.
 
 The plant must be a **dense random direction**, not a single column: that is
 how an activation encodes anything, and a one-column plant in a wide block is
