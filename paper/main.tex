@@ -58,25 +58,27 @@
 \maketitle
 
 \begin{abstract}
-Whether an LLM judge's internal state predicts its own verdict errors is a type-2 (correctness) ROC
-problem. We characterise the estimator used to answer it and identify five properties that make the
-standard construction report something other than metacognitive sensitivity. Two are leakage
-channels specific to judge evaluation: because a judge is correct exactly when its verdict matches
-the label, any feature separating positive from negative items scores without self-knowledge
-(identity decodability \IdentLo{}--\IdentHi{} on our benchmark, invariant across judges), and,
-within a label stratum, any feature decoding the judge's own verdict is a perfect predictor
-(verdict decodability \VerdictDecodLo{}--\VerdictDecodHi{}). The second channel is blocked by pooled
-estimation rather than by the conditional metric, and only at balanced strata. Two are estimator
-failures in the nested comparison: under a shared penalty a hidden-state block of
-\AddBlockWide{} columns removes \SwampLossWide{} AUROC of real signal from a baseline, while an
-offset formulation with a cross-validated ridge shrinks the same block to a correction of
-\OffsetShrinkRatio{} of the baseline's scale, producing a zero. The fifth is the reference point:
-a first-order signal-detection observer with no metacognition attains conditional AUROC
-\SdtAurocMid{} at accuracy \SdtAccMid{}, so scoring against $0.5$ credits first-order accuracy as
-self-knowledge. We give corrected estimators and two reference distributions, and establish a
-detection threshold below which the nested comparison is uninformative regardless of its standard
-error. On a four-judge panel, spectral attention-graph features fitted alone attain
-\MTwoOnlyLo{}--\MTwoOnlyHi{} conditional AUROC, at or below chance on every slice.
+LLM judges are used at a scale that precludes checking their verdicts, so a growing literature asks
+whether a judge's internal state predicts its own errors, and answers by reporting a type-2
+(correctness) AUROC against a reference of $0.5$. We show that this construction measures something
+other than the judge's insight into its own reliability, and give the corrections.
+
+Two leakage channels are specific to judge evaluation. Inside a label stratum, asking whether the
+judge was right and asking what the judge said are the same question, so a probe that reads the
+judge's own verdict off its final hidden state scores near-perfectly while knowing nothing about
+reliability; we measure this at \VerdictDecodHi{}, and show it is blocked by how the probe is fitted
+rather than by the metric. The nested comparison used to isolate what internals add to behaviour
+fails in two opposite directions depending on how it is regularised, once removing real signal from
+the baseline and once removing the added block entirely, and both failures pass a conventional
+planted-data check. The reference point itself is wrong: an observer with no metacognition scores
+far above $0.5$, and higher as it becomes more accurate, so the conventional comparison credits
+first-order accuracy as self-knowledge.
+
+We supply two reference distributions to replace $0.5$, an estimator whose acceptance criterion is
+recovery of a planted effect across magnitudes rather than at one point, and a detection threshold
+below which a null is uninformative irrespective of its confidence interval. A practitioner
+reporting that a judge knows when it is wrong should report the value their judge's own accuracy
+already implies, and what a verdict decoder alone attains, alongside it.
 \end{abstract}
 
 \section{Introduction}
@@ -87,9 +89,22 @@ unreliable verdicts has value. The standard proposal reads it from the judge: fi
 judge's internal state to predict whether its verdict was correct, and report the AUROC. The
 construction is cheap and returns values between $0.6$ and $0.9$.
 
-The quantity it returns is not metacognitive sensitivity. Correctness is defined as
-$\texttt{is\_correct} = (\texttt{pred} = \texttt{gt})$, a comparison of two variables, and a probe
-can score by recovering either one. This paper characterises the resulting estimator.
+The quantity it returns is not metacognitive sensitivity. One instance makes the problem concrete
+before any formalism. Correctness is defined as agreement between the judge's verdict and the label,
+so \emph{within a set of items sharing a label}, ``was the judge right'' and ``what did the judge
+say'' are the same question. A probe that reads the judge's own verdict off its final hidden state
+therefore scores perfectly on that set while carrying no information about reliability --- and the
+final hidden state is exactly where the verdict is read from, so this is not a hypothetical: we
+measure such decoding at \VerdictDecodHi{}. Conditioning on the label, the standard remedy for the
+better-known confound, does not remove it, because the quantity being decoded is the judge's output
+rather than the label.
+
+\Cref{fig:sdt} shows the second instance. An observer with no metacognition at all --- one latent
+decision variable, a threshold, and no access to its own errors --- scores far above $0.5$ on this
+metric, and higher as it becomes more accurate. Reporting against $0.5$ therefore credits a judge's
+first-order accuracy as though it were self-knowledge.
+
+This paper characterises the resulting estimator and supplies the corrections.
 
 Five properties separate the reported quantity from the intended one. Two are leakage channels, one
 through the ground-truth label and one through the judge's own verdict, requiring different
@@ -219,21 +234,19 @@ meta-$d'$/$d'$ \citep{maniscalco2012,fleming2014}. Each rung is reported as a pe
 $F_{\mathrm{SDT}}$, and those percentiles enter the same Benjamini--Hochberg family as every other
 contrast.
 
-\begin{table}[h]
-\centering\small
-\caption{An observer with no metacognition, at three discriminabilities. Scored against $0.5$, the
-third row reads as strong self-knowledge.}
-\label{tab:sdt}
-\begin{tabular}{lcc}
-\toprule
-& accuracy & $\mathrm{AUROC}_{\mathrm{c}}$ \\
-\midrule
-$d' \approx 0$ & \SdtAccLow{}  & \SdtAurocLow{}  \\
-$d' = 0.9$     & \SdtAccMid{}  & \SdtAurocMid{}  \\
-$d' = 1.4$     & \SdtAccHigh{} & \SdtAurocHigh{} \\
-\bottomrule
-\end{tabular}
-\end{table}
+\begin{figure}[t]
+\centering
+\includegraphics[width=.48\linewidth]{figs/fig_sdt_floor.pdf}\hfill
+\includegraphics[width=.48\linewidth]{figs/fig_ladder_failures.pdf}
+\caption{\textbf{Left: the reference point is not $0.5$.} An observer with no metacognition scores
+above $0.5$ on the correctness ROC, and higher as its first-order sensitivity rises; the observed
+judges lie on or below that curve, so none carries information beyond its own accuracy. Band is the
+10th--90th percentile over simulations. \textbf{Right: nested estimation fails in two directions.}
+With a genuinely informative added block, concatenation under a shared penalty degrades as the block
+widens, while the offset estimator with a penalty selected by out-of-fold AUROC tracks the effect.
+A conventional planted-data check at a single narrow width passes for both.}
+\label{fig:sdt}
+\end{figure}
 
 \subsection{The verdict-leakage floor}
 \label{sec:verdictfloor}
@@ -358,6 +371,19 @@ distinguish absence from redundancy and from shrinkage: block-only rungs, fitted
 columns; and a positive control recovering a target known to be encoded, which attains at least
 \PosControlLo{} on every slice, establishing that a null reflects the signal rather than the
 pipeline.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=.42\linewidth]{figs/fig_recovery.pdf}\hfill
+\includegraphics[width=.55\linewidth]{figs/fig_floors.pdf}
+\caption{\textbf{Left: a null below the detection threshold is uninformative.} The measured
+increment for a planted effect calibrated to the observed data, against sample size; below the
+threshold the estimator cannot express the effect, so a delta of zero says nothing about the
+representation. \textbf{Right: every rung against its own floor rather than against $0.5$.} Points
+are the rungs of one slice, the bar is $\phi$ from \cref{eq:floor}. Read against $0.5$ several
+slices appear informative; read against $\phi$, none clears its floor.}
+\label{fig:floors}
+\end{figure}
 
 \section{Inference}
 \label{sec:inference}
