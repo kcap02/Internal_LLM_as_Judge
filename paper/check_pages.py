@@ -30,7 +30,13 @@ DEANON = [
     (r"github\.com/[^\s}]+", "GitHub URL"),
     (r"https?://(?!anonymous)[^\s}]+", "URL (anonymous hosts excepted)"),
     (r"\bour (?:repository|repo|github|code release)\b", "first-person repo reference"),
-    (r"\b(?:C:\\\\Users|/home/|/Users/)[A-Za-z0-9_.-]+", "filesystem path with a username"),
+    # No leading \b: a word boundary cannot match between a space and "/", so
+    # "under /home/valno" was never flagged. And a single backslash in the
+    # regex, not two: r"C:\\\\Users" matches a path containing TWO literal
+    # backslashes, which no real path has. Both bugs were silent because a
+    # clean document produces no hits either way.
+    (r"(?:[A-Za-z]:\\Users\\|/home/|/Users/)[A-Za-z0-9_.\-]+",
+     "filesystem path with a username"),
     (r"\\(?:acknowledgements|acks|thanks)\b", "acknowledgement"),
 ]
 

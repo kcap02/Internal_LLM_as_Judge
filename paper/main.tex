@@ -240,11 +240,14 @@ contrast.
 \includegraphics[width=.48\linewidth]{figs/fig_ladder_failures.pdf}
 \caption{\textbf{Left: the reference point is not $0.5$.} An observer with no metacognition scores
 above $0.5$ on the correctness ROC, and higher as its first-order sensitivity rises; the observed
-judges lie on or below that curve, so none carries information beyond its own accuracy. Band is the
-10th--90th percentile over simulations. \textbf{Right: nested estimation fails in two directions.}
-With a genuinely informative added block, concatenation under a shared penalty degrades as the block
-widens, while the offset estimator with a penalty selected by out-of-fold AUROC tracks the effect.
-A conventional planted-data check at a single narrow width passes for both.}
+slices lie on or below that curve, so none carries information beyond its own accuracy. Band is the
+10th--90th percentile over 12 simulations per point. \textbf{Right: nested estimation fails in two
+directions.} A genuinely informative block is added at increasing width. Concatenation under a
+shared penalty degrades and crosses into negative territory, reporting that a real effect subtracts
+information. The offset form with its penalty selected by squared error on the working residual
+reports a near-constant value insensitive to width, around a third of the effect. Only the offset
+form with the penalty selected by out-of-fold AUROC holds. All three agree at the narrowest width,
+which is why a planted check at one width certifies nothing.}
 \label{fig:sdt}
 \end{figure}
 
