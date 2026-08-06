@@ -108,27 +108,29 @@ first-order accuracy as though it were self-knowledge.
 
 This paper characterises the resulting estimator and supplies the corrections.
 
-Five properties separate the reported quantity from the intended one. Two are leakage channels, one
-through the ground-truth label and one through the judge's own verdict, requiring different
-corrections (\cref{sec:leakage}). Two are failures of the nested comparison that is supposed to
-measure what internals add to behaviour, and they act in opposite directions: concatenation under a
-shared penalty removes signal from the baseline, and an offset formulation with cross-validated
-ridge removes the added block (\cref{sec:ladder}). The fifth concerns the reference point, which is
-conventionally $0.5$ and should be the performance of an observer that decides as well as this judge
-but has no access to how it decided (\cref{sec:estimand}).
+The failures group into three, and the paper is organised around them. \textbf{The reference point}
+is conventionally $0.5$, and should be the performance of an observer that decides as well as this
+system but has no access to how it decided (\cref{sec:estimand}). \textbf{Two leakage channels} run
+into the correctness target, one through the label and one through the system's own output,
+requiring different corrections (\cref{sec:leakage}). \textbf{The nested comparison} used to isolate
+what hidden states add to a behavioural baseline fails in either direction depending on its
+regularisation (\cref{sec:ladder}). Which failures apply to which existing setups is
+\cref{sec:generalisation}; only the reference point applies to all of them.
 
-Four of the five inflate the reported value and one deflates it. The conclusion is not that internal
-signals are weaker than claimed but that the published quantity differs from the intended one.
+The first two inflate the reported value and the third can move it either way. The conclusion is not
+that internal signals are weaker than claimed but that the published quantity differs from the
+intended one.
 
 \paragraph{Contributions.}
 \begin{enumerate}[nosep,leftmargin=*]
-\item \textbf{Two reference distributions for type-2 AUROC in judge evaluation}, replacing $0.5$: a
-      first-order signal-detection floor, which is a Monte-Carlo form of meta-$d'$/$d'$, and a
-      verdict-leakage floor arising from incomplete sign cancellation at unbalanced strata
-      (\cref{sec:estimand}).
+\item \textbf{Two reference distributions to replace $0.5$} for correctness prediction from internal
+      state: a first-order floor, which is a Monte-Carlo form of meta-$d'$/$d'$ and applies to every
+      such result without exemption, and an output-leakage floor arising from incomplete
+      cancellation at unbalanced strata (\cref{sec:estimand}).
 \item \textbf{A two-dimensional leakage taxonomy} for the correctness target, distinguishing
-      item-identity leakage, removed by conditioning, from self-verdict leakage, removed only by
-      pooled estimation (\cref{sec:leakage}).
+      item-identity leakage, removed by conditioning, from self-output leakage, removed only by
+      pooled estimation, with a map of which setups are exposed to which
+      (\cref{sec:leakage,sec:generalisation}).
 \item \textbf{Two opposed failure modes of nested estimation from wide representations}, with a
       corrected estimator and an acceptance criterion --- recovery of a planted effect across
       magnitudes --- that both failures violate (\cref{sec:ladder}).
@@ -191,17 +193,13 @@ $d_{\mathrm{a}} = \dim X^{\mathrm{a}}$ the model's hidden size. Cross-validation
 derived from normalised question text, so that the two orders of a pairwise item and the
 positive/negative partners of one question share a fold.
 
-\paragraph{Banks.} Five banks (MMLU, MMLU-Pro, JudgeBench, LLMBar, RewardBench~2), balanced $50/50$
-by construction, seeded, byte-identical across judges. Grouping on text rather than identifier
-collapses 419 LLMBar pairs into 418 groups, one instruction appearing verbatim in two adversarial
-subsets, and 620 JudgeBench identifiers into 528 groups.
-
-\paragraph{Features.} Three families in increasing cost. Margin: $m$ and $|m|$. Activation: the
-last-token hidden state at half and full depth. Spectral: attention-graph diagnostics --- Fiedler
-value, high-frequency energy ratio, smoothness, spectral entropy, and a Fiedler-velocity summary ---
-on the symmetric normalised Laplacian over a task-token subgraph, summarised as mean, slope and
-normalised argmax over the last third of layers. The summary is fixed \emph{a priori} at three
-numbers per metric. Precision is \texttt{bfloat16} uniformly (\cref{sec:hygiene}).
+\paragraph{Banks and features.} Five judge banks (MMLU, MMLU-Pro, JudgeBench, LLMBar,
+RewardBench~2), balanced $50/50$, seeded, byte-identical across judges, with folds grouped on
+normalised question text rather than identifier. Three feature families: the margin, the last-token
+hidden state, and attention-graph spectral diagnostics summarised at three numbers per metric fixed
+\emph{a priori}. Precision is \texttt{bfloat16} throughout, for reasons given in
+\cref{app:hygiene}. Construction, grouping and feature definitions are in
+\cref{app:banks,app:features}.
 
 \section{Reference distributions for type-2 AUROC}
 \label{sec:estimand}
@@ -447,12 +445,9 @@ that reason, which is a control for the same nuisance channel our baseline carri
 \section{Inference}
 \label{sec:inference}
 
-\paragraph{Clustering.} Items are clustered by construction: the two orders of a pairwise item and
-the positive/negative partners of one question share a group. Paired DeLong assumes independence.
-On planted data with one item per group its standard error matches the grouped bootstrap
-(\DelongSEIndep{} for both); with four clustered rows per question it understates the standard
-error by \DelongRatioClustered{}$\times$. We use a grouped paired bootstrap, which is itself paired,
-and report DeLong as a labelled cross-check.
+\paragraph{Clustering.} Items are clustered by construction, so we use a grouped paired bootstrap
+rather than paired DeLong, which assumes independence and understates the standard error by
+\DelongRatioClustered{}$\times$ on data of this shape (\cref{app:delong}).
 
 \paragraph{Equivalence.} Each contrast carries a two-one-sided-test verdict against a band of
 \EqBand{} conditional AUROC, read from the same bootstrap.
@@ -516,21 +511,6 @@ All five banks enter a hierarchical model as a random effect. Both floors are re
 alongside per-stratum support counts, and the recovery curve is re-measured at the panel's block
 width before any delta is interpreted.
 
-\section{Numerical and provenance conditions}
-\label{sec:hygiene}
-
-\paragraph{Precision.} Under \texttt{float16} one judge produced non-finite attention weights. Its
-spectral analysis failed on every item, and its verdict logits were corrupted: it presented as
-degenerate (\NumFpAcc{} accuracy, \NumFpBias{} verdict bias) where under \texttt{bfloat16} it is
-competent (\NumBfAcc{}). The two precisions agree on \NumAgreeFpBf{} of its verdicts. Precision must
-be uniform across a panel, since neither spectral metrics nor logits are comparable across dtypes.
-The analysis library now raises on the first layer of non-finite attention.
-
-\paragraph{Versions.} Spectral rows computed under different library versions are not comparable,
-and the version appears only in the run log. We verified that the change on the code path in use
-shifts every metric by at most \VerDtypeShift{}, and pin the library by commit rather than by
-version string.
-
 \section{Limitations}
 \label{sec:limitations}
 
@@ -578,11 +558,6 @@ Conditional AUROC estimated from a stratum holding one minority item; the bootst
 Two contrasts surviving BH-FDR with implausible deltas &
 Minimum class count per stratum; contrast suppression; exclusion from the FDR family \\
 \addlinespace
-Precision corrupting verdicts &
-\texttt{float16} overflow to non-finite attention &
-Per-item error field only &
-\texttt{bfloat16} panel-wide; library raises on non-finite attention \\
-\addlinespace
 Baseline swamped by a wide block &
 Shared penalty over disparate column counts &
 Delta correlating $r=-0.85$ with baseline strength &
@@ -593,11 +568,6 @@ Penalty selected by squared error on a working residual &
 Rungs numerically equal to the baseline &
 Penalty selected by out-of-fold AUROC; recovery-curve test \\
 \addlinespace
-Diagnostic reporting on an unused path &
-Coefficient norms computed on the concatenation pipeline while claims used the offset one &
-Healthy ratios alongside a collapsed estimator &
-Diagnostic bound to the estimator in use \\
-\addlinespace
 Validator sharing its input's seeds &
 Calibration checked against the sweep cell it was calibrating &
 Target at the edge of its own interval &
@@ -607,23 +577,13 @@ Trend read from overlapping intervals &
 Directional claim from a table whose IQRs overlap &
 Repeat measurement at fresh seeds &
 Script refuses a monotonicity claim unless consecutive IQRs are disjoint \\
-\addlinespace
-Verification run overwriting a reported artefact &
-A rigged failure sweep, used to test the pass condition, wrote the path the manuscript reads &
-An unrelated macro downstream, by chance &
-Canonical path written only under an explicit flag and only when every parameter matches the preregistered configuration \\
-\addlinespace
-Format check passing by not looking &
-Detection of the bibliography from rendered text alone; on failure it fell back to counting every page as main text, producing a plausible number &
-Cross-reading the page count by hand, twice &
-Page taken from the \texttt{.aux} and the render, both required present and consistent; no fallback \\
-\bottomrule
 \end{tabular}
 \end{table}
 
 \input{ai_use}
 
-% Authoritative record of where the bibliography starts. LaTeX writes the page
+% Authoritative record of where the bibliography starts. Appendices follow the bibliography, per
+% the ICLR guidelines, and are excluded from the page limit. LaTeX writes the page
 % number of this label into main.aux, which check_pages.py reads as its primary
 % source; the PDF text is used only as an independent cross-check, and the two
 % must agree. See the errata table: detecting this from the rendered text alone
@@ -631,5 +591,141 @@ Page taken from the \texttt{.aux} and the render, both required present and cons
 \phantomsection\label{sec:refstart}
 \bibliographystyle{iclr2027_conference}
 \bibliography{refs}
+
+\appendix
+
+\section{Banks and grouping}
+\label{app:banks}
+
+Five judge banks: MMLU and MMLU-Pro (multiple choice), JudgeBench, LLMBar and RewardBench~2
+(free text). All are balanced $50/50$ by construction, seeded, and byte-identical across judges, so
+that any difference between judges is a property of the judge.
+
+Cross-validation folds are grouped on \emph{normalised question text} rather than on the dataset's
+identifiers. Two duplications make this load-bearing. LLMBar's 419 curated pairs collapse to 418
+groups: one instruction appears verbatim under two identifiers in two different adversarial subsets.
+JudgeBench's 620 identifiers collapse to 528 groups, the same questions recurring across its splits.
+Grouping on identifiers would place the same question in training and test.
+
+Free-text banks carry two item formats. In \texttt{pairwise}, both responses are shown and the
+verdict is A or B, with each pair presented in both orders; counterbalancing makes prompt length
+identical across the two orders, so length cannot predict the verdict. In \texttt{single}, one
+response is shown and the verdict is Yes or No, which on preference datasets treats a relative
+preference as absolute truth and caps achievable accuracy. Pairwise is primary for both reasons.
+
+\section{Feature families}
+\label{app:features}
+
+\textbf{Margin.} The signed difference of the two verdict log-probabilities, and its absolute value.
+The signed margin determines the verdict, so it also carries the judge's own output.
+
+\textbf{Nuisance.} Prompt length and its logarithm, the token index at which the judged content
+begins after the header, and subject identity with levels rarer than 20 items pooled.
+
+\textbf{Peer difficulty.} The fraction of the \emph{other} judges scoring the same item correctly,
+computed leave-one-model-out. This is what forces an internal claim past ``this item is hard for
+models in general''.
+
+\textbf{Activation.} The last-token hidden state at half and full depth, entering at full dimension.
+
+\textbf{Spectral.} Attention-graph diagnostics on the symmetric normalised Laplacian over a
+task-token subgraph: Fiedler value, high-frequency energy ratio, smoothness, spectral entropy, and a
+Fiedler-velocity summary. Each layer profile is reduced to mean, slope over the last third of the
+network, and normalised argmax --- three numbers per metric, fixed \emph{a priori}, with no
+post-hoc layer selection. The symmetric normalisation is required: the random-walk Laplacian is
+non-symmetric and its eigenvectors are not orthonormal, which silently invalidates every
+energy-ratio metric.
+
+\section{Clustering and paired DeLong}
+\label{app:delong}
+
+Paired DeLong is the field's default test for two ROCs on shared items, and assumes the items are
+independent. This design violates that by construction: the two orders of one pairwise item, and the
+positive and negative partners of one question, share nearly all their text and occupy one
+cross-validation group.
+
+On planted data with one item per group, DeLong's standard error matches the grouped paired
+bootstrap to three decimal places (\DelongSEIndep{} for both), confirming the two agree where the
+assumption holds. With four clustered rows per question, DeLong understates the standard error by
+\DelongRatioClustered{}$\times$. Since pairwise judge benchmarks are clustered by construction,
+adopting it as the primary test manufactures significance. We use the grouped paired bootstrap,
+which recomputes both metrics on identical resamples and is therefore already paired, and report
+DeLong only as a labelled cross-check whose ratio to the bootstrap measures how much of the
+interval's width is clustering.
+
+\section{Numerical precision and provenance}
+\label{app:hygiene}
+
+\textbf{Precision.} Under \texttt{float16} one judge produced non-finite attention weights. Its
+spectral analysis failed on every item, and its verdict logits were corrupted: it presented as a
+degenerate judge (\NumFpAcc{} accuracy, \NumFpBias{} verdict bias) where under \texttt{bfloat16} it
+is competent (\NumBfAcc{}). The two precisions agree on only \NumAgreeFpBf{} of its verdicts. Both
+harms are silent: the spectral failure is caught per item, so the run completes and the model simply
+contributes no rows, and the corrupted verdicts are visible only by comparison against another
+dtype. Precision must be uniform across a panel, since neither spectral metrics nor logits are
+comparable across dtypes. The analysis library now raises on the first layer of non-finite
+attention, so this cannot recur silently.
+
+\textbf{Provenance.} Spectral rows computed under different library versions are not comparable, and
+the version is recorded only in the run log rather than in the results. We verified that the change
+on the code path in use shifts every metric by at most \VerDtypeShift{}, pin the library by commit
+rather than by version string, and write the resolved commit into every result file.
+
+\section{Further errata}
+\label{app:errata}
+
+\Cref{tab:errata} carries the failures bearing on the three contributions. The remainder are
+recorded here in the same form.
+
+\begin{table}[h]
+\centering\scriptsize
+\caption{Analytic and infrastructural failures not bearing directly on the three contributions.}
+\label{tab:errata-more}
+\begin{tabular}{p{2.4cm}p{3.4cm}p{2.6cm}p{3.4cm}}
+\toprule
+\textbf{Failure} & \textbf{Cause} & \textbf{Detected by} & \textbf{Fix and check} \\
+\midrule
+Degenerate slices producing discoveries &
+Conditional AUROC estimated from a stratum holding one minority item; the bootstrap resampled it &
+Two contrasts surviving BH-FDR with implausible deltas &
+Minimum class count per stratum; contrast suppression; exclusion from the FDR family \\
+\addlinespace
+Precision corrupting verdicts &
+\texttt{float16} overflow to non-finite attention &
+Per-item error field only &
+\texttt{bfloat16} panel-wide; library raises on non-finite attention \\
+\addlinespace
+Diagnostic reporting on an unused path &
+Coefficient norms computed on the concatenation pipeline while claims used the offset one &
+Healthy ratios alongside a collapsed estimator &
+Diagnostic bound to the estimator in use \\
+\addlinespace
+Verification run overwriting a reported artefact &
+A rigged failure sweep, used to test the pass condition, wrote the path the manuscript reads &
+An unrelated macro downstream, by chance &
+Canonical path written only under an explicit flag and only when every parameter matches the preregistered configuration \\
+\addlinespace
+Format check passing by not looking &
+Detection of the bibliography from rendered text alone; on failure it fell back to counting every page as main text &
+Cross-reading the page count by hand, twice &
+Page taken from the \texttt{.aux} and the render, both required present and consistent; no fallback \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Reproducibility}
+\label{app:repro}
+
+Every printed quantity in this paper is a macro resolved from a results file by a build script,
+and the build fails on an undefined or unmeasured macro rather than printing a stale value. Three
+further build-time gates run against the manuscript: every citation must resolve to an entry
+carrying a DOI or arXiv identifier; the main text must fit the page limit, with the bibliography's
+page read independently from the \texttt{.aux} and from the rendered PDF and required to agree; and
+the source and render are swept for content that would break anonymity.
+
+Each result file records the git commit, the resolved commit of every dependency, the configuration,
+and a digest of the item bank that was scored. The analysis plan, including the primary tests, the
+panel, the equivalence band and the stopping rule, was frozen before the scaled run and is versioned
+alongside the code.
 
 \end{document}

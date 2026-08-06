@@ -109,6 +109,34 @@ Every line below is a pointer to chase, not a claim. Nothing moves into
 - Fleming & Lau 2014 — M-ratio normalisation. **Title and venue unconfirmed.**
 - Hewitt & Liang, control tasks — **unconfirmed**, cited from memory.
 
+### Selecting reimplementation targets — by exposure, not by headline number
+
+A prompt-read probe is **not** an exempt target. It cannot decode the output,
+so the output-decoding channel is genuinely absent — and that is exactly what
+makes it the cleanest test of the **first-order floor**, because the reported
+signal must then be either self-knowledge or item difficulty, with no third
+explanation available.
+
+The first-order floor is the only channel with **no exemption**, which is a
+feature of the taxonomy rather than a limitation: one that exempted nothing
+would be suspiciously convenient.
+
+Two targets, one from each category:
+
+1. **A prompt-read probe with a stated difficulty baseline** — floor-only test,
+   one channel, cheapest to run. Compute the matched first-order floor and see
+   what the headline becomes relative to it. If the floor lands near the
+   authors' own difficulty baseline, the entire increment is accounted for by
+   first-order accuracy and the result survives only against the wrong
+   reference.
+2. **A post-generation probe on a task where correctness is agreement with a
+   discrete label** — the full three-channel test. Hallucination detection on
+   classification or short-answer QA is where these live.
+
+**The selection criterion is readout position and label type, not the headline
+AUROC.** Searching for the largest published number selects targets that may be
+exempt from the channels being tested.
+
 ### Highest-value empirical item remaining
 
 **Li et al., "Language models are capable of metacognitive monitoring and
