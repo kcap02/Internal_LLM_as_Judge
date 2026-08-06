@@ -8,6 +8,12 @@
 %   python paper/fill_numbers.py --verify
 %   python paper/check_macros.py && python paper/check_refs.py
 %   pdflatex main && bibtex main && pdflatex main && pdflatex main
+%   python paper/check_pages.py          <- reads the BUILT PDF, not the source
+%
+% Style files are the official ICLR 2027 set (iclr-2027-style-files.zip, retrieved 2026-08-06).
+% Page limit is 9 for the main text at submission, 10 at camera-ready; references and appendices
+% are excluded. check_pages.py enforces it, and also checks anonymity and the author-year
+% bibliography form.
 %
 % check_macros.py currently BLOCKS: macros downstream of the scaled run print as ??.
 %
@@ -19,7 +25,7 @@
 % !! ai_use.tex asserts a human-verified bibliography. That is FALSE until the verification pass is
 % !! done. Do not submit until it is.
 %
-% Needs iclr2027_conference.sty/.bst from the ICLR 2027 call-for-papers page.
+% Style files are committed alongside this file; no fallback preamble is used or needed.
 
 \documentclass{article}
 \usepackage{iclr2027_conference,times}
