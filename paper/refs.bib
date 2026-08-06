@@ -48,6 +48,45 @@
 %   result of this paper; phrase it as the framework's convention, not as their finding.
 
 % ---------------------------------------------------------------------------------------------
+% Correctness prediction from internal state -- the literature this paper corrects
+% ---------------------------------------------------------------------------------------------
+
+@article{kadavath2022,
+  title   = {Language Models (Mostly) Know What They Know},
+  author  = {Kadavath, Saurav and Conerly, Tom and Askell, Amanda and Henighan, Tom and
+             Drain, Dawn and Perez, Ethan and Schiefer, Nicholas and Hatfield-Dodds, Zac and
+             others},
+  journal = {arXiv preprint},
+  year    = {2022},
+  eprint  = {2207.05221},
+  archivePrefix = {arXiv}
+}
+% CLAIM: larger models are well calibrated on multiple-choice and true/false questions in the right
+%   format, and can be asked to propose an answer then evaluate P(True) that it is correct, with
+%   encouraging calibration and scaling.
+% USED-FOR: sec:related, as the origin of the self-evaluation line this paper's estimator applies
+%   to. SUPPORTED. NB their P(True) is a BEHAVIOURAL readout, not a hidden-state probe; do not
+%   cite it as a probing result.
+
+@inproceedings{azaria2023,
+  title     = {The Internal State of an {LLM} Knows When It's Lying},
+  author    = {Azaria, Amos and Mitchell, Tom},
+  booktitle = {Findings of the Association for Computational Linguistics: EMNLP 2023},
+  year      = {2023},
+  eprint    = {2304.13734},
+  archivePrefix = {arXiv}
+}
+% CLAIM: a classifier on hidden-layer activations labels held-out statements true vs false at 71-83%
+%   accuracy depending on the base model. They also observe that the LLM's own sentence probability
+%   depends on sentence LENGTH and word frequency, and argue the trained classifier is more reliable
+%   for that reason.
+% USED-FOR: sec:related, as the canonical hidden-state correctness probe. SUPPORTED -- and the
+%   length observation is worth citing approvingly in sec:leakage, since it is a partial control for
+%   the same nuisance channel our baseline carries.
+% NB: their target is statement truth, not the model's own correctness on a task, so the
+%   self-verdict channel does NOT arise in their setup. Say so rather than implying otherwise.
+
+% ---------------------------------------------------------------------------------------------
 % Probing and its controls
 % ---------------------------------------------------------------------------------------------
 

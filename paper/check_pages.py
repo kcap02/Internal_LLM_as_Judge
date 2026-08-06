@@ -74,11 +74,16 @@ def main() -> int:
 
     # ── Main-text length, counted to the references ──────────────────────
     # The ICLR style sets section headings in small caps, which pdftotext
-    # renders with the initial letter separated: "R EFERENCES". Matching
-    # "^References$" silently finds nothing and the whole document is then
-    # counted as main text.
-    ref_re = re.compile(r"^\s*R\s*EFERENCES\s*$", re.M | re.I)
-    ref_page = next((i for i, p in enumerate(pages, 1) if ref_re.search(p)),
+    # renders with the letters spaced in ways that vary with the surrounding
+    # layout ("R EFERENCES", and other splits). Matching a fixed pattern
+    # silently finds nothing, and the whole document is then counted as main
+    # text -- a check that fails by not looking. Normalise instead: a line
+    # whose letters alone spell REFERENCES.
+    def _is_ref_heading(line: str) -> bool:
+        return re.sub(r"[^A-Za-z]", "", line).upper() == "REFERENCES"
+
+    ref_page = next((i for i, p in enumerate(pages, 1)
+                     if any(_is_ref_heading(ln) for ln in p.splitlines())),
                     None)
     if ref_page is None:
         print("WARN no References heading found; counting all pages as main text")
