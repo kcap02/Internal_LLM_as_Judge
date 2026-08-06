@@ -1,4 +1,8 @@
-Analysis plan frozen at commit e6566a82c3444f776dba83bda1b902a953f2df66
+Analysis plan frozen at commit 23d9534b6db4c5a847fab51b2294d6633e6206fa
 
 paper/PREREGISTRATION.md as of that commit is the frozen specification.
 The stopping rule in its section 9 applies from this point.
+
+Supersedes e6566a8, which named the cheap arm third checkpoint by a condition
+("the largest the card fits") rather than by name. Closed before any data was
+seen; no other text differs.
