@@ -2,13 +2,13 @@
 % page limit) plus a declaration in the submission form. \input this from main.tex before the
 % bibliography.
 %
-% !! ONE CLAUSE IS NOT YET TRUE. The bibliography paragraph asserts that every reference was
-% !! human-verified against the paper it cites. At the time of writing, the references had been
-% !! resolved by an LLM reading search results and annotated with what each paper establishes, but
-% !! the human confirmation pass had NOT been done. Do that pass, then this section is accurate.
-% !! Do not submit with the clause as written until it is. Under the ICLR 2027 AI policy a
-% !! misrepresentation of this kind is a Code of Ethics matter, and this paper's own thesis is that
-% !! plausible-looking output requires checking.
+% The bibliography paragraph previously asserted that every reference had been verified by a human
+% author against the paper it cites. That was not true when written, so the claim has been replaced
+% by an accurate description of what was actually done, plus an explicit statement that full-text
+% confirmation remains outstanding and is a precondition of submission. Under the ICLR 2027 AI
+% policy a misrepresentation of this kind is a Code of Ethics matter, and this paper's own thesis is
+% that plausible-looking output requires checking, so the disclosure states the limit rather than
+% carrying a warning about a false sentence.
 
 \section*{Use of large language models}
 \label{sec:aiuse}
@@ -52,15 +52,22 @@ the power stage and the regression tests. All of it is covered by the test suite
 checks described below; none of it was accepted without a test that fails when the behaviour
 regresses.
 
-\paragraph{As a search tool over the literature, with human verification.} Candidate references were
-located using LLM-assisted search. Every citation was then opened and checked by a human author
-against the claim the sentence makes, and the record of that check --- what each paper establishes,
-and which sentence leans on it --- is kept as structured comments in the released
-\texttt{refs.bib}. Two mismatches were caught this way and fixed in the \emph{sentence} rather than
-the citation: a pair of probing papers that reach opposite prescriptions had been cited as
-agreeing, and a reward-model benchmark had been cited behind a later, differently-named dataset it
-does not describe. A build check refuses to compile the paper if any cited key lacks a resolvable
-DOI or arXiv identifier.
+\paragraph{As a search tool over the literature.} Candidate references were located using
+LLM-assisted search. Each was then resolved to a specific paper and checked at the level of the
+\emph{claim} rather than the topic: what the paper establishes, and which sentence in this
+manuscript leans on it, are recorded as structured comments beside every entry in the released
+\texttt{refs.bib}, together with scope limits where the paper does not support what a neighbouring
+sentence might imply. Two mismatches were caught this way and fixed in the \emph{sentence} rather
+than the citation: a pair of probing papers that reach opposite prescriptions on probe complexity
+had been cited as agreeing, and a reward-model benchmark had been cited behind a later,
+differently-named dataset it does not describe. A build check refuses to compile the manuscript if
+any cited key lacks a resolvable DOI or arXiv identifier.
+
+We state the limit of that process precisely, because this paper's subject makes it material. The
+resolution and claim-checking were performed against abstracts, publication metadata and, where
+available, the papers' own summaries of their results --- not against full texts read end to end by
+an author. Confirmation against the full text of every cited work is the authors' responsibility and
+is a precondition of submission rather than a step this disclosure records as complete.
 
 \paragraph{What was not delegated.} The research question, the experimental design, the choice of
 banks and panel, the preregistered primary tests, and the decision about what may be claimed are

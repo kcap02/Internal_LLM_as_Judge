@@ -88,7 +88,7 @@ DETECT_DELTA = 0.02
 # reduced sweep cannot reach the canonical path even if the operator forgets.
 PREREG_CONFIG = {
     "n": [200, 400, 800, 1600],
-    "width": 1536,
+    "width": 2048,   # Qwen2.5-3B hidden size: the spectral arm ceiling (prereg §3)
     "strengths": [0.0, 0.5, 1.0, 1.5, 2.0, 3.0],
     "target": 0.633,
     "pilot_n": 200,
@@ -174,7 +174,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", nargs="*", type=int,
                     default=[200, 400, 800, 1600, 3200])
-    ap.add_argument("--width", type=int, default=1536)
+    ap.add_argument("--width", type=int, default=2048)
     ap.add_argument("--strengths", nargs="*", type=float,
                     default=[0.0, 0.5, 1.0, 1.5, 2.0, 3.0])
     ap.add_argument("--target", type=float, default=0.633,

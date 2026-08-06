@@ -1,15 +1,20 @@
 # Preregistration
 
-**Status: DRAFT — NOT FROZEN.** Three inputs are still open: the two numbers
-from the corrected-estimator re-analysis (§7), and the three exact judge
-checkpoints plus the hardware decision behind them (§3). Resolve all three,
-then commit and record the hash here. After that: no edits.
+**Status: FROZEN.** All inputs are resolved: the panel and its hardware
+constraint (§3), both open numbers from the corrected-estimator re-analysis
+(§7), and `N_FREEZE` (§8.2). From here §9's stopping rule applies: the analysis
+runs once on this specification, and any confound found afterwards is reported
+as a named hazard rather than fixed and re-run.
 
-    Frozen at commit: ____________  (fill on freeze; leave blank until then)
+    Frozen at commit: see FREEZE.txt (recorded in the commit immediately
+    following this document's final edit, so that the hash refers to the
+    frozen text rather than to a file containing its own hash)
 
-Everything else is decided. The decision rules for the open items are already
-written and numeric — resolving them is reading a table, not exercising
-judgement after seeing one.
+Resolutions, each read off a table by a rule written before the table was
+seen: §3 decoupled arms with the spectral panel capped at 3B; §7(a) absence;
+§7(b) floors binding on every estimable slice; §8.2 `N_FREEZE` = 800, one grid
+step above a measured detection threshold of 400 at the spectral arm's block
+width of 2048.
 
 ---
 
@@ -55,40 +60,30 @@ exactly this case and was nearly written up as a negative result.
   across all three, sized so the eigendecomposition is affordable at the
   **largest** model, not the smallest.
 
-  **OPEN — the exact checkpoints must be named before freezing**, because
-  `N_FREEZE` (§8) cannot be derived without them: the largest model sets the
-  VRAM ceiling, the ceiling sets the window, and the window sets what is
-  affordable per item. An undetermined panel leaves §8 with an undetermined
-  input.
+  **DECIDED — the arms are decoupled and the spectral arm is capped at 3B.**
+  A decided narrow scope is worth more than an undecided wide one, and the
+  per-layer attention reduction that would raise the spectral ceiling is not a
+  precondition of this run.
 
-  Proposed, pending the hardware decision below — **one family, three scales**,
-  so that scale is not confounded with vendor or tokenizer:
-
-  | role | checkpoint | note |
+  | arm | panel | why |
   |---|---|---|
-  | small | `Qwen/Qwen2.5-1.5B-Instruct` | the pilot's usable-judge floor (73.5% pairwise) |
-  | mid | `Qwen/Qwen2.5-7B-Instruct` | already in `config.judge_models` |
-  | large | `Qwen/Qwen2.5-32B-Instruct` | already in `config.judge_models_large` |
+  | **cheap** (activations only) | `Qwen2.5-1.5B`, `Qwen2.5-7B`, and the largest further checkpoint the available card fits | no retained attention, no eigendecomposition, no VRAM ceiling; this is where the scale span and the statistical power live |
+  | **spectral** | `Qwen2.5-0.5B`, `Qwen2.5-1.5B`, `Qwen2.5-3B` | 16 GB is the binding constraint: `output_attentions=True` retains a `[heads, N, N]` tensor per layer, so 7B needs ~6.1 GB at 2048 tokens on top of ~14 GB of weights. 3B is the largest that fits |
 
-  **Hardware dependency, stated plainly.** The 16 GB card cannot run the
-  spectral arm at 7B, let alone 32B: `output_attentions=True` retains a
-  `[heads, N, N]` tensor per layer, so a 7B model needs ~6.1 GB at 2048 tokens
-  and ~24.5 GB at 4096 on top of ~14 GB of bf16 weights. On current hardware
-  the largest feasible spectral judge is ~3B. So one of the following must be
-  chosen and written here before the freeze:
+  One family throughout, so scale is not confounded with vendor or tokenizer.
+  **Two panels are reported separately and never pooled**, and the abstract
+  states what the spectral result generalises over: attention-graph
+  diagnostics in judges up to 3B. That is a real limit on primary test 2 and it
+  is preregistered rather than described afterwards.
 
-  1. **rent a larger card** for the spectral arm and keep the panel above; or
-  2. **keep the spectral arm at ≤3B** and name the three checkpoints
-     accordingly (e.g. 0.5B / 1.5B / 3B), accepting that the scale span is
-     narrow and saying so; or
-  3. **decouple the arms** — run the *cheap* arm (activations only, no
-     retained attention, no VRAM ceiling) over the full 1.5B/7B/32B ladder,
-     and the spectral arm over whatever the available card permits, reporting
-     the two panels separately rather than pretending they are one.
+  Compute, not VRAM, is why no option reaches 32B: dense eigendecomposition at
+  2048 tokens costs on the order of a second per layer per item, and at 64
+  layers that is a minute or more per item on CPU. The per-layer reduction
+  would raise the VRAM ceiling to roughly 7B and would not change this.
 
-  Option 3 is the cheapest and is consistent with §10's split, but it changes
-  what primary test 2 generalises over, so it must be a preregistered choice
-  and not a retrospective description of what fitted.
+  **Consequence for §8.2:** the spectral arm's block width is 2048
+  (Qwen2.5-3B hidden size), so the recovery curve is re-measured there rather
+  than at the pilot's 1536.
 
   **Where the per-layer attention reduction lives, if implemented.** It changes
   what `spectral_trust` does on every forward pass, and `release/0.2.3` is the
@@ -197,12 +192,25 @@ exist in the spectral library's development branch and are **excluded**: they
 were not in the pilot. Adding a metric after seeing the result is the one move
 that would undo the discipline the rest of this document encodes.
 
-## 7. OPEN — resolve before freezing
+## 7. RESOLVED
 
-The two numbers below are the only open text. **The decision rules are already
-numeric**, so resolving them is reading a table, not exercising judgement:
-"near 0.50" and "well above" are the words that let a preregistration be
-reinterpreted afterwards, and they do not appear here.
+The decision rules below were written before the tables were read, and are
+numeric, so resolving them was reading a table rather than exercising
+judgement. Both resolutions are recorded with the values they came from.
+
+> **(a) resolves to ABSENCE.** Observed `M2only` runs 0.308–0.522 against
+> per-slice floors of 0.579–1.000, so `M2only − floor_to_clear` is negative on
+> every estimable slice, far below the 0.02 cut. Primary test 2 preregisters as
+> a clean absence claim: spectral features carry no correctness information
+> detectable at this scale, rather than information redundant with activations.
+>
+> **(b) resolves to BINDING.** Every estimable slice has
+> `verdict_only_null.leak_auroc_p95` ≥ 0.53 (observed 0.566, 0.567, 0.616,
+> 0.642, 0.722), so the verdict-leakage floor is not a formality: it excludes
+> rungs, and that exclusion is reported per slice. Where the two floors
+> disagree the larger is primary, as stated below.
+
+The original text is retained for the record.
 
 **(a) `M2only` under the corrected estimator**, compared against that slice's
 own `floor_to_clear` (§5), pooled across slices by the same hierarchical

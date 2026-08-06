@@ -1,0 +1,31 @@
+17:33:44 INFO stage=22_recovery_curve | commit=4a24d08 | logfile=22_recovery_curve_20260806T153344Z.log
+17:33:44 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.8.0", "datasets": "4.8.5", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.3@2149f55"}
+17:33:44 INFO width 2048 | 12 seeds/cell | detection at delta >= 0.02 in >= 80% of seeds
+17:33:44 INFO 
+=== calibration: block-only AUROC at the pilot's n=200 ===
+17:33:44 INFO   plant   median block-only              IQR
+17:33:46 INFO    0.00               0.468   [0.461, 0.501]
+17:33:48 INFO    0.50               0.480   [0.471, 0.506]
+17:33:50 INFO    1.00               0.512   [0.491, 0.527]
+17:33:52 INFO    1.50               0.543   [0.520, 0.570]
+17:33:54 INFO    2.00               0.585   [0.553, 0.613]
+17:33:56 INFO    3.00               0.642   [0.608, 0.672]
+17:33:56 INFO 
+calibrated plant strength for a pilot reading of 0.633: s* = 2.845  (interpolated)
+17:33:56 INFO 
+=== sweep at s* = 2.845 ===
+17:33:56 INFO   cells are PAIRED: one realisation per seed, evaluated at every n as a nested prefix,
+  so the columns track one underlying signal rather than unrelated draws.
+17:33:56 INFO      n   median delta          delta IQR   detect   block-only          block IQR
+17:37:14 INFO    200        +0.0433   [+0.027, +0.065]      75%        0.652     [0.609, 0.677]
+17:37:14 INFO    400        +0.0580   [+0.052, +0.063]     100%        0.657     [0.621, 0.661]
+17:37:14 INFO    800        +0.0646   [+0.052, +0.073]     100%        0.651     [0.640, 0.671]
+17:37:14 INFO   1600        +0.0810   [+0.071, +0.088]     100%        0.642     [0.621, 0.654]
+17:37:14 INFO 
+==================================================================
+17:37:14 INFO [PASS] detection: n=400 reaches >= 80% of 12 seeds. N_FREEZE candidate = 400 items per stratum.
+17:37:14 INFO [NOTE] block-only: NO consecutive IQRs separate — NO MONOTONICITY CLAIM IS PERMITTED from this table. Any apparent rise or fall is within sampling noise.
+17:37:16 INFO [PASS] calibration self-check on 12 INDEPENDENT worlds at n=200: block-only 0.652 IQR [0.618, 0.697] against target 0.633
+17:37:16 INFO wrote recovery_curve.json
+17:37:16 INFO 
+OVERALL: PASS
