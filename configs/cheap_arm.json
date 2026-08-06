@@ -1,0 +1,9 @@
+{
+  "_comment": "Cheap arm, frozen panel (prereg §3): activations only, no retained attention. Named checkpoints, no conditionals.",
+  "judge_models_pilot": [
+    "Qwen/Qwen2.5-1.5B-Instruct",
+    "Qwen/Qwen2.5-3B-Instruct",
+    "Qwen/Qwen2.5-7B-Instruct"
+  ],
+  "model_dtype": "bfloat16"
+}
