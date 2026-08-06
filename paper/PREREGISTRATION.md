@@ -67,7 +67,7 @@ exactly this case and was nearly written up as a negative result.
 
   | arm | panel | why |
   |---|---|---|
-  | **cheap** (activations only) | `Qwen2.5-1.5B`, `Qwen2.5-7B`, and the largest further checkpoint the available card fits | no retained attention, no eigendecomposition, no VRAM ceiling; this is where the scale span and the statistical power live |
+  | **cheap** (activations only) | `Qwen/Qwen2.5-1.5B-Instruct`, `Qwen/Qwen2.5-3B-Instruct`, `Qwen/Qwen2.5-7B-Instruct` | no retained attention, no eigendecomposition, no VRAM ceiling; this is where the scale span and the statistical power live |
   | **spectral** | `Qwen2.5-0.5B`, `Qwen2.5-1.5B`, `Qwen2.5-3B` | 16 GB is the binding constraint: `output_attentions=True` retains a `[heads, N, N]` tensor per layer, so 7B needs ~6.1 GB at 2048 tokens on top of ~14 GB of weights. 3B is the largest that fits |
 
   One family throughout, so scale is not confounded with vendor or tokenizer.
@@ -75,6 +75,14 @@ exactly this case and was nearly written up as a negative result.
   states what the spectral result generalises over: attention-graph
   diagnostics in judges up to 3B. That is a real limit on primary test 2 and it
   is preregistered rather than described afterwards.
+
+  All six checkpoints are named. `Qwen2.5-7B` at `bfloat16` is close to the
+  16 GB card's capacity even without retained attention; if it cannot be made
+  to complete, that is a **run that fails to complete**, which §9 already
+  covers as a declarable exception, and it is reported as such rather than
+  resolved by a conditional written here. A specification that names a
+  parameter by the condition it must satisfy is exactly where a later choice
+  can be made to look preregistered.
 
   Compute, not VRAM, is why no option reaches 32B: dense eigendecomposition at
   2048 tokens costs on the order of a second per layer per item, and at 64
