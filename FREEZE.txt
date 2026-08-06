@@ -1,0 +1,4 @@
+Analysis plan frozen at commit e6566a82c3444f776dba83bda1b902a953f2df66
+
+paper/PREREGISTRATION.md as of that commit is the frozen specification.
+The stopping rule in its section 9 applies from this point.
