@@ -73,26 +73,58 @@ def main() -> int:
         return 0
 
     # ── Main-text length, counted to the references ──────────────────────
-    # The ICLR style sets section headings in small caps, which pdftotext
-    # renders with the letters spaced in ways that vary with the surrounding
-    # layout ("R EFERENCES", and other splits). Matching a fixed pattern
-    # silently finds nothing, and the whole document is then counted as main
-    # text -- a check that fails by not looking. Normalise instead: a line
-    # whose letters alone spell REFERENCES.
+    # TWO INDEPENDENT SOURCES, REQUIRED TO AGREE.
+    #
+    # Detecting the bibliography from rendered text alone failed twice in this
+    # project. The ICLR style sets headings in small caps, which pdftotext
+    # renders with the letters spaced in ways that shift with the surrounding
+    # layout, so a fixed pattern finds nothing -- and the old fallback then
+    # counted every page as main text, producing a plausible number from a
+    # failed detection. A check whose failure mode is silence is
+    # indistinguishable from a check that passed.
+    #
+    # Primary source is main.aux, where LaTeX records the page of the
+    # \label{sec:refstart} placed immediately before \bibliography. The PDF is
+    # the cross-check. Neither may be missing, and they must agree.
+    aux = PAPER / (Path(args.pdf).stem + ".aux")
+    aux_page = None
+    if aux.exists():
+        m = re.search(r"\\newlabel\{sec:refstart\}\{\{[^}]*\}\{(\d+)\}",
+                      aux.read_text(encoding="utf-8", errors="replace"))
+        if m:
+            aux_page = int(m.group(1))
+
     def _is_ref_heading(line: str) -> bool:
         return re.sub(r"[^A-Za-z]", "", line).upper() == "REFERENCES"
 
-    ref_page = next((i for i, p in enumerate(pages, 1)
+    pdf_page = next((i for i, p in enumerate(pages, 1)
                      if any(_is_ref_heading(ln) for ln in p.splitlines())),
                     None)
-    if ref_page is None:
-        print("WARN no References heading found; counting all pages as main text")
-        main_pages = len([p for p in pages if p.strip()])
-    else:
-        main_pages = ref_page - 1
+
+    if aux_page is None:
+        print("[FAIL] no \\label{sec:refstart} page in the .aux -- the label is "
+              "missing from main.tex, or LaTeX has not been run twice. "
+              "REFUSING to guess the main-text length.")
+        return 1
+    if pdf_page is None:
+        print("[FAIL] the References heading was not found in the rendered "
+              "text. REFUSING to fall back to counting every page as main "
+              "text, which is how this check silently passed twice before.")
+        return 1
+    # The label sits at the END of the body, so it lands either on the
+    # bibliography's first page (no break) or on the page before it (break).
+    # Anything else means one of the two readings is wrong.
+    if aux_page not in (pdf_page - 1, pdf_page):
+        print(f"[FAIL] sources disagree beyond a page break: the "
+              f"\\label{{sec:refstart}} is on page {aux_page}, the rendered "
+              f"References heading is on page {pdf_page}")
+        return 1
+
+    ref_page = pdf_page
+    main_pages = ref_page - 1
     status = "PASS" if main_pages <= args.limit else "FAIL"
     print(f"[{status}] main text {main_pages} pages (limit {args.limit}); "
-          f"references start on page {ref_page}")
+          f"bibliography starts on page {ref_page} (.aux and PDF agree)")
     if main_pages > args.limit:
         fail = True
 

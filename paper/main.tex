@@ -249,7 +249,11 @@ shared penalty degrades and crosses into negative territory, reporting that a re
 information. The offset form with its penalty selected by squared error on the working residual
 reports a near-constant value insensitive to width, around a third of the effect. Only the offset
 form with the penalty selected by out-of-fold AUROC holds. All three agree at the narrowest width,
-which is why a planted check at one width certifies nothing.}
+which is why a planted check at one width certifies nothing. The regime shown ($n=800$, plant
+strength $2.5$) is one in which the effect is recoverable: at $n=500$ with strength $1.0$ the
+corrected estimator is \emph{indistinguishable} from the broken one, both decaying to zero, because
+that combination lies below the detection threshold of \cref{sec:absence}. The correction does not
+remove the threshold; it removes the two failures that occur above it.}
 \label{fig:sdt}
 \end{figure}
 
@@ -608,12 +612,23 @@ Verification run overwriting a reported artefact &
 A rigged failure sweep, used to test the pass condition, wrote the path the manuscript reads &
 An unrelated macro downstream, by chance &
 Canonical path written only under an explicit flag and only when every parameter matches the preregistered configuration \\
+\addlinespace
+Format check passing by not looking &
+Detection of the bibliography from rendered text alone; on failure it fell back to counting every page as main text, producing a plausible number &
+Cross-reading the page count by hand, twice &
+Page taken from the \texttt{.aux} and the render, both required present and consistent; no fallback \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \input{ai_use}
 
+% Authoritative record of where the bibliography starts. LaTeX writes the page
+% number of this label into main.aux, which check_pages.py reads as its primary
+% source; the PDF text is used only as an independent cross-check, and the two
+% must agree. See the errata table: detecting this from the rendered text alone
+% failed twice by finding nothing and counting every page as main text.
+\phantomsection\label{sec:refstart}
 \bibliographystyle{iclr2027_conference}
 \bibliography{refs}
 
