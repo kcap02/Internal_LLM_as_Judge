@@ -1,0 +1,846 @@
+{
+  "mmlu": {
+    "family_size": 159,
+    "alpha_raw": 0.05,
+    "alpha_effective": 0.0003144654088050315,
+    "target_effect": 0.04,
+    "power": 0.8,
+    "slices": {
+      "Qwen/Qwen2.5-1.5B-Instruct|mcq": {
+        "n_items": 800,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 800,
+            "observed_delta": 0.017193393894014086,
+            "se": 0.016776924234971492,
+            "mde_at_pilot_n_uncorrected": 0.041715400347178924,
+            "mde_at_pilot_n_fdr": 0.07147711682834453,
+            "n_needed_uncorrected": 871,
+            "n_needed_fdr": 2555
+          },
+          "M1nd - M1n": {
+            "n_items": 800,
+            "observed_delta": 0.06460590819829615,
+            "se": 0.018354822878645552,
+            "mde_at_pilot_n_uncorrected": 0.045638805657129994,
+            "mde_at_pilot_n_fdr": 0.07819966287537737,
+            "n_needed_uncorrected": 1042,
+            "n_needed_fdr": 3058
+          },
+          "M3 - M1nd": {
+            "n_items": 800,
+            "observed_delta": -0.0034047723323397117,
+            "se": 0.003992203178985988,
+            "mde_at_pilot_n_uncorrected": 0.009926512842654193,
+            "mde_at_pilot_n_fdr": 0.01700855109258081,
+            "n_needed_uncorrected": 50,
+            "n_needed_fdr": 145
+          }
+        }
+      },
+      "Qwen/Qwen2.5-3B-Instruct|mcq": {
+        "n_items": 800,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 800,
+            "observed_delta": -0.004492981765709114,
+            "se": 0.011074391667648086,
+            "mde_at_pilot_n_uncorrected": 0.02753619647720769,
+            "mde_at_pilot_n_fdr": 0.04718180614902636,
+            "n_needed_uncorrected": 380,
+            "n_needed_fdr": 1114
+          },
+          "M1nd - M1n": {
+            "n_items": 800,
+            "observed_delta": 0.13132952905680184,
+            "se": 0.019624822228301014,
+            "mde_at_pilot_n_uncorrected": 0.04879662711293062,
+            "mde_at_pilot_n_fdr": 0.0836104217615636,
+            "n_needed_uncorrected": 1191,
+            "n_needed_fdr": 3496
+          },
+          "M3 - M1nd": {
+            "n_items": 800,
+            "observed_delta": -0.00031155712973895966,
+            "se": 0.002445236997467301,
+            "mde_at_pilot_n_uncorrected": 0.006080020322226574,
+            "mde_at_pilot_n_fdr": 0.01041779101419764,
+            "n_needed_uncorrected": 19,
+            "n_needed_fdr": 55
+          }
+        }
+      },
+      "Qwen/Qwen2.5-7B-Instruct|mcq": {
+        "n_items": 800,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 800,
+            "observed_delta": 0.019314641744548222,
+            "se": 0.013816813297341779,
+            "mde_at_pilot_n_uncorrected": 0.03435515891639937,
+            "mde_at_pilot_n_fdr": 0.05886573512628136,
+            "n_needed_uncorrected": 591,
+            "n_needed_fdr": 1733
+          },
+          "M1nd - M1n": {
+            "n_items": 800,
+            "observed_delta": 0.042207844077002954,
+            "se": 0.013668754107654248,
+            "mde_at_pilot_n_uncorrected": 0.03398701346337172,
+            "mde_at_pilot_n_fdr": 0.05823493749910095,
+            "n_needed_uncorrected": 578,
+            "n_needed_fdr": 1696
+          }
+        }
+      }
+    },
+    "summary": {
+      "n_primary_contrasts_measured": 2,
+      "median_se": 0.003992203178985988,
+      "median_slice_n": 800,
+      "mde_uncorrected": 0.009926512842654193,
+      "mde_fdr": 0.01700855109258081,
+      "n_needed_for_target_uncorrected": 50,
+      "n_needed_for_target_fdr": 145
+    }
+  },
+  "mmlu_pro": {
+    "family_size": 159,
+    "alpha_raw": 0.05,
+    "alpha_effective": 0.0003144654088050315,
+    "target_effect": 0.04,
+    "power": 0.8,
+    "slices": {
+      "Qwen/Qwen2.5-1.5B-Instruct|mcq": {
+        "n_items": 800,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 800,
+            "observed_delta": -0.009916244611627434,
+            "se": 0.01088005478908526,
+            "mde_at_pilot_n_uncorrected": 0.027052982714188444,
+            "mde_at_pilot_n_fdr": 0.046353845100949635,
+            "n_needed_uncorrected": 366,
+            "n_needed_fdr": 1075
+          },
+          "M1nd - M1n": {
+            "n_items": 800,
+            "observed_delta": 0.017111668387667867,
+            "se": 0.020355227990445108,
+            "mde_at_pilot_n_uncorrected": 0.050612762678484066,
+            "mde_at_pilot_n_fdr": 0.08672227332992458,
+            "n_needed_uncorrected": 1281,
+            "n_needed_fdr": 3761
+          },
+          "M3 - M1nd": {
+            "n_items": 800,
+            "observed_delta": 0.006703709167199312,
+            "se": 0.004997407743100433,
+            "mde_at_pilot_n_uncorrected": 0.012425928721009134,
+            "mde_at_pilot_n_fdr": 0.021291167086984832,
+            "n_needed_uncorrected": 78,
+            "n_needed_fdr": 227
+          }
+        }
+      },
+      "Qwen/Qwen2.5-3B-Instruct|mcq": {
+        "n_items": 800,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 800,
+            "observed_delta": -0.009068693999456978,
+            "se": 0.010856121901403693,
+            "mde_at_pilot_n_uncorrected": 0.02699347419062847,
+            "mde_at_pilot_n_fdr": 0.0462518804151171,
+            "n_needed_uncorrected": 365,
+            "n_needed_fdr": 1070
+          },
+          "M1nd - M1n": {
+            "n_items": 800,
+            "observed_delta": 0.07477599782785771,
+            "se": 0.04367033492639932,
+            "mde_at_pilot_n_uncorrected": 0.10858518994517195,
+            "mde_at_pilot_n_fdr": 0.1860549399728801,
+            "n_needed_uncorrected": 5896,
+            "n_needed_fdr": 17309
+          },
+          "M3 - M1nd": {
+            "n_items": 800,
+            "observed_delta": 0.0009231604670105753,
+            "se": 0.004955194234112992,
+            "mde_at_pilot_n_uncorrected": 0.01232096589213734,
+            "mde_at_pilot_n_fdr": 0.02111131886979254,
+            "n_needed_uncorrected": 76,
+            "n_needed_fdr": 223
+          }
+        }
+      },
+      "Qwen/Qwen2.5-7B-Instruct|mcq": {
+        "n_items": 800,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 800,
+            "observed_delta": 0.014343899415618866,
+            "se": 0.013522611177960522,
+            "mde_at_pilot_n_uncorrected": 0.033623632742644884,
+            "mde_at_pilot_n_fdr": 0.057612303986959275,
+            "n_needed_uncorrected": 566,
+            "n_needed_fdr": 1660
+          },
+          "M1nd - M1n": {
+            "n_items": 800,
+            "observed_delta": 0.01216575172658052,
+            "se": 0.017322217921035495,
+            "mde_at_pilot_n_uncorrected": 0.043071259389179745,
+            "mde_at_pilot_n_fdr": 0.07380030908687006,
+            "n_needed_uncorrected": 928,
+            "n_needed_fdr": 2724
+          },
+          "M3 - M1nd": {
+            "n_items": 800,
+            "observed_delta": 0.0016823091907207655,
+            "se": 0.004161595307053363,
+            "mde_at_pilot_n_uncorrected": 0.010347702110664448,
+            "mde_at_pilot_n_fdr": 0.017730236471741986,
+            "n_needed_uncorrected": 54,
+            "n_needed_fdr": 158
+          }
+        }
+      }
+    },
+    "summary": {
+      "n_primary_contrasts_measured": 3,
+      "median_se": 0.004955194234112992,
+      "median_slice_n": 800,
+      "mde_uncorrected": 0.01232096589213734,
+      "mde_fdr": 0.02111131886979254,
+      "n_needed_for_target_uncorrected": 76,
+      "n_needed_for_target_fdr": 223
+    }
+  },
+  "judgebench": {
+    "family_size": 159,
+    "alpha_raw": 0.05,
+    "alpha_effective": 0.0003144654088050315,
+    "target_effect": 0.04,
+    "power": 0.8,
+    "slices": {
+      "Qwen/Qwen2.5-1.5B-Instruct|pairwise": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": -0.012703175793948418,
+            "se": 0.03030922074903266,
+            "mde_at_pilot_n_uncorrected": 0.07536311543455379,
+            "mde_at_pilot_n_fdr": 0.12913068463042818,
+            "n_needed_uncorrected": 1420,
+            "n_needed_fdr": 4169
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.11307826956739186,
+            "se": 0.024357591251593796,
+            "mde_at_pilot_n_uncorrected": 0.06056453831001667,
+            "mde_at_pilot_n_fdr": 0.10377411086581036,
+            "n_needed_uncorrected": 918,
+            "n_needed_fdr": 2693
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": 0.01595398849712426,
+            "se": 0.011654066302436893,
+            "mde_at_pilot_n_uncorrected": 0.028977542883893714,
+            "mde_at_pilot_n_fdr": 0.049651476454079024,
+            "n_needed_uncorrected": 210,
+            "n_needed_fdr": 617
+          }
+        }
+      },
+      "Qwen/Qwen2.5-1.5B-Instruct|single": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.02485919596038072,
+            "se": 0.03641570363061869,
+            "mde_at_pilot_n_uncorrected": 0.09054673160583997,
+            "mde_at_pilot_n_fdr": 0.15514700229535397,
+            "n_needed_uncorrected": 2050,
+            "n_needed_fdr": 6018
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.17530912151226774,
+            "se": 0.037220748328187364,
+            "mde_at_pilot_n_uncorrected": 0.09254845500794293,
+            "mde_at_pilot_n_fdr": 0.15857684873766004,
+            "n_needed_uncorrected": 2142,
+            "n_needed_fdr": 6287
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": -0.0011005373211626646,
+            "se": 0.0026821385637439197,
+            "mde_at_pilot_n_uncorrected": 0.006669070111192238,
+            "mde_at_pilot_n_fdr": 0.011427096456149555,
+            "n_needed_uncorrected": 12,
+            "n_needed_fdr": 33
+          }
+        }
+      },
+      "Qwen/Qwen2.5-3B-Instruct|pairwise": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": -0.02337839513828599,
+            "se": 0.021553858115792388,
+            "mde_at_pilot_n_uncorrected": 0.05359312635222727,
+            "mde_at_pilot_n_fdr": 0.09182896775754988,
+            "n_needed_uncorrected": 719,
+            "n_needed_fdr": 2109
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.1266278060275332,
+            "se": 0.035012058630748445,
+            "mde_at_pilot_n_uncorrected": 0.08705660360056185,
+            "mde_at_pilot_n_fdr": 0.14916685383452274,
+            "n_needed_uncorrected": 1895,
+            "n_needed_fdr": 5563
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": -0.005333002604489656,
+            "se": 0.005471767478043212,
+            "mde_at_pilot_n_uncorrected": 0.013605412276789365,
+            "mde_at_pilot_n_fdr": 0.02331214934322527,
+            "n_needed_uncorrected": 47,
+            "n_needed_fdr": 136
+          }
+        }
+      },
+      "Qwen/Qwen2.5-3B-Instruct|single": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": -0.018498179085496114,
+            "se": 0.029130190279763157,
+            "mde_at_pilot_n_uncorrected": 0.0724314858129229,
+            "mde_at_pilot_n_fdr": 0.1241074934056335,
+            "n_needed_uncorrected": 1312,
+            "n_needed_fdr": 3851
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.14185791086189936,
+            "se": 0.031535240819001505,
+            "mde_at_pilot_n_uncorrected": 0.07841158351702968,
+            "mde_at_pilot_n_fdr": 0.1343540723353323,
+            "n_needed_uncorrected": 1538,
+            "n_needed_fdr": 4513
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": 0.0017920110989074756,
+            "se": 0.006010673094265702,
+            "mde_at_pilot_n_uncorrected": 0.014945387543721989,
+            "mde_at_pilot_n_fdr": 0.02560812559910489,
+            "n_needed_uncorrected": 56,
+            "n_needed_fdr": 164
+          }
+        }
+      },
+      "Qwen/Qwen2.5-7B-Instruct|pairwise": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": -0.03677342823250296,
+            "se": 0.024135299130474096,
+            "mde_at_pilot_n_uncorrected": 0.060011814539159894,
+            "mde_at_pilot_n_fdr": 0.10282704812124761,
+            "n_needed_uncorrected": 901,
+            "n_needed_fdr": 2644
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.08196350900977234,
+            "se": 0.02647600169082665,
+            "mde_at_pilot_n_uncorrected": 0.06583191261144158,
+            "mde_at_pilot_n_fdr": 0.11279947620302758,
+            "n_needed_uncorrected": 1084,
+            "n_needed_fdr": 3181
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": 0.012088346607919576,
+            "se": 0.020357242276014566,
+            "mde_at_pilot_n_uncorrected": 0.05061777114891444,
+            "mde_at_pilot_n_fdr": 0.08673085507726737,
+            "n_needed_uncorrected": 641,
+            "n_needed_fdr": 1881
+          }
+        }
+      },
+      "Qwen/Qwen2.5-7B-Instruct|single": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.012708018154311662,
+            "se": 0.03271336130456764,
+            "mde_at_pilot_n_uncorrected": 0.08134095048705864,
+            "mde_at_pilot_n_fdr": 0.13937338662711074,
+            "n_needed_uncorrected": 1655,
+            "n_needed_fdr": 4857
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.1475542107917297,
+            "se": 0.04728308317550298,
+            "mde_at_pilot_n_uncorrected": 0.11756819764397168,
+            "mde_at_pilot_n_fdr": 0.20144684525038628,
+            "n_needed_uncorrected": 3456,
+            "n_needed_fdr": 10146
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": -0.001210287443267788,
+            "se": 0.004757915536626876,
+            "mde_at_pilot_n_uncorrected": 0.011830437370321118,
+            "mde_at_pilot_n_fdr": 0.02027082437208447,
+            "n_needed_uncorrected": 35,
+            "n_needed_fdr": 103
+          }
+        }
+      }
+    },
+    "summary": {
+      "n_primary_contrasts_measured": 6,
+      "median_se": 0.006010673094265702,
+      "median_slice_n": 400,
+      "mde_uncorrected": 0.014945387543721989,
+      "mde_fdr": 0.02560812559910489,
+      "n_needed_for_target_uncorrected": 56,
+      "n_needed_for_target_fdr": 164
+    }
+  },
+  "llmbar": {
+    "family_size": 159,
+    "alpha_raw": 0.05,
+    "alpha_effective": 0.0003144654088050315,
+    "target_effect": 0.04,
+    "power": 0.8,
+    "slices": {
+      "Qwen/Qwen2.5-1.5B-Instruct|pairwise": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.18192151556156966,
+            "se": 0.0388131434515252,
+            "mde_at_pilot_n_uncorrected": 0.09650790545014408,
+            "mde_at_pilot_n_fdr": 0.16536115619912234,
+            "n_needed_uncorrected": 2329,
+            "n_needed_fdr": 6837
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.06652232746955344,
+            "se": 0.017232762959957265,
+            "mde_at_pilot_n_uncorrected": 0.042848831877309534,
+            "mde_at_pilot_n_fdr": 0.0734191913912596,
+            "n_needed_uncorrected": 460,
+            "n_needed_fdr": 1348
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": -0.0018944519621109102,
+            "se": 0.006764519963934338,
+            "mde_at_pilot_n_uncorrected": 0.016819808833838053,
+            "mde_at_pilot_n_fdr": 0.028819846652339914,
+            "n_needed_uncorrected": 71,
+            "n_needed_fdr": 208
+          }
+        }
+      },
+      "Qwen/Qwen2.5-1.5B-Instruct|single": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.04249044238121247,
+            "se": 0.039143274460340535,
+            "mde_at_pilot_n_uncorrected": 0.09732876790424297,
+            "mde_at_pilot_n_fdr": 0.16676766029696916,
+            "n_needed_uncorrected": 2369,
+            "n_needed_fdr": 6953
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.03877662479519384,
+            "se": 0.015430283975247776,
+            "mde_at_pilot_n_uncorrected": 0.03836701319520587,
+            "mde_at_pilot_n_fdr": 0.06573983377085876,
+            "n_needed_uncorrected": 369,
+            "n_needed_fdr": 1081
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": -0.01736755871108686,
+            "se": 0.027317740867598715,
+            "mde_at_pilot_n_uncorrected": 0.06792487591360381,
+            "mde_at_pilot_n_fdr": 0.11638565735485738,
+            "n_needed_uncorrected": 1154,
+            "n_needed_fdr": 3387
+          }
+        }
+      },
+      "Qwen/Qwen2.5-3B-Instruct|pairwise": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.10237949969493576,
+            "se": 0.03353186324621834,
+            "mde_at_pilot_n_uncorrected": 0.0833761349882635,
+            "mde_at_pilot_n_fdr": 0.14286056688066653,
+            "n_needed_uncorrected": 1738,
+            "n_needed_fdr": 5103
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.13075045759609527,
+            "se": 0.023009408389903414,
+            "mde_at_pilot_n_uncorrected": 0.057212315517033714,
+            "mde_at_pilot_n_fdr": 0.09803025564173155,
+            "n_needed_uncorrected": 819,
+            "n_needed_fdr": 2403
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": 0.010067114093959662,
+            "se": 0.011979460793222166,
+            "mde_at_pilot_n_uncorrected": 0.029786628104984426,
+            "mde_at_pilot_n_fdr": 0.05103780089039476,
+            "n_needed_uncorrected": 222,
+            "n_needed_fdr": 652
+          }
+        }
+      },
+      "Qwen/Qwen2.5-3B-Instruct|single": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.011529093369418209,
+            "se": 0.010523946807450592,
+            "mde_at_pilot_n_uncorrected": 0.026167529170221762,
+            "mde_at_pilot_n_fdr": 0.044836667610587654,
+            "n_needed_uncorrected": 172,
+            "n_needed_fdr": 503
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.16665764546684703,
+            "se": 0.025013680750819795,
+            "mde_at_pilot_n_uncorrected": 0.06219588835609615,
+            "mde_at_pilot_n_fdr": 0.10656934228780565,
+            "n_needed_uncorrected": 968,
+            "n_needed_fdr": 2840
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": -0.008010825439783598,
+            "se": 0.01380841852889212,
+            "mde_at_pilot_n_uncorrected": 0.034334285535689374,
+            "mde_at_pilot_n_fdr": 0.05882996970010316,
+            "n_needed_uncorrected": 295,
+            "n_needed_fdr": 866
+          }
+        }
+      },
+      "Qwen/Qwen2.5-7B-Instruct|pairwise": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.06420651007511635,
+            "se": 0.024361938313740485,
+            "mde_at_pilot_n_uncorrected": 0.06057534717076155,
+            "mde_at_pilot_n_fdr": 0.10379263127304157,
+            "n_needed_uncorrected": 918,
+            "n_needed_fdr": 2694
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.03416000953857168,
+            "se": 0.010893721421406316,
+            "mde_at_pilot_n_uncorrected": 0.02708696445188278,
+            "mde_at_pilot_n_fdr": 0.04641207099869946,
+            "n_needed_uncorrected": 184,
+            "n_needed_fdr": 539
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": 0.01722904495051858,
+            "se": 0.017167246703893874,
+            "mde_at_pilot_n_uncorrected": 0.04268592735365224,
+            "mde_at_pilot_n_fdr": 0.07314006316589412,
+            "n_needed_uncorrected": 456,
+            "n_needed_fdr": 1338
+          }
+        }
+      },
+      "Qwen/Qwen2.5-7B-Instruct|single": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.004168779223705732,
+            "se": 0.013834651601139236,
+            "mde_at_pilot_n_uncorrected": 0.034399513410346146,
+            "mde_at_pilot_n_fdr": 0.058941734189440535,
+            "n_needed_uncorrected": 296,
+            "n_needed_fdr": 869
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.17362402118190523,
+            "se": 0.030714805858309477,
+            "mde_at_pilot_n_uncorrected": 0.07637159261257363,
+            "mde_at_pilot_n_fdr": 0.13085865656578366,
+            "n_needed_uncorrected": 1459,
+            "n_needed_fdr": 4281
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": 0.000788687961241652,
+            "se": 0.009701093202197789,
+            "mde_at_pilot_n_uncorrected": 0.02412152436686881,
+            "mde_at_pilot_n_fdr": 0.041330947345565604,
+            "n_needed_uncorrected": 146,
+            "n_needed_fdr": 428
+          }
+        }
+      }
+    },
+    "summary": {
+      "n_primary_contrasts_measured": 6,
+      "median_se": 0.01380841852889212,
+      "median_slice_n": 400,
+      "mde_uncorrected": 0.034334285535689374,
+      "mde_fdr": 0.05882996970010316,
+      "n_needed_for_target_uncorrected": 295,
+      "n_needed_for_target_fdr": 866
+    }
+  },
+  "rewardbench2": {
+    "family_size": 159,
+    "alpha_raw": 0.05,
+    "alpha_effective": 0.0003144654088050315,
+    "target_effect": 0.04,
+    "power": 0.8,
+    "slices": {
+      "Qwen/Qwen2.5-1.5B-Instruct|pairwise": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": -0.009210348096979515,
+            "se": 0.020223207166361057,
+            "mde_at_pilot_n_uncorrected": 0.050284496218333356,
+            "mde_at_pilot_n_fdr": 0.08615980623317511,
+            "n_needed_uncorrected": 633,
+            "n_needed_fdr": 1856
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.07510497087904655,
+            "se": 0.03469632737074783,
+            "mde_at_pilot_n_uncorrected": 0.08627154575988862,
+            "mde_at_pilot_n_fdr": 0.1478216990349092,
+            "n_needed_uncorrected": 1861,
+            "n_needed_fdr": 5463
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": -0.008194500880400968,
+            "se": 0.012875045607827798,
+            "mde_at_pilot_n_uncorrected": 0.03201347723196873,
+            "mde_at_pilot_n_fdr": 0.05485338827260522,
+            "n_needed_uncorrected": 257,
+            "n_needed_fdr": 753
+          }
+        }
+      },
+      "Qwen/Qwen2.5-1.5B-Instruct|single": {
+        "n_items": 400,
+        "unreliable": true
+      },
+      "Qwen/Qwen2.5-3B-Instruct|pairwise": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": -0.014341085271317833,
+            "se": 0.015317669818951414,
+            "mde_at_pilot_n_uncorrected": 0.038087000926635806,
+            "mde_at_pilot_n_fdr": 0.06526004766147515,
+            "n_needed_uncorrected": 363,
+            "n_needed_fdr": 1065
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": -0.07467700258397936,
+            "se": 0.018868786872534613,
+            "mde_at_pilot_n_uncorrected": 0.04691676420714985,
+            "mde_at_pilot_n_fdr": 0.08038937678969507,
+            "n_needed_uncorrected": 551,
+            "n_needed_fdr": 1616
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": -0.017506459948320452,
+            "se": 0.0065429744557104885,
+            "mde_at_pilot_n_uncorrected": 0.016268941497177353,
+            "mde_at_pilot_n_fdr": 0.02787596480890272,
+            "n_needed_uncorrected": 67,
+            "n_needed_fdr": 195
+          }
+        }
+      },
+      "Qwen/Qwen2.5-3B-Instruct|single": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.008913412563667233,
+            "se": 0.023075179692265475,
+            "mde_at_pilot_n_uncorrected": 0.05737585420690093,
+            "mde_at_pilot_n_fdr": 0.09831047047712349,
+            "n_needed_uncorrected": 823,
+            "n_needed_fdr": 2417
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.12167515563101289,
+            "se": 0.045412226991095844,
+            "mde_at_pilot_n_uncorrected": 0.11291636077378676,
+            "mde_at_pilot_n_fdr": 0.19347617051948698,
+            "n_needed_uncorrected": 3188,
+            "n_needed_fdr": 9359
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": 0.0011318619128468654,
+            "se": 0.023889728897078386,
+            "mde_at_pilot_n_uncorrected": 0.05940121032732836,
+            "mde_at_pilot_n_fdr": 0.10178081032365414,
+            "n_needed_uncorrected": 883,
+            "n_needed_fdr": 2590
+          }
+        }
+      },
+      "Qwen/Qwen2.5-7B-Instruct|pairwise": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": -0.012016143826820702,
+            "se": 0.006815293451708462,
+            "mde_at_pilot_n_uncorrected": 0.016946055834769557,
+            "mde_at_pilot_n_fdr": 0.02903616416481033,
+            "n_needed_uncorrected": 72,
+            "n_needed_fdr": 211
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.033388369106585936,
+            "se": 0.023660713038501525,
+            "mde_at_pilot_n_uncorrected": 0.05883176815231558,
+            "mde_at_pilot_n_fdr": 0.10080510148395397,
+            "n_needed_uncorrected": 866,
+            "n_needed_fdr": 2541
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": 0.008163639699137692,
+            "se": 0.02383165606598394,
+            "mde_at_pilot_n_uncorrected": 0.05925681369273254,
+            "mde_at_pilot_n_fdr": 0.10153339438050779,
+            "n_needed_uncorrected": 878,
+            "n_needed_fdr": 2578
+          }
+        }
+      },
+      "Qwen/Qwen2.5-7B-Instruct|single": {
+        "n_items": 400,
+        "unreliable": false,
+        "contrasts": {
+          "M1n - M1": {
+            "n_items": 400,
+            "observed_delta": 0.0021023125437983348,
+            "se": 0.012790098229433985,
+            "mde_at_pilot_n_uncorrected": 0.031802257711125055,
+            "mde_at_pilot_n_fdr": 0.054491474872706835,
+            "n_needed_uncorrected": 253,
+            "n_needed_fdr": 743
+          },
+          "M1nd - M1n": {
+            "n_items": 400,
+            "observed_delta": 0.14832982947909357,
+            "se": 0.0417099590049524,
+            "mde_at_pilot_n_uncorrected": 0.10371076449931685,
+            "mde_at_pilot_n_fdr": 0.17770287157212694,
+            "n_needed_uncorrected": 2689,
+            "n_needed_fdr": 7895
+          },
+          "M3 - M1nd": {
+            "n_items": 400,
+            "observed_delta": -0.00389317137740397,
+            "se": 0.018072301618954945,
+            "mde_at_pilot_n_uncorrected": 0.04493632364734562,
+            "mde_at_pilot_n_fdr": 0.0769959973641925,
+            "n_needed_uncorrected": 505,
+            "n_needed_fdr": 1483
+          }
+        }
+      }
+    },
+    "summary": {
+      "n_primary_contrasts_measured": 5,
+      "median_se": 0.018072301618954945,
+      "median_slice_n": 400,
+      "mde_uncorrected": 0.04493632364734562,
+      "mde_fdr": 0.0769959973641925,
+      "n_needed_for_target_uncorrected": 505,
+      "n_needed_for_target_fdr": 1483
+    }
+  }
+}

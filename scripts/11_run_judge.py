@@ -30,9 +30,32 @@ from llm_judge.token_ids import resolve_target_token_ids
 def run_model(model_name, items, dataset, store, cfg, log, limit=None,
               tag=None, allow_slow=False):
     short = model_name.split("/")[-1]
-    todo = [it for it in items if not store.is_done(model_name, it["item_id"])]
     if limit:
-        todo = todo[:limit]
+        # `limit` is the TOTAL items per SLICE, a slice being (model, format) --
+        # the unit the analysis and the recovery curve both operate on.
+        #
+        # Two things this has to get right, both of which it got wrong before.
+        # It was a cap on the model's whole bank, so a two-format bank
+        # delivered limit/2 to each slice while a single-format bank delivered
+        # the full amount. And applying it to the not-yet-done items instead
+        # makes it a cap on ADDITIONAL work, so resuming a slice with 400 rows
+        # adds another 800 and lands at 1200.
+        #
+        # So: select the first `limit` items of each format from the FULL bank,
+        # then subtract what is already stored. The target is a property of the
+        # slice, not of the run.
+        by_fmt: dict[str, list] = {}
+        for it in items:
+            by_fmt.setdefault(it["format"], []).append(it)
+        target = [it for fmt in sorted(by_fmt) for it in by_fmt[fmt][:limit]]
+        todo = [it for it in target
+                if not store.is_done(model_name, it["item_id"])]
+        log.info("%s: target %d per slice x %d format(s) = %d; %d already "
+                 "stored, %d to run", short, limit, len(by_fmt), len(target),
+                 len(target) - len(todo), len(todo))
+    else:
+        todo = [it for it in items
+                if not store.is_done(model_name, it["item_id"])]
     if not todo:
         log.info("%s: already complete", short)
         return
@@ -158,7 +181,8 @@ def main() -> None:
     ap.add_argument("--pilot", action="store_true",
                     help="use the <4B pilot panel instead of the main panel")
     ap.add_argument("--limit", type=int, default=None,
-                    help="cap items per model (pilot runs)")
+                    help="cap items PER SLICE (model x format), the unit the "
+                         "analysis and the recovery curve operate on")
     ap.add_argument("--allow-slow", action="store_true",
                     help="override the throughput gate for a campaign the "
                          "probe projects cannot finish")

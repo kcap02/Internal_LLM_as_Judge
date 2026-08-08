@@ -13,7 +13,24 @@
 > discrepancy is visible by reading §4 against `cv.py`, and nothing about the
 > outcome bears on it. A systematic pass over all 14 quantitative claims in
 > this document against the code that implements them found this to be the
-> only mismatch. No other text differs.
+> only mismatch.
+>
+> **Second correction, same date.** `N_FREEZE` was written as "800 items per
+> *stratum*" in four places. The quantity the recovery curve measures is items
+> per **slice** (one model × format); each slice contains two `gt_verdict`
+> strata, so 800 per slice is ~400 per stratum. The wording is corrected to
+> match what was measured. No number changed.
+>
+> This one had a consequence. `--limit` in stage 11 capped items per model per
+> *bank*, so a two-format bank delivered half the intended count to each slice:
+> the three free-text banks ran at 400 per slice rather than 800, while the
+> single-format MCQ banks got the full 800. The flag did not implement what
+> §8.2 specifies, which is **§9's implementation-bug exception**, declared
+> here: the flag now means items per slice and logs the resolved figure, and
+> all three free-text banks were re-run — not only the one carrying the
+> illustrative slices, since fixing only that bank would select which slices
+> get full power after seeing which ones mattered. Before/after item counts are
+> reported in the results.
 
 **Status: FROZEN.** All inputs are resolved: the panel and its hardware
 constraint (§3), both open numbers from the corrected-estimator re-analysis
@@ -274,7 +291,7 @@ question.**
 The honest consequence is a fork, and it is taken *now* rather than after
 seeing the data:
 
-> **At n per stratum of `N_FREEZE`, we are powered to detect `MDE_FREEZE` at
+> **At n per slice of `N_FREEZE`, we are powered to detect `MDE_FREEZE` at
 > 80% power under the preregistered m = 3 family. We will report TOST against
 > ±0.02 for every primary test. We will not claim a positive result for any
 > effect below `MDE_FREEZE`, regardless of what BH-FDR returns.**
@@ -323,7 +340,7 @@ so the columns track one underlying signal instead of unrelated draws.
 Detection is a delta ≥ 0.02 in ≥ 80% of seeds, matching the power convention
 used elsewhere in this document.
 
-| n per stratum | median delta | delta IQR | detect | block-only | block IQR |
+| n per slice | median delta | delta IQR | detect | block-only | block IQR |
 |---|---|---|---|---|---|
 | 200 | +0.032 | [+0.018, +0.042] | 60% | 0.574 | [0.537, 0.636] |
 | 400 | +0.053 | [+0.046, +0.076] | 100% | 0.626 | [0.608, 0.639] |
@@ -374,7 +391,9 @@ reading a trend into it was an error. **The `n` dependence lives in the
 detection fraction and the delta, not in block-only** — and those are what set
 `N_FREEZE`.
 
-> **`N_FREEZE` = 800 items per stratum.**
+> **`N_FREEZE` = 800 items per slice** (a slice being one
+> model x format; each slice contains two `gt_verdict` strata, so ~400 per
+> stratum).
 >
 > The measured detection threshold is 400 — the smallest n detecting the
 > calibrated plant in ≥ 80% of seeds. We preregister **one grid step above
@@ -488,7 +507,7 @@ exploration budget.
 | when | what |
 |---|---|
 | this week | freeze §3 and §7, record the hash |
-| immediately after | **cheap arm** at $n = $ `N_FREEZE` per stratum across the panel — hours of inference, no retained attention, no eigendecomposition, no VRAM ceiling |
+| immediately after | **cheap arm** at $n = $ `N_FREEZE` per slice across the panel — hours of inference, no retained attention, no eigendecomposition, no VRAM ceiling |
 | behind it | CPU queue against the stored features: transfer matrix, risk–coverage, full-vector layer contrast, floor decomposition |
 | in parallel | **published-baseline reimplementation** (§10.1) |
 | final three weeks | writing |

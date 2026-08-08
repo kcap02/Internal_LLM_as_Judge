@@ -253,8 +253,14 @@ def load_model_safe(model_name: str, allow_cpu_offload: bool = True,
         # insufficient the correct behaviour is to fail loudly: a retry would
         # have masked the signal that identified this as resource contention
         # rather than a capacity limit of the model.
-        spill = plan["need_gb"] - plan["gpu_all_gb"]
-        if plan["ram_gb"] < spill + RAM_SAFETY_GB and not allow_low_ram:
+        # max(0, ...): when the model fits VRAM nothing spills, and a negative
+        # "spill" must not be compared against free RAM. Without the clamp this
+        # refused a 3B model that loads comfortably, reporting "~-2 GB must
+        # spill to host memory".
+        spill = max(0.0, plan["need_gb"] + plan["headroom_gb"]
+                    - plan["gpu_all_gb"])
+        if spill > 0 and plan["ram_gb"] < spill + RAM_SAFETY_GB \
+                and not allow_low_ram:
             raise RuntimeError(
                 f"REFUSING to load {short}: ~{spill:.0f} GB must spill to host "
                 f"memory but only {plan['ram_gb']:.0f} GB RAM is free "

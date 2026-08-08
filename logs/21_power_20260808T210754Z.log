@@ -1,0 +1,100 @@
+23:07:54 INFO stage=21_power | commit=ef62619 | logfile=21_power_20260808T210754Z.log
+23:07:54 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.8.0", "datasets": "4.8.5", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.3@2149f55"}
+23:07:54 INFO datasets: mmlu, mmlu_pro, judgebench, llmbar, rewardbench2
+23:07:54 INFO 
+=== mmlu ===
+23:07:54 INFO   FDR family size m=159; effective one-sided alpha for the smallest p-value = 0.05/159 = 0.00031
+23:07:54 INFO   target effect = 0.040 conditional AUROC, power = 80%
+23:07:54 INFO   Qwen/Qwen2.5-1.5B-Instruct|mcq (n=800):
+23:07:54 INFO     M3 - M1nd      delta=-0.003  SE=0.004  MDE(a=0.05)=0.010  MDE(FDR)=0.017  n for 0.04: 145
+23:07:54 INFO   Qwen/Qwen2.5-3B-Instruct|mcq (n=800):
+23:07:54 INFO     M3 - M1nd      delta=-0.000  SE=0.002  MDE(a=0.05)=0.006  MDE(FDR)=0.010  n for 0.04: 55
+23:07:54 INFO 
+  SUMMARY across 2 primary contrasts (median SE=0.004 at n=800):
+23:07:54 INFO     detectable at alpha=0.05 (no correction): 0.010 conditional-AUROC lift
+23:07:54 INFO     detectable under BH-FDR (m=159):                0.017
+23:07:54 INFO     to detect 0.040 under BH-FDR you need ~145 items per slice (0x the pilot)
+23:07:54 INFO     to detect 0.040 with m=3 primary tests only: ~71 items per slice
+23:07:54 INFO 
+=== mmlu_pro ===
+23:07:54 INFO   FDR family size m=159; effective one-sided alpha for the smallest p-value = 0.05/159 = 0.00031
+23:07:54 INFO   target effect = 0.040 conditional AUROC, power = 80%
+23:07:54 INFO   Qwen/Qwen2.5-1.5B-Instruct|mcq (n=800):
+23:07:54 INFO     M3 - M1nd      delta=+0.007  SE=0.005  MDE(a=0.05)=0.012  MDE(FDR)=0.021  n for 0.04: 227
+23:07:54 INFO   Qwen/Qwen2.5-3B-Instruct|mcq (n=800):
+23:07:54 INFO     M3 - M1nd      delta=+0.001  SE=0.005  MDE(a=0.05)=0.012  MDE(FDR)=0.021  n for 0.04: 223
+23:07:54 INFO   Qwen/Qwen2.5-7B-Instruct|mcq (n=800):
+23:07:54 INFO     M3 - M1nd      delta=+0.002  SE=0.004  MDE(a=0.05)=0.010  MDE(FDR)=0.018  n for 0.04: 158
+23:07:54 INFO 
+  SUMMARY across 3 primary contrasts (median SE=0.005 at n=800):
+23:07:54 INFO     detectable at alpha=0.05 (no correction): 0.012 conditional-AUROC lift
+23:07:54 INFO     detectable under BH-FDR (m=159):                0.021
+23:07:54 INFO     to detect 0.040 under BH-FDR you need ~223 items per slice (0x the pilot)
+23:07:54 INFO     to detect 0.040 with m=3 primary tests only: ~109 items per slice
+23:07:54 INFO 
+=== judgebench ===
+23:07:54 INFO   FDR family size m=159; effective one-sided alpha for the smallest p-value = 0.05/159 = 0.00031
+23:07:54 INFO   target effect = 0.040 conditional AUROC, power = 80%
+23:07:54 INFO   Qwen/Qwen2.5-1.5B-Instruct|pairwise (n=400):
+23:07:54 INFO     M3 - M1nd      delta=+0.016  SE=0.012  MDE(a=0.05)=0.029  MDE(FDR)=0.050  n for 0.04: 617
+23:07:54 INFO   Qwen/Qwen2.5-1.5B-Instruct|single (n=400):
+23:07:54 INFO     M3 - M1nd      delta=-0.001  SE=0.003  MDE(a=0.05)=0.007  MDE(FDR)=0.011  n for 0.04: 33
+23:07:54 INFO   Qwen/Qwen2.5-3B-Instruct|pairwise (n=400):
+23:07:54 INFO     M3 - M1nd      delta=-0.005  SE=0.005  MDE(a=0.05)=0.014  MDE(FDR)=0.023  n for 0.04: 136
+23:07:54 INFO   Qwen/Qwen2.5-3B-Instruct|single (n=400):
+23:07:54 INFO     M3 - M1nd      delta=+0.002  SE=0.006  MDE(a=0.05)=0.015  MDE(FDR)=0.026  n for 0.04: 164
+23:07:54 INFO   Qwen/Qwen2.5-7B-Instruct|pairwise (n=400):
+23:07:54 INFO     M3 - M1nd      delta=+0.012  SE=0.020  MDE(a=0.05)=0.051  MDE(FDR)=0.087  n for 0.04: 1,881
+23:07:54 INFO   Qwen/Qwen2.5-7B-Instruct|single (n=400):
+23:07:54 INFO     M3 - M1nd      delta=-0.001  SE=0.005  MDE(a=0.05)=0.012  MDE(FDR)=0.020  n for 0.04: 103
+23:07:54 INFO 
+  SUMMARY across 6 primary contrasts (median SE=0.006 at n=400):
+23:07:54 INFO     detectable at alpha=0.05 (no correction): 0.015 conditional-AUROC lift
+23:07:54 INFO     detectable under BH-FDR (m=159):                0.026
+23:07:54 INFO     to detect 0.040 under BH-FDR you need ~164 items per slice (0x the pilot)
+23:07:54 INFO     to detect 0.040 with m=3 primary tests only: ~80 items per slice
+23:07:54 INFO 
+=== llmbar ===
+23:07:54 INFO   FDR family size m=159; effective one-sided alpha for the smallest p-value = 0.05/159 = 0.00031
+23:07:54 INFO   target effect = 0.040 conditional AUROC, power = 80%
+23:07:54 INFO   Qwen/Qwen2.5-1.5B-Instruct|pairwise (n=400):
+23:07:54 INFO     M3 - M1nd      delta=-0.002  SE=0.007  MDE(a=0.05)=0.017  MDE(FDR)=0.029  n for 0.04: 208
+23:07:54 INFO   Qwen/Qwen2.5-1.5B-Instruct|single (n=400):
+23:07:54 INFO     M3 - M1nd      delta=-0.017  SE=0.027  MDE(a=0.05)=0.068  MDE(FDR)=0.116  n for 0.04: 3,387
+23:07:54 INFO   Qwen/Qwen2.5-3B-Instruct|pairwise (n=400):
+23:07:54 INFO     M3 - M1nd      delta=+0.010  SE=0.012  MDE(a=0.05)=0.030  MDE(FDR)=0.051  n for 0.04: 652
+23:07:54 INFO   Qwen/Qwen2.5-3B-Instruct|single (n=400):
+23:07:54 INFO     M3 - M1nd      delta=-0.008  SE=0.014  MDE(a=0.05)=0.034  MDE(FDR)=0.059  n for 0.04: 866
+23:07:54 INFO   Qwen/Qwen2.5-7B-Instruct|pairwise (n=400):
+23:07:54 INFO     M3 - M1nd      delta=+0.017  SE=0.017  MDE(a=0.05)=0.043  MDE(FDR)=0.073  n for 0.04: 1,338
+23:07:54 INFO   Qwen/Qwen2.5-7B-Instruct|single (n=400):
+23:07:54 INFO     M3 - M1nd      delta=+0.001  SE=0.010  MDE(a=0.05)=0.024  MDE(FDR)=0.041  n for 0.04: 428
+23:07:54 INFO 
+  SUMMARY across 6 primary contrasts (median SE=0.014 at n=400):
+23:07:54 INFO     detectable at alpha=0.05 (no correction): 0.034 conditional-AUROC lift
+23:07:54 INFO     detectable under BH-FDR (m=159):                0.059
+23:07:54 INFO     to detect 0.040 under BH-FDR you need ~866 items per slice (2x the pilot)
+23:07:54 INFO     to detect 0.040 with m=3 primary tests only: ~421 items per slice
+23:07:54 INFO 
+=== rewardbench2 ===
+23:07:54 INFO   FDR family size m=159; effective one-sided alpha for the smallest p-value = 0.05/159 = 0.00031
+23:07:54 INFO   target effect = 0.040 conditional AUROC, power = 80%
+23:07:54 INFO   Qwen/Qwen2.5-1.5B-Instruct|pairwise (n=400):
+23:07:54 INFO     M3 - M1nd      delta=-0.008  SE=0.013  MDE(a=0.05)=0.032  MDE(FDR)=0.055  n for 0.04: 753
+23:07:54 INFO   Qwen/Qwen2.5-1.5B-Instruct|single: UNRELIABLE (contrasts suppressed) — carries no power
+23:07:54 INFO   Qwen/Qwen2.5-3B-Instruct|pairwise (n=400):
+23:07:54 INFO     M3 - M1nd      delta=-0.018  SE=0.007  MDE(a=0.05)=0.016  MDE(FDR)=0.028  n for 0.04: 195
+23:07:54 INFO   Qwen/Qwen2.5-3B-Instruct|single (n=400):
+23:07:54 INFO     M3 - M1nd      delta=+0.001  SE=0.024  MDE(a=0.05)=0.059  MDE(FDR)=0.102  n for 0.04: 2,590
+23:07:54 INFO   Qwen/Qwen2.5-7B-Instruct|pairwise (n=400):
+23:07:54 INFO     M3 - M1nd      delta=+0.008  SE=0.024  MDE(a=0.05)=0.059  MDE(FDR)=0.102  n for 0.04: 2,578
+23:07:54 INFO   Qwen/Qwen2.5-7B-Instruct|single (n=400):
+23:07:54 INFO     M3 - M1nd      delta=-0.004  SE=0.018  MDE(a=0.05)=0.045  MDE(FDR)=0.077  n for 0.04: 1,483
+23:07:54 INFO 
+  SUMMARY across 5 primary contrasts (median SE=0.018 at n=400):
+23:07:54 INFO     detectable at alpha=0.05 (no correction): 0.045 conditional-AUROC lift
+23:07:54 INFO     detectable under BH-FDR (m=159):                0.077
+23:07:54 INFO     to detect 0.040 under BH-FDR you need ~1,483 items per slice (4x the pilot)
+23:07:54 INFO     to detect 0.040 with m=3 primary tests only: ~721 items per slice
+23:07:54 INFO 
+wrote C:\Users\valno\Dev\Internal_LLM_as_Judge\results\power__cheap.json
