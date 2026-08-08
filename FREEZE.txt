@@ -1,8 +1,14 @@
-Analysis plan frozen at commit 23d9534b6db4c5a847fab51b2294d6633e6206fa
+Analysis plan frozen at commit 5a7c8a8fbf1d752e0af23be84f354ba37d4949f0
 
 paper/PREREGISTRATION.md as of that commit is the frozen specification.
 The stopping rule in its section 9 applies from this point.
 
-Supersedes e6566a8, which named the cheap arm third checkpoint by a condition
-("the largest the card fits") rather than by name. Closed before any data was
-seen; no other text differs.
+Supersedes 23d9534, whose section 4 described the offset ladder second stage as
+RidgeCV on the working residual. The code had used the offset logistic with
+out-of-fold AUROC selection since 9d431d3, one day before that freeze, and the
+run used the code. Documentation correction, verifiable without reference to
+any result. A systematic pass over all 14 quantitative claims found it the only
+mismatch; no other text differs.
+
+23d9534 supersedes e6566a8 (cheap-arm third checkpoint named rather than
+described by a condition).
