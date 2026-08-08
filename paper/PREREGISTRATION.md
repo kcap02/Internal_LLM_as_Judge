@@ -1,5 +1,20 @@
 # Preregistration
 
+> **Supersession, 2026-08-08.** §4's description of the offset ladder's second
+> stage was **stale at the time of freezing** and has been corrected. It said
+> the internal block "fits the working residual under RidgeCV"; the code has
+> used a penalised offset logistic with the penalty selected by out-of-fold
+> AUROC since commit `9d431d3` (2026-08-05), a day before the freeze. The run
+> used the code, not the document. The frozen text also contradicted itself:
+> §4.1 and the errata table both list the RidgeCV form as a *failure mode*.
+>
+> This is a documentation correction, not a specification change, and the test
+> is that it **could have been made without seeing any results** — the
+> discrepancy is visible by reading §4 against `cv.py`, and nothing about the
+> outcome bears on it. A systematic pass over all 14 quantitative claims in
+> this document against the code that implements them found this to be the
+> only mismatch. No other text differs.
+
 **Status: FROZEN.** All inputs are resolved: the panel and its hardware
 constraint (§3), both open numbers from the corrected-estimator re-analysis
 (§7), and `N_FREEZE` (§8.2). From here §9's stopping rule applies: the analysis
@@ -110,10 +125,15 @@ exactly this case and was nearly written up as a negative result.
 
 - Conditional AUROC within `gt_verdict` strata, minimum 5 of each class per
   stratum; per-stratum support counts reported beside every value.
-- **Offset ladder** (`ladder_mode="offset"`): baseline out-of-fold logit as a
-  fixed offset, internal block fits the working residual under RidgeCV, with
-  the training-row offset from an inner CV. Concatenation is not used for any
-  claim.
+- **Offset ladder** (`ladder_mode="offset"`): the baseline's out-of-fold logit
+  enters as a fixed, unpenalised offset, and the internal block extends it by
+  penalised logistic regression on the same likelihood, with the penalty
+  selected by **out-of-fold AUROC** and the training-row offset from an inner
+  CV. Concatenation is not used for any claim.
+  *(Corrected 2026-08-08 — see the supersession note in the header. The frozen
+  text described the block as fitting the working residual under RidgeCV,
+  which is the superseded second stage that §4.1 and the errata table both
+  identify as a failure mode.)*
 - Both estimands reported side by side: offset rung (increment) and `*only`
   rung (achievable alone); the gap is redundancy.
 - Grouped paired bootstrap, 2,000 resamples, groups = text-derived `group_id`.
