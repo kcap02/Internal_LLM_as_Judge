@@ -360,7 +360,7 @@ def main() -> None:
     out["verdict"] = verdict
     out["canonical"] = bool(args.canonical)
     p = RESULTS_DIR / f"{tagged('recovery_curve', write_tag)}.json"
-    atomic_write_json(p, out)
+    atomic_write_json(p, out, tag=write_tag)
     log(f"wrote {p.name}"
         + ("" if args.canonical else "  (NOT canonical: the paper reads "
                                      "recovery_curve.json, written only "

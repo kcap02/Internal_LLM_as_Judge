@@ -104,7 +104,28 @@ def main() -> None:
             n_act_models += 1
             log("  %s: activations %s", short, mat.shape)
 
+        # Which rows carry the execution-path fields, and which predate them.
+        # `plan_loading` computes its mode from machine state, so the same
+        # model and config can run CPU-offloaded or disk-offloaded with very
+        # different throughput. Rows written before those fields existed record
+        # `load_mode` alone, which cannot distinguish the two. Stating this
+        # explicitly beats leaving a reader to find an unexplained schema
+        # change: the first campaign ran under conditions that are no longer
+        # recoverable from the data.
+        prov_fields = ("load_devices", "free_vram_gb_at_load",
+                       "free_ram_gb_at_load")
+        n_full = sum(1 for r in rows if any(f in r for f in prov_fields))
         prov = {
+            "execution_path_provenance": {
+                "rows_with_fields": n_full,
+                "rows_without": len(rows) - n_full,
+                "fields": list(prov_fields),
+                "note": ("Rows without these fields predate their addition. "
+                         "They record load_mode only, which does not "
+                         "distinguish a CPU-offload run from a disk-offload "
+                         "run of the same config; the machine state they ran "
+                         "under is not recoverable."),
+            },
             "written_utc": datetime.now(timezone.utc).isoformat(),
             "git_commit": _git_commit(),
             "versions": _versions(),          # carries the spectral-trust SHA

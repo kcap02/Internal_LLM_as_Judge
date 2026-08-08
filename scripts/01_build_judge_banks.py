@@ -77,7 +77,8 @@ def main() -> None:
                      "folds)", name, grp["n_merged_by_text"])
 
         atomic_write_json(out, {"dataset": name, "mode": mode, "seed": cfg.seed,
-                                "grouping": grp, "items": items})
+                                "grouping": grp, "items": items},
+                          tag=None)
         log.info("%s: bank written (%d items, %d question_ids, %d CV groups, "
                  "mode=%s) -> %s", name, len(items), grp["n_question_ids"],
                  grp["n_groups"], mode, out.name)

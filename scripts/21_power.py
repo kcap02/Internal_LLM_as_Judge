@@ -202,7 +202,7 @@ def main() -> None:
             out[name] = res
 
     path = RESULTS_DIR / f"{tagged('power', args.tag)}.json"
-    atomic_write_json(path, out)
+    atomic_write_json(path, out, tag=args.tag)
     log(f"\nwrote {path}")
 
 

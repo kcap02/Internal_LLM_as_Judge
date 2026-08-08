@@ -243,7 +243,7 @@ def main() -> None:
 
         reports[name] = report
         out = RESULTS_DIR / f"{tagged('analysis_' + name, args.tag)}.json"
-        atomic_write_json(out, report)
+        atomic_write_json(out, report, tag=args.tag)
         log.info("%s: analysis written -> %s", name, out.name)
 
     # ── Multiplicity control across every contrast in this run ───────────
@@ -263,7 +263,8 @@ def main() -> None:
                               "delta": c["delta"], "p": c["p_one_sided"]}
                              for (ds, key, cname, c), rej
                              in zip(all_contrasts, rejected) if rej]}
-        atomic_write_json(RESULTS_DIR / "analysis_fdr.json", fdr)
+        fdr_path = RESULTS_DIR / f"{tagged('analysis_fdr', args.tag)}.json"
+        atomic_write_json(fdr_path, fdr, tag=args.tag)
 
     log.info("Reading guide: the CONDITIONAL AUROC is the headline — it only "
              "compares items sharing a gt_verdict, so a feature cannot score "

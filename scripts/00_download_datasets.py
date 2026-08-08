@@ -51,13 +51,13 @@ def main() -> None:
         payload = get_loader(name)(n, cfg.seed)
 
         if kind == "questions":
-            atomic_write_json(out_main, payload["questions"])
-            atomic_write_json(DATA_DIR / f"{name}_dev.json", payload["dev"])
+            atomic_write_json(out_main, payload["questions"], tag=None)
+            atomic_write_json(DATA_DIR / f"{name}_dev.json", payload["dev"], tag=None)
             log.info("%s: %d questions, %d dev examples -> %s", name,
                      len(payload["questions"]), len(payload["dev"]),
                      out_main.name)
         else:
-            atomic_write_json(out_main, payload["items"])
+            atomic_write_json(out_main, payload["items"], tag=None)
             n_q = len({it["question_id"] for it in payload["items"]})
             by_fmt = {}
             for it in payload["items"]:

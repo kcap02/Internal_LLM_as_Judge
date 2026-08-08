@@ -1,0 +1,139 @@
+{
+  "n_contrasts": 159,
+  "n_survive": 19,
+  "survivors": [
+    {
+      "dataset": "mmlu",
+      "key": "Qwen/Qwen2.5-1.5B-Instruct|mcq",
+      "contrast": "M1nd - M1n",
+      "delta": 0.06460590819829615,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "mmlu",
+      "key": "Qwen/Qwen2.5-3B-Instruct|mcq",
+      "contrast": "M1nd - M1n",
+      "delta": 0.13132952905680184,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "mmlu",
+      "key": "Qwen/Qwen2.5-7B-Instruct|mcq",
+      "contrast": "M1nd - M1n",
+      "delta": 0.042207844077002954,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "judgebench",
+      "key": "Qwen/Qwen2.5-1.5B-Instruct|pairwise",
+      "contrast": "M1nd - M1n",
+      "delta": 0.11307826956739186,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "judgebench",
+      "key": "Qwen/Qwen2.5-1.5B-Instruct|single",
+      "contrast": "M1nd - M1n",
+      "delta": 0.17530912151226774,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "judgebench",
+      "key": "Qwen/Qwen2.5-3B-Instruct|pairwise",
+      "contrast": "M1nd - M1n",
+      "delta": 0.1266278060275332,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "judgebench",
+      "key": "Qwen/Qwen2.5-3B-Instruct|single",
+      "contrast": "M1nd - M1n",
+      "delta": 0.14185791086189936,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "judgebench",
+      "key": "Qwen/Qwen2.5-7B-Instruct|pairwise",
+      "contrast": "M1nd - M1n",
+      "delta": 0.08196350900977234,
+      "p": 0.002
+    },
+    {
+      "dataset": "judgebench",
+      "key": "Qwen/Qwen2.5-7B-Instruct|single",
+      "contrast": "M1nd - M1n",
+      "delta": 0.1475542107917297,
+      "p": 0.0005
+    },
+    {
+      "dataset": "llmbar",
+      "key": "Qwen/Qwen2.5-1.5B-Instruct|pairwise",
+      "contrast": "M1n - M1",
+      "delta": 0.18192151556156966,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "llmbar",
+      "key": "Qwen/Qwen2.5-1.5B-Instruct|pairwise",
+      "contrast": "M1nd - M1n",
+      "delta": 0.06652232746955344,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "llmbar",
+      "key": "Qwen/Qwen2.5-3B-Instruct|pairwise",
+      "contrast": "M1n - M1",
+      "delta": 0.10237949969493576,
+      "p": 0.0005
+    },
+    {
+      "dataset": "llmbar",
+      "key": "Qwen/Qwen2.5-3B-Instruct|pairwise",
+      "contrast": "M1nd - M1n",
+      "delta": 0.13075045759609527,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "llmbar",
+      "key": "Qwen/Qwen2.5-3B-Instruct|single",
+      "contrast": "M1nd - M1n",
+      "delta": 0.16665764546684703,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "llmbar",
+      "key": "Qwen/Qwen2.5-7B-Instruct|pairwise",
+      "contrast": "M1n - M1",
+      "delta": 0.06420651007511635,
+      "p": 0.005
+    },
+    {
+      "dataset": "llmbar",
+      "key": "Qwen/Qwen2.5-7B-Instruct|pairwise",
+      "contrast": "M1nd - M1n",
+      "delta": 0.03416000953857168,
+      "p": 0.0005
+    },
+    {
+      "dataset": "llmbar",
+      "key": "Qwen/Qwen2.5-7B-Instruct|single",
+      "contrast": "M1nd - M1n",
+      "delta": 0.17362402118190523,
+      "p": 0.0004997501249375312
+    },
+    {
+      "dataset": "rewardbench2",
+      "key": "Qwen/Qwen2.5-3B-Instruct|single",
+      "contrast": "M1nd - M1n",
+      "delta": 0.12167515563101289,
+      "p": 0.0035
+    },
+    {
+      "dataset": "rewardbench2",
+      "key": "Qwen/Qwen2.5-7B-Instruct|single",
+      "contrast": "M1nd - M1n",
+      "delta": 0.14832982947909357,
+      "p": 0.0004997501249375312
+    }
+  ]
+}

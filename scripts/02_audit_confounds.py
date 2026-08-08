@@ -76,7 +76,7 @@ def main() -> None:
                      json.dumps(detail, default=str)[:400])
 
     out = RESULTS_DIR / "audit_banks.json"
-    atomic_write_json(out, summary)
+    atomic_write_json(out, summary, tag=None)
     log.info("=" * 72)
     log.info("OVERALL BANK AUDIT: %s   -> %s", worst_overall, out.name)
     log.info("WARN entries are documented limitations, not blockers; FAIL "

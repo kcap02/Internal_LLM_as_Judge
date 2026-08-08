@@ -23,9 +23,33 @@ import time
 from pathlib import Path
 
 
-def atomic_write_json(path: str | Path, obj, retries: int = 8) -> None:
-    """Write JSON via tmp+replace, retrying the replace on transient locks."""
+def atomic_write_json(path: str | Path, obj, *, tag: str | None,
+                      retries: int = 8) -> None:
+    """Write JSON via tmp+replace, retrying the replace on transient locks.
+
+    `tag` is REQUIRED and keyword-only, and the path must agree with it. A
+    variant run that forgets to tag one of its outputs otherwise overwrites the
+    canonical file, and nothing downstream can tell. This happened three times:
+    a rigged recovery sweep overwrote the sweep the paper reads; a `--tag cheap`
+    analysis overwrote the pilot's FDR summary; and the same class of collision
+    is why result STREAMS are keyed by `(model, item_id)` in the first place.
+
+    Enforcing it at the write layer rather than at each call site means a stage
+    that forgets fails immediately with a TypeError for the missing argument,
+    or a ValueError for a path that disagrees, instead of silently clobbering.
+    """
     path = Path(path)
+    stem = path.stem
+    if tag:
+        if not stem.endswith(f"__{tag}"):
+            raise ValueError(
+                f"tagged write disagrees with its path: tag={tag!r} but the "
+                f"filename is {path.name!r}. Compose it with "
+                f"llm_judge.config.tagged(base, tag).")
+    elif "__" in stem:
+        raise ValueError(
+            f"untagged write to what looks like a variant path: {path.name!r}. "
+            f"Pass the tag explicitly, or rename the output.")
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = str(path) + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
