@@ -36,6 +36,11 @@ from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer  # noqa
 # attention_memory_gb().
 VRAM_HEADROOM_GB = 2.0
 
+# Host memory that must remain free ABOVE the spilled weights for a CPU-offload
+# load to complete. Below this the offload reaches disk; observed outcomes were
+# an 11-item stall and a segfault during from_pretrained.
+RAM_SAFETY_GB = 4.0
+
 # Disk offload dir, used only if CPU RAM is insufficient.
 OFFLOAD_DIR = "./offload"
 
@@ -207,7 +212,8 @@ def _kwargs(mode: str, dtype: str = "bfloat16",
 # ── Loading ───────────────────────────────────────────────────────────────────
 def load_model_safe(model_name: str, allow_cpu_offload: bool = True,
                     force: str | None = None, dtype: str = "bfloat16",
-                    headroom_gb: float | None = None):
+                    headroom_gb: float | None = None,
+                    allow_low_ram: bool = False):
     """Load a model at full precision (bf16 by default), no quantization.
 
     `headroom_gb` is the VRAM to leave free for activations. Stage 12 must
@@ -237,9 +243,28 @@ def load_model_safe(model_name: str, allow_cpu_offload: bool = True,
             f"drop it from the panel or use a bigger pod.")
 
     if plan["mode"] == "cpu_offload":
+        # Load-side gate, the complement to throughput_gate. The plan is a
+        # function of MACHINE STATE, not of the config: the same model on the
+        # same card offloads to CPU with ample free RAM and to DISK without
+        # it, and the disk path hangs or segfaults during load. Refuse rather
+        # than proceed into a mode that cannot finish.
+        #
+        # Deliberately NO retry and no automatic recovery. When resources are
+        # insufficient the correct behaviour is to fail loudly: a retry would
+        # have masked the signal that identified this as resource contention
+        # rather than a capacity limit of the model.
+        spill = plan["need_gb"] - plan["gpu_all_gb"]
+        if plan["ram_gb"] < spill + RAM_SAFETY_GB and not allow_low_ram:
+            raise RuntimeError(
+                f"REFUSING to load {short}: ~{spill:.0f} GB must spill to host "
+                f"memory but only {plan['ram_gb']:.0f} GB RAM is free "
+                f"(need {spill + RAM_SAFETY_GB:.0f} GB with margin). Below "
+                f"this the offload reaches disk and the load hangs or "
+                f"segfaults. Free host memory and retry, or pass "
+                f"--allow-low-ram to override.")
         print(f"  [warn] {short}: some layers will stay in CPU RAM. Each "
-              f"forward transfers weights — time 3 items before committing "
-              f"to the full campaign.")
+              f"forward transfers weights, so throughput can fall by orders "
+              f"of magnitude and varies between banks.")
 
     tok_kwargs = {}
     if "mistral" in model_name.lower() or "ministral" in model_name.lower():
@@ -271,8 +296,17 @@ def load_model_safe(model_name: str, allow_cpu_offload: bool = True,
             print(f"  [ok] {short} loaded {dtype}/{mode} "
                   f"({before - vram_total_free_gb():.1f} GB VRAM used"
                   + (f", devices: {sorted(devices)}" if devices else "") + ")")
-            return model, tokenizer, {"mode": mode, "dtype": dtype,
-                                      "need_gb": plan["need_gb"]}
+            return model, tokenizer, {
+                "mode": mode, "dtype": dtype, "need_gb": plan["need_gb"],
+                # The plan is machine-state dependent, so record the state it
+                # was computed from. Without these, a CPU-offload run and a
+                # disk-offload run of the same config are indistinguishable in
+                # the results, and they differ by orders of magnitude in
+                # throughput and by whether they complete at all.
+                "devices": sorted(devices) if devices else None,
+                "free_vram_gb": round(plan["gpu_all_gb"], 1),
+                "free_ram_gb": round(plan["ram_gb"], 1),
+            }
         except (torch.cuda.OutOfMemoryError, RuntimeError, ValueError, OSError) as e:
             last_err = e
             # CRUCIAL: an aborted load leaves weights in VRAM. Without this
@@ -283,6 +317,54 @@ def load_model_safe(model_name: str, allow_cpu_offload: bool = True,
 
     free_vram()
     raise RuntimeError(f"{short}: loading impossible. Last error: {last_err}")
+
+
+# A campaign projected to exceed this is refused unless explicitly overridden.
+SLOW_CAMPAIGN_HOURS = 6.0
+
+
+def throughput_gate(timed_fn, n_planned: int, mode: str,
+                    max_hours: float = SLOW_CAMPAIGN_HOURS,
+                    override: bool = False, n_probe: int = 3,
+                    log=print) -> dict:
+    """Time `n_probe` items and REFUSE a campaign that cannot finish.
+
+    This replaces an advisory warning that told the operator to "time 3 items
+    before committing to the full campaign". A gate that advises rather than
+    blocks is the one category this project has repeatedly found worthless:
+    the campaign was launched straight past it, and a 7B model under CPU
+    offload then produced 11 items in 20 minutes while three banks queued
+    behind it.
+
+    `timed_fn` runs one representative item. Returns the measurement; raises
+    RuntimeError when the projection exceeds `max_hours` and `override` is
+    False, so the refusal happens before the queue rather than after.
+
+    Note the projection is a point estimate from a short sample of a rate that
+    is NOT stationary -- observed throughput for one model varied by more than
+    an order of magnitude between banks. It is used only as a threshold test,
+    never reported as an ETA.
+    """
+    import time as _t
+
+    t0 = _t.perf_counter()
+    for _ in range(n_probe):
+        timed_fn()
+    per_item = (_t.perf_counter() - t0) / max(n_probe, 1)
+    hours = per_item * n_planned / 3600.0
+    out = {"seconds_per_item": per_item, "n_planned": n_planned,
+           "projected_hours": hours, "mode": mode, "overridden": override}
+
+    log(f"  [probe] {per_item:.2f} s/item over {n_probe} items -> "
+        f"~{hours:.1f} h for {n_planned} items (mode={mode}). "
+        f"Rate is not stationary; this is a threshold test, not an ETA.")
+    if hours > max_hours and not override:
+        raise RuntimeError(
+            f"REFUSING to start: {per_item:.2f} s/item projects ~{hours:.1f} h "
+            f"for {n_planned} items, over the {max_hours:.0f} h limit. "
+            f"Re-run with --allow-slow to override, reduce the panel, or free "
+            f"the device so the model need not offload (mode={mode}).")
+    return out
 
 
 def _hard_unload(model) -> None:

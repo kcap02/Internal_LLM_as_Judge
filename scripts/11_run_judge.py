@@ -19,7 +19,8 @@ import torch
 from llm_judge.config import DATA_DIR, RESULTS_DIR, Config, tagged
 from llm_judge.io_utils import ResumableResults, read_json
 from llm_judge.log_utils import setup_logging
-from llm_judge.model_loading import free_vram, load_model_safe, unload, vram_free_gb
+from llm_judge.model_loading import (free_vram, load_model_safe,
+                                     throughput_gate, unload, vram_free_gb)
 from llm_judge.prompts import (build_judge_prompt, render, task_token_start,
                                verdict_labels)
 from llm_judge.scoring import ActivationStore, margin, score_targets
@@ -27,7 +28,7 @@ from llm_judge.token_ids import resolve_target_token_ids
 
 
 def run_model(model_name, items, dataset, store, cfg, log, limit=None,
-              tag=None):
+              tag=None, allow_slow=False):
     short = model_name.split("/")[-1]
     todo = [it for it in items if not store.is_done(model_name, it["item_id"])]
     if limit:
@@ -50,6 +51,7 @@ def run_model(model_name, items, dataset, store, cfg, log, limit=None,
         for fmt in sorted({it["format"] for it in todo}):
             probe = next(it for it in todo if it["format"] == fmt)
             h, b = build_judge_prompt(probe)
+
             probe_prompt = render(h, b, tokenizer, cfg.use_chat_template)
             try:
                 ids_by_format[fmt] = resolve_target_token_ids(
@@ -59,6 +61,22 @@ def run_model(model_name, items, dataset, store, cfg, log, limit=None,
 
         max_len = min(getattr(tokenizer, "model_max_length", 4096) or 4096,
                       cfg.max_prompt_tokens) - 8
+
+        # Throughput gate. Under CPU offload each forward transfers weights and
+        # throughput can collapse, so time a few real items and REFUSE a
+        # campaign that cannot finish, rather than warning and starting one.
+        if info.get("mode") == "cpu_offload" and ids_by_format:
+            _fmt0 = next(iter(ids_by_format))
+            _probe_item = next(it for it in todo if it["format"] == _fmt0)
+            _h, _b = build_judge_prompt(_probe_item)
+            _p = render(_h, _b, tokenizer, cfg.use_chat_template)
+
+            def _one():
+                score_targets(model, tokenizer, _p, ids_by_format[_fmt0],
+                              activation_layers=cfg.activation_layers)
+
+            throughput_gate(_one, len(todo), info["mode"],
+                            override=allow_slow, log=log.info)
 
         n_done = 0
         for it in todo:
@@ -103,7 +121,16 @@ def run_model(model_name, items, dataset, store, cfg, log, limit=None,
                     "task_start_idx": task_token_start(h, b, tokenizer, prompt),
                     "neg_source": it.get("neg_source"),
                     "gt_mean_prob": it.get("gt_mean_prob"),
+                    # Provenance for the execution path, not just its name.
+                    # `plan_loading` is a function of MACHINE STATE: the same
+                    # model and config offloads to CPU with ample free RAM and
+                    # to disk without it, with very different throughput and
+                    # failure modes. Recording only `load_mode` says what
+                    # happened without recording why, so these pin it.
                     "load_mode": info["mode"],
+                    "load_devices": info.get("devices"),
+                    "free_vram_gb_at_load": info.get("free_vram_gb"),
+                    "free_ram_gb_at_load": info.get("free_ram_gb"),
                 })
                 n_done += 1
                 if n_done % 25 == 0:
@@ -132,6 +159,9 @@ def main() -> None:
                     help="use the <4B pilot panel instead of the main panel")
     ap.add_argument("--limit", type=int, default=None,
                     help="cap items per model (pilot runs)")
+    ap.add_argument("--allow-slow", action="store_true",
+                    help="override the throughput gate for a campaign the "
+                         "probe projects cannot finish")
     ap.add_argument("--tag", default=None,
                     help="variant tag; keeps ablation runs in their own "
                          "result stream instead of colliding with the main one")
@@ -158,7 +188,8 @@ def main() -> None:
                         name)
         for model_name in models:
             run_model(model_name, items, name, store, cfg, log,
-                      limit=args.limit, tag=args.tag)
+                      limit=args.limit, tag=args.tag,
+                      allow_slow=args.allow_slow)
         store.close()
 
     log.info("done.")

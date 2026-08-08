@@ -1,0 +1,73 @@
+22:57:48 INFO stage=11_run_judge | commit=c72b809 | logfile=11_run_judge_20260807T205748Z.log
+22:57:48 INFO versions={"python": "3.11.15", "platform": "Windows-10-10.0.26200-SP0", "torch": "2.11.0+cu128", "transformers": "5.8.0", "datasets": "4.8.5", "sklearn": "1.8.0", "numpy": "2.4.4", "spectral_trust": "0.2.3@2149f55"}
+22:57:48 INFO config={"seed": 42, "judge_models_pilot": ["Qwen/Qwen2.5-1.5B-Instruct", "Qwen/Qwen2.5-3B-Instruct", "Qwen/Qwen2.5-7B-Instruct"], "judge_models": ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "microsoft/phi-4", "google/gemma-2-27b-it", "mistralai/Mistral-Nemo-Instruct-2407"], "judge_models_large": ["Qwen/Qwen2.5-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"], "no_cpu_offload": ["google/gemma-2-27b-it"], "distractor_panel": null, "datasets": ["mmlu", "mmlu_pro", "judgebench", "llmbar", "rewardbench2"], "n_questions": {"mmlu": 2000, "mmlu_pro": 2000, "judgebench": null, "llmbar": null, "rewardbench2": 1000}, "model_dtype": "bfloat16", "ntrain": 0, "use_chat_template": false, "max_prompt_tokens": 4096, "spectral_max_len": 4096, "spectral_normalization": "sym", "spectral_calc_velocity": true, "spectral_task_subgraph": true, "hfer_cutoff_ratio": 0.1, "eigen_solver": "dense", "activation_layers": [0.5, 1.0], "n_splits": 5, "n_bootstrap": 2000, "activation_probe": "full", "activation_pca_dims": 24}
+22:57:48 INFO === dataset mmlu: 800 items (bank mode=logprob), resume=0 rows ===
+22:57:48 INFO Qwen2.5-1.5B-Instruct: 800 items to judge
+22:58:14 INFO   [25/800] done
+22:58:17 INFO   [50/800] done
+22:58:19 INFO   [75/800] done
+22:58:22 INFO   [100/800] done
+22:58:25 INFO   [125/800] done
+22:58:28 INFO   [150/800] done
+22:58:30 INFO   [175/800] done
+22:58:33 INFO   [200/800] done
+22:58:36 INFO   [225/800] done
+22:58:38 INFO   [250/800] done
+22:58:41 INFO   [275/800] done
+22:58:44 INFO   [300/800] done
+22:58:46 INFO   [325/800] done
+22:58:49 INFO   [350/800] done
+22:58:52 INFO   [375/800] done
+22:58:55 INFO   [400/800] done
+22:58:57 INFO   [425/800] done
+22:59:00 INFO   [450/800] done
+22:59:03 INFO   [475/800] done
+22:59:05 INFO   [500/800] done
+22:59:08 INFO   [525/800] done
+22:59:11 INFO   [550/800] done
+22:59:13 INFO   [575/800] done
+22:59:16 INFO   [600/800] done
+22:59:19 INFO   [625/800] done
+22:59:21 INFO   [650/800] done
+22:59:24 INFO   [675/800] done
+22:59:27 INFO   [700/800] done
+22:59:30 INFO   [725/800] done
+22:59:32 INFO   [750/800] done
+22:59:35 INFO   [775/800] done
+22:59:38 INFO   [800/800] done
+22:59:38 INFO Qwen2.5-1.5B-Instruct: unloaded, 8.6 GB VRAM free
+22:59:38 INFO Qwen2.5-3B-Instruct: 800 items to judge
+23:00:07 INFO   [25/800] done
+23:00:09 INFO   [50/800] done
+23:00:10 INFO   [75/800] done
+23:00:12 INFO   [100/800] done
+23:00:14 INFO   [125/800] done
+23:00:16 INFO   [150/800] done
+23:00:17 INFO   [175/800] done
+23:00:19 INFO   [200/800] done
+23:00:20 INFO   [225/800] done
+23:00:22 INFO   [250/800] done
+23:00:23 INFO   [275/800] done
+23:00:25 INFO   [300/800] done
+23:00:27 INFO   [325/800] done
+23:00:28 INFO   [350/800] done
+23:00:30 INFO   [375/800] done
+23:00:32 INFO   [400/800] done
+23:00:33 INFO   [425/800] done
+23:00:35 INFO   [450/800] done
+23:00:37 INFO   [475/800] done
+23:00:38 INFO   [500/800] done
+23:00:40 INFO   [525/800] done
+23:00:41 INFO   [550/800] done
+23:00:43 INFO   [575/800] done
+23:00:45 INFO   [600/800] done
+23:00:46 INFO   [625/800] done
+23:00:48 INFO   [650/800] done
+23:00:50 INFO   [675/800] done
+23:00:52 INFO   [700/800] done
+23:00:53 INFO   [725/800] done
+23:00:55 INFO   [750/800] done
+23:00:56 INFO   [775/800] done
+23:00:58 INFO   [800/800] done
+23:00:59 INFO Qwen2.5-3B-Instruct: unloaded, 11.8 GB VRAM free
+23:00:59 INFO Qwen2.5-7B-Instruct: 800 items to judge
