@@ -207,6 +207,16 @@ def collect() -> dict[str, str | None]:
                         continue
                     ext.append(r["external"]); mar.append(r["margin"])
                     n_hi += int(r["external"] > r["margin"])
+        # Agreement between the held-out judge and the training judges. The
+        # RANGE is what the paper reports: a correlation over a handful of fits
+        # invites exactly the over-reading it is meant to guard against.
+        agr = [r.get("agreement_with_train")
+               for byfmt in tr.values() for byjudge in byfmt.values()
+               for r in byjudge.values()]
+        agr = [a for a in agr if a is not None]
+        if agr:
+            m["AgreeLo"] = _fmt(min(agr))
+            m["AgreeHi"] = _fmt(max(agr))
         if ext:
             m["TransferN"] = str(len(ext))
             m["TransferExtLo"] = _fmt(min(ext))

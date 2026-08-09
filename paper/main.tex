@@ -190,6 +190,19 @@ bank & held-out judge & external & confidence & $\phi$ \\
 \end{tabular}
 \end{table}
 
+\paragraph{A confound we can measure but not resolve.} If the judges resemble one another closely
+enough, peer difficulty is a noisy copy of the held-out judge's own correctness, and transfer would
+measure inter-judge agreement rather than difficulty generalising. We therefore report agreement
+between each held-out judge and its training judges alongside every fit. It spans
+\AgreeLo{}--\AgreeHi{} across the panel, a range too narrow to separate the two accounts: with the
+confounding variable nearly constant, no amount of data from this panel has leverage on it. Adding
+banks does not help, because agreement is a property of the judge pair rather than of the bank, so
+more fits estimate the range more precisely without widening it.
+
+What would resolve it is a judge that disagrees more --- a second model family at comparable scale,
+which is the same addition the one-family limitation calls for. We state the confound as measured
+and open rather than as a hedge, and the agreement range is what a replication should try to widen.
+
 \paragraph{Practical form.} Reported as risk--coverage rather than $\Delta$AUROC, since a $0.02$
 AUROC difference has no operational meaning and a coverage change does (\cref{app:coverage}).
 
@@ -212,8 +225,12 @@ magnitude more items than any affordable design (\cref{app:power}).
 \section{Limitations}
 \label{sec:limitations}
 
-One model family and three scales, so whether the transfer result holds across families is untested
-and is the first thing we would add. Judges are single-token log-probability readouts, which is what
+One model family and three scales. This is not generic hedging: it is the specific reason the
+agreement confound of \cref{sec:results} cannot be resolved here, since three scales of one family
+agree over only \AgreeLo{}--\AgreeHi{} and a confound with almost no variation cannot be tested
+against. A second family chosen for maximum \emph{disagreement} rather than convenience is the one
+addition that would both widen that range and test generality, and it is inference-only on this
+arm. Judges are single-token log-probability readouts, which is what
 production reward pipelines do but not the only deployment; chain-of-thought judges would need the
 generated length as a further nuisance covariate. The external predictor is not free: peer difficulty
 requires other judges' verdicts on the same items, so the deployable claim concerns ensembles ---

@@ -161,7 +161,25 @@ def main() -> None:
                     sc = fit_predict(A, y_tr, B)
                     scores[lbl] = (stratified_auroc(y_te, sc, s_te)
                                    if sc is not None else None)
-                res[held] = {**scores, "n": int(len(y_te))}
+                # Inter-judge agreement, the confound this result must be read
+                # against. If the judges are near-copies of one another, peer
+                # difficulty is a noisy copy of the held-out judge's own
+                # correctness and transfer measures agreement rather than
+                # difficulty generalisation.
+                #
+                # Note what this can and cannot show. Agreement is a property
+                # of the JUDGE PAIR, not of the bank, so adding banks gives a
+                # better estimate of its RANGE and no additional leverage on
+                # the confound. Widening that range needs a judge that
+                # disagrees more, i.e. a second model family.
+                common = [i for i in idx[held]
+                          if all(i in idx[m] for m in train)]
+                agree = float(np.mean([
+                    np.mean([idx[held][i]["pred_verdict"]
+                             == idx[m][i]["pred_verdict"] for m in train])
+                    for i in common])) if common else None
+                res[held] = {**scores, "n": int(len(y_te)),
+                             "agreement_with_train": agree}
                 f = lambda v: "  n/a" if v is None else f"{v:.3f}"
                 log(f"    {held.split('/')[-1][:29]:30}"
                     f"{f(scores['external']):>10}{f(scores['margin']):>9}"
