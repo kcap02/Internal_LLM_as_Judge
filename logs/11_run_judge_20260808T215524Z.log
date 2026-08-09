@@ -4,3 +4,71 @@
 23:55:24 INFO === dataset judgebench: 2480 items (bank mode=native), resume=0 rows ===
 23:55:24 INFO Qwen2.5-1.5B-Instruct: target 800 per slice x 2 format(s) = 1600; 0 already stored, 1600 to run
 23:55:24 INFO Qwen2.5-1.5B-Instruct: 1600 items to judge
+23:55:35 INFO   [25/1600] done
+23:55:41 INFO   [50/1600] done
+23:55:54 INFO   [75/1600] done
+23:56:02 INFO   [100/1600] done
+23:56:09 INFO   [125/1600] done
+23:56:17 INFO   [150/1600] done
+23:56:24 INFO   [175/1600] done
+23:56:32 INFO   [200/1600] done
+23:56:43 INFO   [225/1600] done
+23:56:55 INFO   [250/1600] done
+23:57:06 INFO   [275/1600] done
+23:57:15 INFO   [300/1600] done
+23:57:22 INFO   [325/1600] done
+23:57:30 INFO   [350/1600] done
+23:57:41 INFO   [375/1600] done
+23:57:50 INFO   [400/1600] done
+23:57:59 INFO   [425/1600] done
+23:58:09 INFO   [450/1600] done
+23:58:18 INFO   [475/1600] done
+23:58:27 INFO   [500/1600] done
+23:58:35 INFO   [525/1600] done
+23:58:44 INFO   [550/1600] done
+23:58:52 INFO   [575/1600] done
+23:59:01 INFO   [600/1600] done
+23:59:09 INFO   [625/1600] done
+23:59:12 INFO   [650/1600] done
+23:59:17 INFO   [675/1600] done
+23:59:21 INFO   [700/1600] done
+23:59:25 INFO   [725/1600] done
+23:59:30 INFO   [750/1600] done
+23:59:35 INFO   [775/1600] done
+23:59:40 INFO   [800/1600] done
+23:59:45 INFO   [825/1600] done
+23:59:50 INFO   [850/1600] done
+23:59:55 INFO   [875/1600] done
+00:00:00 INFO   [900/1600] done
+00:00:03 INFO   [925/1600] done
+00:00:08 INFO   [950/1600] done
+00:00:13 INFO   [975/1600] done
+00:00:17 INFO   [1000/1600] done
+00:00:25 INFO   [1025/1600] done
+00:00:35 INFO   [1050/1600] done
+00:00:43 INFO   [1075/1600] done
+00:00:51 INFO   [1100/1600] done
+00:00:58 INFO   [1125/1600] done
+00:01:04 INFO   [1150/1600] done
+00:01:09 INFO   [1175/1600] done
+00:01:15 INFO   [1200/1600] done
+00:01:20 INFO   [1225/1600] done
+00:01:26 INFO   [1250/1600] done
+00:01:31 INFO   [1275/1600] done
+00:01:37 INFO   [1300/1600] done
+00:01:43 INFO   [1325/1600] done
+00:01:47 INFO   [1350/1600] done
+00:01:52 INFO   [1375/1600] done
+00:01:57 INFO   [1400/1600] done
+00:02:02 INFO   [1425/1600] done
+00:02:06 INFO   [1450/1600] done
+00:02:09 INFO   [1475/1600] done
+00:02:13 INFO   [1500/1600] done
+00:02:16 INFO   [1525/1600] done
+00:02:19 INFO   [1550/1600] done
+00:02:23 INFO   [1575/1600] done
+00:02:26 INFO   [1600/1600] done
+00:02:27 INFO Qwen2.5-1.5B-Instruct: unloaded, 7.8 GB VRAM free
+00:02:27 INFO Qwen2.5-3B-Instruct: target 800 per slice x 2 format(s) = 1600; 0 already stored, 1600 to run
+00:02:27 INFO Qwen2.5-3B-Instruct: 1600 items to judge
+00:02:28 INFO Qwen2.5-3B-Instruct: unloaded, 7.8 GB VRAM free

@@ -167,6 +167,54 @@ def collect() -> dict[str, str | None]:
             m["FloorLo"] = _fmt(min(fl))
             m["FloorHi"] = _fmt(max(fl))
         m["NSlicesEstimable"] = str(len(m2o))
+    # ── Floors: how often each rung clears, under the validity condition ────
+    # A slice's floor is usable only when the SDT null is tight AND phi leaves
+    # room to clear. A wide null (thin minority stratum) and a null saturating
+    # at 1.0 are both vacuous, in different ways.
+    SD_MAX, PHI_MAX = 0.10, 0.95
+    est = clears = {}
+    slices = []
+    for p in RESULTS.glob("analysis_*__cheap.json"):
+        if "fdr" in p.name:
+            continue
+        for k, v in json.loads(p.read_text(encoding="utf-8")).items():
+            if not isinstance(v, dict) or v.get("floor_to_clear") is None:
+                continue
+            slices.append((v, p.stem.replace("analysis_", "").replace("__cheap", "")))
+    if slices:
+        usable = [(v, ds) for v, ds in slices
+                  if v["sdt_null"]["null_auroc_sd"] <= SD_MAX
+                  and v["floor_to_clear"] <= PHI_MAX]
+        m["NSlicesTotal"] = str(len(slices))
+        m["NSlicesUsable"] = str(len(usable))
+        m["NSlicesExcluded"] = str(len(slices) - len(usable))
+        m["FloorSdMax"] = f"{SD_MAX:.2f}"
+        m["FloorPhiMax"] = f"{PHI_MAX:.2f}"
+        for rung, key in (("M1", "NClearConfidence"), ("M1nd", "NClearBaseline"),
+                          ("M3", "NClearInternal")):
+            m[key] = str(sum(
+                1 for v, _ in usable
+                if (v["auroc_conditional"].get(rung) or -1) > v["floor_to_clear"]))
+
+    # ── Cross-judge transfer (results/transfer__cheap.json) ─────────────────
+    tr = _load("transfer__cheap.json")
+    if tr:
+        ext, mar, n_hi = [], [], 0
+        for bank, byfmt in tr.items():
+            for fmt, byjudge in byfmt.items():
+                for judge, r in byjudge.items():
+                    if r.get("external") is None or r.get("margin") is None:
+                        continue
+                    ext.append(r["external"]); mar.append(r["margin"])
+                    n_hi += int(r["external"] > r["margin"])
+        if ext:
+            m["TransferN"] = str(len(ext))
+            m["TransferExtLo"] = _fmt(min(ext))
+            m["TransferExtHi"] = _fmt(max(ext))
+            m["TransferMarLo"] = _fmt(min(mar))
+            m["TransferMarHi"] = _fmt(max(mar))
+            m["TransferExtBeatsMargin"] = str(n_hi)
+
     # ── Recovery curve / detection threshold (results/recovery_curve.json) ──
     rc = _load("recovery_curve.json")
     if rc:

@@ -278,3 +278,29 @@
 %   chosen coverage; reports 2% top-5 ImageNet error at ~60% coverage with probability 0.999.
 % USED-FOR: sec:related -- same clause as elyaniv2010. SUPPORTED, and it is the reason we report
 %   coverage at fixed risk rather than Delta-AUROC.
+
+@article{tan2026conformal,
+  title   = {Diagnosing {LLM} Judge Reliability: Conformal Prediction Sets and
+             Transitivity Violations},
+  author  = {Anonymous},
+  journal = {arXiv preprint},
+  year    = {2026},
+  eprint  = {2604.15302},
+  archivePrefix = {arXiv}
+}
+% CLAIM: on SummEval, split conformal prediction sets over 1-5 Likert scores; set WIDTH correlates
+%   with judge-human disagreement at Spearman r_s = +0.576 over 1,918 pooled observations
+%   (p < 1e-100), and width agrees across judges, which the authors read as capturing
+%   document-level difficulty rather than judge-specific noise. Four judges (GPT-4o-mini,
+%   LLaMA-3.1-70B, Qwen-2.5-72B, Mistral-Small-3.1), four criteria. Also reports transitivity
+%   violations (3-cycles) in 33-67%% of documents.
+% USED-FOR: sec:related, as independent black-box evidence that judge reliability tracks item
+%   difficulty. SUPPORTED.
+% !! SCOPE: their target is distance from a human Likert rating, NOT correctness against a discrete
+% !! label; their judges are 70B-class API models, not 1.5-7B open weights; they show cross-judge
+% !! AGREEMENT of set width, not predictive transfer to a held-out judge; and they use no internal
+% !! access. Four differences at once. Do NOT describe as convergent evidence - the paper says
+% !! whether it is the same effect is open.
+% VERIFIED 2026-08-09: abstract and HTML full text fetched; the 0.576 sentence reads "pooling 1,918
+%   observations across all judges and criteria yields Spearman rs=+0.576 (p<10-100) between width
+%   and actual judge-human disagreement". Author list not confirmed - fill before submission.
